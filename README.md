@@ -73,7 +73,7 @@ A comprehensive, modern eCommerce platform built with Laravel 11, featuring a be
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/yourusername/laravel-ecommerce.git
+git clone https://github.com/needyamin/eCommerceLaravel
 cd laravel-ecommerce
 ```
 
