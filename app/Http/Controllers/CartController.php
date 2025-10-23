@@ -1,0 +1,83 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Cart;
+use App\Models\CartItem;
+use App\Models\Product;
+use Illuminate\Support\Str;
+
+class CartController extends Controller
+{
+	protected function currentCart(Request $request): Cart
+	{
+		$sessionId = $request->session()->get('cart_session_id');
+		if (!$sessionId) {
+			$sessionId = (string) Str::uuid();
+			$request->session()->put('cart_session_id', $sessionId);
+		}
+		return Cart::firstOrCreate([
+			'session_id' => $sessionId,
+		], [
+			'user_id' => auth()->id(),
+		]);
+	}
+
+	public function index(Request $request)
+	{
+		$cart = $this->currentCart($request)->load('items.product');
+		return view('cart.index', compact('cart'));
+	}
+
+	public function add(Request $request)
+	{
+		$request->validate([
+			'product_id' => ['required', 'exists:products,id'],
+			'quantity' => ['nullable', 'integer', 'min:1'],
+		]);
+		$cart = $this->currentCart($request);
+		$product = Product::findOrFail($request->integer('product_id'));
+		$quantity = max(1, (int) $request->input('quantity', 1));
+		$item = CartItem::firstOrNew([
+			'cart_id' => $cart->id,
+			'product_id' => $product->id,
+		]);
+		$item->quantity = ($item->exists ? $item->quantity : 0) + $quantity;
+		$item->unit_price = $product->price;
+		$item->line_total = $item->quantity * $item->unit_price;
+		$item->save();
+		$this->recalculateTotals($cart);
+		return redirect()->back()->with('success', 'Added to cart');
+	}
+
+	public function update(Request $request, CartItem $item)
+	{
+		$request->validate([
+			'quantity' => ['required', 'integer', 'min:1'],
+		]);
+		$item->quantity = (int) $request->input('quantity');
+		$item->line_total = $item->quantity * $item->unit_price;
+		$item->save();
+		$this->recalculateTotals($item->cart);
+		return redirect()->back()->with('success', 'Cart updated');
+	}
+
+	public function remove(Request $request, CartItem $item)
+	{
+		$cart = $item->cart;
+		$item->delete();
+		$this->recalculateTotals($cart);
+		return redirect()->back()->with('success', 'Item removed');
+	}
+
+	protected function recalculateTotals(Cart $cart): void
+	{
+		$cart->load('items');
+		$cart->subtotal = $cart->items->sum('line_total');
+		$cart->discount_total = 0;
+		$cart->tax_total = round($cart->subtotal * 0.00, 2); // placeholder
+		$cart->grand_total = $cart->subtotal - $cart->discount_total + $cart->tax_total;
+		$cart->save();
+	}
+}
