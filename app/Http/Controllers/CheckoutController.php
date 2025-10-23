@@ -6,24 +6,34 @@ use Illuminate\Http\Request;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Notifications\OrderConfirmation;
 use Illuminate\Support\Str;
+use App\Http\Controllers\PaymentGateway\PaymentGatewayManager;
 
 class CheckoutController extends Controller
 {
-	public function show(Request $request)
-	{
-		$cart = Cart::where('session_id', $request->session()->get('cart_session_id'))
-			->with('items.product')
-			->firstOrFail();
-		return view('checkout.show', compact('cart'));
-	}
+    public function show(Request $request)
+    {
+        $cart = Cart::where('session_id', $request->session()->get('cart_session_id'))
+            ->with('items.product', 'coupon')
+            ->firstOrFail();
+
+        $gatewayManager = new PaymentGatewayManager();
+        $enabledGateways = $gatewayManager->getEnabledGateways();
+
+        return view('checkout.show', [
+            'cart' => $cart,
+            'gateways' => $enabledGateways,
+        ]);
+    }
 
 	public function place(Request $request)
 	{
-		$request->validate([
-			'billing_name' => ['required', 'string', 'max:255'],
-			'billing_email' => ['required', 'email'],
-		]);
+        $request->validate([
+            'billing_name' => ['required', 'string', 'max:255'],
+            'billing_email' => ['required', 'email'],
+            'gateway' => ['required', 'in:stripe,paypal'],
+        ]);
 		$cart = Cart::where('session_id', $request->session()->get('cart_session_id'))
 			->with('items.product')
 			->firstOrFail();
@@ -61,6 +71,11 @@ class CheckoutController extends Controller
 		$cart->items()->delete();
 		$cart->delete();
 		$request->session()->forget('cart_session_id');
+
+		// Send order confirmation email
+		if ($order->user) {
+			$order->user->notify(new OrderConfirmation($order));
+		}
 
 		return redirect()->route('orders.show', $order->id)->with('success', 'Order placed');
 	}

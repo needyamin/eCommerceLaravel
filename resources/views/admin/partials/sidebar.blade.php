@@ -33,6 +33,12 @@
 					</a>
 				</li>
 				<li class="nav-item">
+					<a href="{{ route('admin.users.index') }}" class="nav-link">
+						<i class="nav-icon bi bi-people"></i>
+						<p>Users</p>
+					</a>
+				</li>
+				<li class="nav-item">
 					<a href="{{ route('admin.roles.index') }}" class="nav-link">
 						<i class="nav-icon bi bi-shield-lock"></i>
 						<p>Role & Permission</p>
@@ -42,6 +48,30 @@
 					<a href="{{ route('admin.permissions.index') }}" class="nav-link">
 						<i class="nav-icon bi bi-key"></i>
 						<p>Group Name</p>
+					</a>
+				</li>
+				<li class="nav-item">
+					<a href="{{ route('admin.email-settings.index') }}" class="nav-link">
+						<i class="nav-icon bi bi-envelope"></i>
+						<p>Email Settings</p>
+					</a>
+				</li>
+				<li class="nav-item">
+					<a href="{{ route('admin.coupons.index') }}" class="nav-link">
+						<i class="nav-icon bi bi-ticket"></i>
+						<p>Coupons</p>
+					</a>
+				</li>
+				<li class="nav-item">
+					<a href="{{ route('admin.newsletter.index') }}" class="nav-link">
+						<i class="nav-icon bi bi-envelope-paper"></i>
+						<p>Newsletter</p>
+					</a>
+				</li>
+				<li class="nav-item">
+					<a href="{{ route('admin.payment-gateways.index') }}" class="nav-link">
+						<i class="nav-icon bi bi-credit-card"></i>
+						<p>Payment Gateways</p>
 					</a>
 				</li>
 			</ul>

@@ -17,6 +17,16 @@ class CartController extends Controller
 			$sessionId = (string) Str::uuid();
 			$request->session()->put('cart_session_id', $sessionId);
 		}
+		
+		// If user is authenticated, try to find their cart first
+		if (auth()->check()) {
+			$cart = Cart::where('user_id', auth()->id())->first();
+			if ($cart) {
+				return $cart;
+			}
+		}
+		
+		// Otherwise, use session-based cart
 		return Cart::firstOrCreate([
 			'session_id' => $sessionId,
 		], [
@@ -73,11 +83,6 @@ class CartController extends Controller
 
 	protected function recalculateTotals(Cart $cart): void
 	{
-		$cart->load('items');
-		$cart->subtotal = $cart->items->sum('line_total');
-		$cart->discount_total = 0;
-		$cart->tax_total = round($cart->subtotal * 0.00, 2); // placeholder
-		$cart->grand_total = $cart->subtotal - $cart->discount_total + $cart->tax_total;
-		$cart->save();
+		$cart->recalculateTotals();
 	}
 }

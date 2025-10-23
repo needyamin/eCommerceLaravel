@@ -3,11 +3,44 @@
 @section('title', 'Dashboard')
 
 @section('content')
-<h1 class="text-2xl font-bold mb-4">Dashboard</h1>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-	<div class="border rounded p-4"><div class="text-sm text-gray-600">Orders</div><div class="text-2xl font-bold">{{ $stats['orders'] }}</div></div>
-	<div class="border rounded p-4"><div class="text-sm text-gray-600">Products</div><div class="text-2xl font-bold">{{ $stats['products'] }}</div></div>
-	<div class="border rounded p-4"><div class="text-sm text-gray-600">Categories</div><div class="text-2xl font-bold">{{ $stats['categories'] }}</div></div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="h3 mb-0 fw-semibold"><i class="bi bi-speedometer2 me-2 text-primary"></i>Dashboard</h1>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body d-flex justify-content-between align-items-center">
+        <div>
+          <div class="text-muted small">Orders</div>
+          <div class="h3 mb-0 fw-bold">{{ $stats['orders'] }}</div>
+        </div>
+        <div class="text-primary"><i class="bi bi-bag fs-1"></i></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body d-flex justify-content-between align-items-center">
+        <div>
+          <div class="text-muted small">Products</div>
+          <div class="h3 mb-0 fw-bold">{{ $stats['products'] }}</div>
+        </div>
+        <div class="text-success"><i class="bi bi-box-seam fs-1"></i></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body d-flex justify-content-between align-items-center">
+        <div>
+          <div class="text-muted small">Categories</div>
+          <div class="h3 mb-0 fw-bold">{{ $stats['categories'] }}</div>
+        </div>
+        <div class="text-warning"><i class="bi bi-diagram-3 fs-1"></i></div>
+      </div>
+    </div>
+  </div>
 </div>
 @endsection
 

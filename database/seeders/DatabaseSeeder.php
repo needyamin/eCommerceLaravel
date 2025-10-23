@@ -62,6 +62,15 @@ class DatabaseSeeder extends Seeder
             'admin.orders.index',
             'admin.orders.show',
             'admin.orders.update',
+            'admin.users.index',
+            'admin.users.show',
+            'admin.users.edit',
+            'admin.users.update',
+            'admin.users.destroy',
+            'admin.users.reset-password',
+            'admin.users.toggle-status',
+            'admin.email-settings.index',
+            'admin.email-settings.update',
             'admin.roles.index',
             'admin.roles.create',
             'admin.roles.store',
@@ -81,6 +90,9 @@ class DatabaseSeeder extends Seeder
         }
         
         $super->givePermissionTo(Permission::where('guard_name', 'admin')->get());
+
+        // Ensure payment gateway permissions exist and assign to Super Admin
+        (new \Database\Seeders\AdminPaymentGatewayPermissionsSeeder())->run();
 
         $admin = Admin::where('email', 'admin@example.com')->first();
         if ($admin && !$admin->hasRole('Super Admin')) {

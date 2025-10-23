@@ -3,104 +3,209 @@
 @section('title', 'Your Cart')
 
 @section('content')
-<div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-8">Your Cart</h1>
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="display-5 fw-bold mb-0">
+                    <i class="bi bi-cart me-2"></i>Your Cart
+                </h1>
+                <a href="{{ route('products.index') }}" class="btn btn-outline-primary btn-custom">
+                    <i class="bi bi-arrow-left me-2"></i>Continue Shopping
+                </a>
+            </div>
+        </div>
+    </div>
 
     @if($cart->items->isEmpty())
-        <div class="bg-gray-100 border border-gray-300 text-gray-700 px-4 py-8 rounded text-center">
-            <p class="text-lg mb-4">Your cart is empty.</p>
-            <a href="{{ route('products.index') }}" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition-colors">
-                Continue Shopping
-            </a>
+        <!-- Empty Cart -->
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card border-0 shadow-sm text-center">
+                    <div class="card-body py-5">
+                        <i class="bi bi-cart-x display-1 text-muted mb-4"></i>
+                        <h3 class="text-muted mb-3">Your cart is empty</h3>
+                        <p class="text-muted mb-4">
+                            Looks like you haven't added any items to your cart yet. 
+                            Start shopping to fill it up!
+                        </p>
+                        <a href="{{ route('products.index') }}" class="btn btn-primary btn-lg btn-custom">
+                            <i class="bi bi-grid me-2"></i>Start Shopping
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     @else
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2">
-                <div class="bg-white rounded-lg shadow overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-200">
-                        <h2 class="text-xl font-semibold">Cart Items</h2>
+        <div class="row">
+            <!-- Cart Items -->
+            <div class="col-lg-8 mb-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="bi bi-list-ul me-2"></i>Cart Items ({{ $cart->items->count() }})
+                        </h5>
                     </div>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @foreach($cart->items as $item)
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
                                     <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm font-medium text-gray-900">{{ $item->product->name }}</div>
-                                            <div class="text-sm text-gray-500">{{ $item->product->sku }}</div>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            ${{ number_format($item->unit_price, 2) }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <form action="{{ route('cart.items.update', $item->id) }}" method="post" class="flex items-center space-x-2">
-                                                @csrf
-                                                @method('PUT')
-                                                <input type="number" name="quantity" min="1" value="{{ $item->quantity }}" 
-                                                       class="w-20 border border-gray-300 rounded-md px-2 py-1 text-center focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                                <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition-colors text-sm">
-                                                    Update
-                                                </button>
-                                            </form>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            ${{ number_format($item->line_total, 2) }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            <form action="{{ route('cart.items.remove', $item->id) }}" method="post" class="inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:text-red-900 transition-colors">
-                                                    Remove
-                                                </button>
-                                            </form>
-                                        </td>
+                                        <th class="border-0">Product</th>
+                                        <th class="border-0">Price</th>
+                                        <th class="border-0">Quantity</th>
+                                        <th class="border-0">Total</th>
+                                        <th class="border-0">Actions</th>
                                     </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @foreach($cart->items as $item)
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="me-3">
+                                                        @if($item->product->images->count() > 0)
+                                                            <img src="{{ asset('storage/' . $item->product->images->first()->image_path) }}" 
+                                                                 alt="{{ $item->product->name }}" 
+                                                                 class="rounded" 
+                                                                 style="width: 60px; height: 60px; object-fit: cover;">
+                                                        @else
+                                                            <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                                                 style="width: 60px; height: 60px;">
+                                                                <i class="bi bi-image text-muted"></i>
+                                                            </div>
+                                                        @endif
+                                                    </div>
+                                                    <div>
+                                                        <h6 class="mb-1">
+                                                            <a href="{{ route('products.show', $item->product->slug) }}" 
+                                                               class="text-decoration-none text-dark">
+                                                                {{ $item->product->name }}
+                                                            </a>
+                                                        </h6>
+                                                        <small class="text-muted">{{ $item->product->sku }}</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="fw-semibold">${{ number_format($item->unit_price, 2) }}</span>
+                                            </td>
+                                            <td>
+                                                <form action="{{ route('cart.items.update', $item->id) }}" method="post" class="d-flex align-items-center">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <div class="input-group" style="width: 120px;">
+                                                        <input type="number" name="quantity" min="1" max="{{ $item->product->stock }}" 
+                                                               value="{{ $item->quantity }}" 
+                                                               class="form-control form-control-sm text-center">
+                                                        <button type="submit" class="btn btn-outline-primary btn-sm">
+                                                            <i class="bi bi-check"></i>
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </td>
+                                            <td>
+                                                <span class="fw-bold text-primary">${{ number_format($item->line_total, 2) }}</span>
+                                            </td>
+                                            <td>
+                                                <form action="{{ route('cart.items.remove', $item->id) }}" method="post" class="d-inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm" 
+                                                            onclick="return confirm('Are you sure you want to remove this item?')">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div>
-                <div class="bg-white rounded-lg shadow overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-200">
-                        <h2 class="text-xl font-semibold">Order Summary</h2>
+            <!-- Order Summary -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm sticky-top" style="top: 100px;">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-receipt me-2"></i>Order Summary
+                        </h5>
                     </div>
-                    <div class="px-6 py-4 space-y-3">
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Subtotal</span>
-                            <span class="font-medium">${{ number_format($cart->subtotal, 2) }}</span>
+                    <div class="card-body">
+                        <!-- Coupon Section -->
+                        <div class="mb-4">
+                            <h6 class="fw-semibold mb-2">
+                                <i class="bi bi-ticket me-1"></i>Coupon Code
+                            </h6>
+                            @if($cart->coupon)
+                                <div class="alert alert-success py-2 mb-2">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>{{ $cart->coupon->code }}</strong>
+                                            <br>
+                                            <small>{{ $cart->coupon->name }}</small>
+                                        </div>
+                                        <form action="{{ route('coupons.remove') }}" method="post" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                <i class="bi bi-x"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            @else
+                                <form id="couponForm" class="d-flex gap-2">
+                                    @csrf
+                                    <input type="text" 
+                                           id="couponCode" 
+                                           class="form-control form-control-sm" 
+                                           placeholder="Enter coupon code"
+                                           maxlength="50">
+                                    <button type="submit" class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-check"></i>
+                                    </button>
+                                </form>
+                                <div id="couponMessage" class="mt-2"></div>
+                            @endif
                         </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Tax</span>
-                            <span class="font-medium">${{ number_format($cart->tax_total, 2) }}</span>
+
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Subtotal</span>
+                            <span>${{ number_format($cart->subtotal, 2) }}</span>
                         </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Shipping</span>
-                            <span class="font-medium">$0.00</span>
+                        @if($cart->coupon_discount > 0)
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-success">
+                                    <i class="bi bi-ticket me-1"></i>Discount ({{ $cart->coupon->code }})
+                                </span>
+                                <span class="text-success">-${{ number_format($cart->coupon_discount, 2) }}</span>
+                            </div>
+                        @endif
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Tax</span>
+                            <span>${{ number_format($cart->tax_total, 2) }}</span>
                         </div>
-                        <hr class="my-3">
-                        <div class="flex justify-between text-lg font-bold">
-                            <span>Total</span>
-                            <span>${{ number_format($cart->grand_total, 2) }}</span>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Shipping</span>
+                            <span class="text-success">FREE</span>
                         </div>
-                    </div>
-                    <div class="px-6 py-4 border-t border-gray-200">
-                        <a href="{{ route('checkout.show') }}" 
-                           class="w-full bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700 transition-colors font-medium text-center block">
-                            Proceed to Checkout
-                        </a>
+                        <hr>
+                        <div class="d-flex justify-content-between mb-4">
+                            <span class="fw-bold fs-5">Total</span>
+                            <span class="fw-bold fs-5 text-primary">${{ number_format($cart->grand_total, 2) }}</span>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <a href="{{ route('checkout.show') }}" class="btn btn-success btn-lg btn-custom">
+                                <i class="bi bi-credit-card me-2"></i>Proceed to Checkout
+                            </a>
+                            <a href="{{ route('products.index') }}" class="btn btn-outline-primary btn-custom">
+                                <i class="bi bi-arrow-left me-2"></i>Continue Shopping
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -108,5 +213,77 @@
     @endif
 </div>
 @endsection
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const couponForm = document.getElementById('couponForm');
+    const couponCode = document.getElementById('couponCode');
+    const couponMessage = document.getElementById('couponMessage');
+
+    if (couponForm) {
+        couponForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const code = couponCode.value.trim();
+            if (!code) {
+                showMessage('Please enter a coupon code.', 'danger');
+                return;
+            }
+
+            // Show loading state
+            const submitBtn = couponForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i>';
+            submitBtn.disabled = true;
+
+            // Get CSRF token
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            fetch('{{ route("coupons.apply") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ code: code })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    showMessage(data.message, 'success');
+                    // Reload page to show updated cart
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    showMessage(data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('An error occurred. Please try again.', 'danger');
+            })
+            .finally(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
+        });
+    }
+
+    function showMessage(message, type) {
+        couponMessage.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>`;
+    }
+});
+</script>
 
 
