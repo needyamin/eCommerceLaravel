@@ -3,7 +3,7 @@
 A comprehensive, modern eCommerce platform built with Laravel 12, featuring a beautiful storefront and powerful admin panel with role-based access control.
 
 ![Laravel](https://img.shields.io/badge/Laravel-12.x-red.svg)
-![PHP](https://img.shields.io/badge/PHP-8.2+-blue.svg)
+![PHP](https://img.shields.io/badge/PHP-8.3+-blue.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 
 ## ✨ Features
@@ -15,7 +15,7 @@ A comprehensive, modern eCommerce platform built with Laravel 12, featuring a be
 - **Checkout Process**: Secure checkout with validation and order creation, email notification
 - **Payment Methods**: Stripe, PayPal, and Cash on Delivery (COD)
 - **Currency**: Default currency enforced globally via `@currency(...)` (frontend switching disabled)
-- **Infinite Scroll**: Products index auto-loads next page while retaining pagination controls
+- **Coins (Loyalty Points)**: Earn coins for add‑to‑cart, order placement, COD choice, and referral sign‑ups. Balance shown on profile; admin can adjust/reset.
 - **Responsive Design**: Mobile-first Bootstrap 5 UI (storefront) with modern components
 - **User Authentication**: Login, register, profile update, password change
 
@@ -27,10 +27,10 @@ A comprehensive, modern eCommerce platform built with Laravel 12, featuring a be
 - **Administrators**: Manage admin users and assign roles (Admin → Administrators)
 - **Site Settings**: Control site name/logo/favicon, meta title/description/keywords, footer text, legal & social links
 - **Payment Gateways**: Stripe/PayPal configure, enable/disable, test connection; logs
-- **Currencies**: CRUD, set default/toggle active, rates & formatting (frontend users cannot switch)
-- **Newsletter**: Subscribers list, status toggle/remove; frontend subscribe forms
-- **OTP Settings**: Enable Email/SMS OTP, length, TTL, attempts, SMS gateway/API fields
-- **Email Settings**: Admin-managed SMTP (mailer/host/port/user/pass/encryption/from) applied at runtime
+- **Currencies**: CRUD, set default/toggle active, rates & formatting
+- **Email Settings**: Admin-managed SMTP applied at runtime
+- **Coin Settings**: Configure coin awards (add‑to‑cart award + daily cap, order award rate/minimum, COD bonus, referral signup bonus) and enable/disable features
+- **Shipping Settings**: Enable/disable shipping, free‑shipping threshold, per‑country/city rates (flat/percent), global fallback rate
 
 ### 🔐 **Security & Authorization**
 - **Role-Based Access Control (RBAC)**: Using Spatie Laravel Permission
@@ -46,6 +46,7 @@ A comprehensive, modern eCommerce platform built with Laravel 12, featuring a be
 - **Pagination**: Efficient data loading with Bootstrap 5 pagination
 - **API Ready**: RESTful API endpoints for mobile app integration
 - **Session Management**: Secure cart and user session handling
+- **Referral System**: Shareable `/r/{code}` links; awards referrer on successful signup
 
 ## 🚀 Why Use This eCommerce System?
 
@@ -53,7 +54,7 @@ A comprehensive, modern eCommerce platform built with Laravel 12, featuring a be
 - **Clean Architecture**: Follows Laravel best practices and MVC pattern
 - **Extensible**: Easy to add new features and customize functionality
 - **Well Documented**: Comprehensive code comments and structure
-- **Modern Stack**: Built with latest Laravel 12 and PHP 8.2+
+- **Modern Stack**: Built with latest Laravel 12 and PHP 8.3+
 - **Security First**: Implements industry-standard security practices
 
 ### **For Business Owners**
@@ -71,7 +72,7 @@ A comprehensive, modern eCommerce platform built with Laravel 12, featuring a be
 
 ## 📋 Requirements
 
-- **PHP**: 8.2 or higher
+- **PHP**: 8.3 or higher
 - **Composer**: Latest version
 - **Database**: MySQL, PostgreSQL, or SQLite
 - **Web Server**: Apache, Nginx, or Laravel Valet
@@ -115,9 +116,22 @@ php artisan migrate --seed
 
 Optional seeders (recommended for admin RBAC and payments):
 ```bash
-php artisan db:seed --class=Database\\Seeders\\AdminRoutePermissionsSeeder
-php artisan db:seed --class=Database\\Seeders\\PaymentGatewaySettingsSeeder
+php artisan db:seed --class=Database\Seeders\AdminRoutePermissionsSeeder
+php artisan db:seed --class=Database\Seeders\PaymentGatewaySettingsSeeder
 ```
+
+### 5.1 Feature Migrations (Coins, Referral, Shipping)
+If you’re upgrading an existing install, run these specific migrations:
+```bash
+php artisan migrate --path=database/migrations/2025_10_24_130000_add_coins_to_users_and_create_user_points_table.php
+php artisan migrate --path=database/migrations/2025_10_24_131000_create_coin_settings_table.php
+php artisan migrate --path=database/migrations/2025_10_24_132000_add_referral_fields_to_users_table.php
+php artisan migrate --path=database/migrations/2025_10_24_133000_add_flags_to_coin_settings_table.php
+php artisan migrate --path=database/migrations/2025_10_24_134000_create_shipping_settings_table.php
+php artisan migrate --path=database/migrations/2025_10_24_134500_add_global_rate_to_shipping_settings_table.php
+```
+
+After migrating, visit Admin → Coin Settings and Admin → Shipping Settings to configure.
 
 ### 6. Compile Assets (Optional)
 ```bash
@@ -183,7 +197,7 @@ The admin panel uses AdminLTE theme. Customize the appearance by modifying:
 - Use Admin → Role & Permission to assign both named and route‑based permissions.
 - Seed all current admin route permissions and grant to Super Admin:
 ```bash
-php artisan db:seed --class=Database\\Seeders\\AdminRoutePermissionsSeeder
+php artisan db:seed --class=Database\Seeders\AdminRoutePermissionsSeeder
 ```
 
 ### Email Configuration
@@ -198,6 +212,14 @@ MAIL_ENCRYPTION=tls
 MAIL_FROM_ADDRESS=no-reply@example.com
 MAIL_FROM_NAME="Your Store"
 ```
+
+### Coins Configuration
+- Admin → Coin Settings: toggle coins system on/off and configure awards
+- Profile shows coin balance; admin user page allows Adjust and Reset
+
+### Shipping Configuration
+- Admin → Shipping Settings: enable shipping, set free shipping minimum, define per‑country/city rates, and a global fallback rate
+- Checkout totals include dynamic shipping and currency formatting
 
 ## 📚 API Documentation
 
@@ -277,4 +299,4 @@ For support, email support@yourcompany.com or create an issue on GitHub.
 
 ---
 
-**Built with ❤️ using Laravel 11**
+**Built with ❤️ using Laravel 12**
