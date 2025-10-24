@@ -37,34 +37,32 @@
                         <i class="bi bi-grid me-1"></i>Products
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link fw-semibold position-relative" href="{{ route('cart.index') }}">
+                    <li class="nav-item">
+                        <a class="nav-link fw-semibold position-relative" href="{{ route('cart.index') }}">
                         <i class="bi bi-cart me-1"></i>Cart
-                        @php
-                            $cartCount = 0;
-                            if (auth()->check()) {
-                                $cart = auth()->user()->carts()->whereHas('items')->first();
-                                $cartCount = $cart ? $cart->items->sum('quantity') : 0;
-                            } else {
-                                $sessionId = session('cart_session_id');
-                                if ($sessionId) {
-                                    $cart = \App\Models\Cart::where('session_id', $sessionId)->with('items')->first();
+                            @php
+                                $cartCount = 0;
+                                if (auth()->check()) {
+                                    $cart = auth()->user()->carts()->whereHas('items')->first();
                                     $cartCount = $cart ? $cart->items->sum('quantity') : 0;
+                                } else {
+                                    $sessionId = session('cart_session_id');
+                                    if ($sessionId) {
+                                        $cart = \App\Models\Cart::where('session_id', $sessionId)->with('items')->first();
+                                        $cartCount = $cart ? $cart->items->sum('quantity') : 0;
+                                    }
                                 }
-                            }
-                        @endphp
-                        @if($cartCount > 0)
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                {{ $cartCount }}
+                            @endphp
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-count-badge {{ $cartCount > 0 ? '' : 'd-none' }}">
+                                {{ $cartCount > 0 ? $cartCount : '' }}
                                 <span class="visually-hidden">items in cart</span>
                             </span>
-                        @endif
                     </a>
                 </li>
             </ul>
 
                 <!-- Currency Switcher -->
-                <form action="{{ route('currency.switch') }}" method="post" class="d-flex align-items-center me-2">
+                <form action="{{ route('currency.switch') }}" method="post" class="d-flex align-items-center me-2" id="currencyForm">
                     @csrf
                     <select name="code" class="form-select form-select-sm" onchange="this.form.submit()">
                         @foreach(($activeCurrencies ?? []) as $c)
@@ -126,5 +124,21 @@
         </div>
     </div>
 </nav>
+    <script>
+    document.addEventListener('DOMContentLoaded', function(){
+        function updateCartCount(count){
+            const badge = document.querySelector('.cart-count-badge');
+            if(!badge){ return; }
+            if(count > 0){
+                badge.textContent = count;
+                badge.classList.remove('d-none');
+            } else {
+                badge.textContent = '';
+                badge.classList.add('d-none');
+            }
+        }
+        window.__updateCartCount = updateCartCount;
+    });
+    </script>
 
 

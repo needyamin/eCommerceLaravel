@@ -104,27 +104,70 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('cart.add') }}" method="post" class="mb-4">
-                        @csrf
-                        <input type="hidden" name="product_id" value="{{ $product->id }}">
-                        
-                        <div class="row align-items-end">
-                            <div class="col-md-4 mb-3">
-                                <label for="quantity" class="form-label fw-semibold">Quantity</label>
-                                <input type="number" min="1" max="{{ $product->stock }}" 
-                                       name="quantity" value="1" 
-                                       class="form-control form-control-lg" 
-                                       id="quantity" required>
+                        @php
+                            $cartItem = null;
+                            if (auth()->check()) {
+                                $cart = \App\Models\Cart::where('user_id', auth()->id())->with('items')->first();
+                                if ($cart) { $cartItem = $cart->items->firstWhere('product_id', $product->id); }
+                            } else {
+                                $sessionId = session('cart_session_id');
+                                if ($sessionId) {
+                                    $cart = \App\Models\Cart::where('session_id', $sessionId)->with('items')->first();
+                                    if ($cart) { $cartItem = $cart->items->firstWhere('product_id', $product->id); }
+                                }
+                            }
+                        @endphp
+
+                        @if($cartItem)
+                            <div class="alert alert-success d-flex justify-content-between align-items-center mb-3" data-stock="{{ (int) $product->stock }}" data-item-id="{{ $cartItem->id }}">
+                                <div>
+                                    <i class="bi bi-check-circle me-2"></i>Carted ({{ $cartItem->quantity }} {{ Str::plural('item', $cartItem->quantity) }})
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <form action="{{ route('cart.items.update', $cartItem->id) }}" method="post" class="d-inline" onsubmit="return pdUpdateCartItemAjax(event, this)">
+                                        @csrf
+                                        @method('PUT')
+                                        <input type="hidden" name="quantity" value="{{ max(1, $cartItem->quantity - 1) }}">
+                                        <button class="btn btn-sm btn-outline-secondary" {{ $cartItem->quantity <= 1 ? 'disabled' : '' }}>
+                                            <i class="bi bi-dash"></i>
+                                        </button>
+                                    </form>
+                                    <form action="{{ route('cart.items.update', $cartItem->id) }}" method="post" class="d-inline" onsubmit="return pdUpdateCartItemAjax(event, this)">
+                                        @csrf
+                                        @method('PUT')
+                                        <input type="hidden" name="quantity" value="{{ min($product->stock, $cartItem->quantity + 1) }}">
+                                        <button class="btn btn-sm btn-outline-secondary" {{ $product->stock <= $cartItem->quantity ? 'disabled' : '' }}>
+                                            <i class="bi bi-plus"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
-                            <div class="col-md-8 mb-3">
-                                <button type="submit" class="btn btn-primary btn-lg w-100 btn-custom"
-                                        {{ $product->stock <= 0 ? 'disabled' : '' }}>
-                                    <i class="bi bi-cart-plus me-2"></i>
-                                    {{ $product->stock <= 0 ? 'Out of Stock' : 'Add to Cart' }}
-                                </button>
-                            </div>
-                        </div>
-                    </form>
+                            <a href="{{ route('cart.index') }}" class="btn btn-outline-primary btn-custom mb-4 w-100">
+                                <i class="bi bi-cart"></i> View Cart
+                            </a>
+                        @else
+                            <form action="{{ route('cart.add') }}" method="post" class="mb-4" onsubmit="return pdAddToCartAjax(event, this)" data-stock="{{ (int) $product->stock }}">
+                                @csrf
+                                <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                
+                                <div class="row align-items-end">
+                                    <div class="col-md-4 mb-3">
+                                        <label for="quantity" class="form-label fw-semibold">Quantity</label>
+                                        <input type="number" min="1" max="{{ $product->stock }}" 
+                                               name="quantity" value="1" 
+                                               class="form-control form-control-lg" 
+                                               id="quantity" required>
+                                    </div>
+                                    <div class="col-md-8 mb-3">
+                                        <button type="submit" class="btn btn-primary btn-lg w-100 btn-custom"
+                                                {{ $product->stock <= 0 ? 'disabled' : '' }}>
+                                            <i class="bi bi-cart-plus me-2"></i>
+                                            {{ $product->stock <= 0 ? 'Out of Stock' : 'Add to Cart' }}
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        @endif
 
                     <!-- Product Features -->
                     <div class="row text-center mb-4">
@@ -146,7 +189,7 @@
         </div>
     </div>
 
-    <!-- Product Description -->
+        <!-- Product Description -->
     @if($product->description)
         <div class="row mt-5">
             <div class="col-12">
@@ -183,5 +226,84 @@
     @endif
 </div>
 @endsection
+<script>
+function pdAddToCartAjax(e, form){
+    e.preventDefault();
+    const fd = new FormData(form);
+    fetch(form.action, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value
+        },
+        body: fd
+    }).then(r=>r.json()).then(data=>{
+        if(!data || !data.success) return;
+        if(data.cart && typeof window.__updateCartCount === 'function'){
+            window.__updateCartCount(data.cart.count);
+        }
+        const container = form.closest('.card');
+        const wrap = document.createElement('div');
+        wrap.className = 'alert alert-success d-flex justify-content-between align-items-center mb-3';
+        wrap.setAttribute('data-stock', form.dataset.stock || '999999');
+        wrap.setAttribute('data-item-id', data.item.id);
+        wrap.innerHTML = `
+            <div><i class="bi bi-check-circle me-2"></i>Carted (${data.item.quantity} ${data.item.quantity>1?'items':'item'})</div>
+            <div class="d-flex align-items-center gap-2">
+                <form action="${window.location.origin}/cart/items/${data.item.id}" method="post" class="d-inline" onsubmit="return pdUpdateCartItemAjax(event, this)">
+                    <input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').getAttribute('content')}">
+                    <input type="hidden" name="_method" value="PUT">
+                    <input type="hidden" name="quantity" value="${Math.max(1, data.item.quantity - 1)}">
+                    <button class="btn btn-sm btn-outline-secondary" ${data.item.quantity<=1?'disabled':''}><i class="bi bi-dash"></i></button>
+                </form>
+                <form action="${window.location.origin}/cart/items/${data.item.id}" method="post" class="d-inline" onsubmit="return pdUpdateCartItemAjax(event, this)">
+                    <input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').getAttribute('content')}">
+                    <input type="hidden" name="_method" value="PUT">
+                    <input type="hidden" name="quantity" value="${data.item.quantity + 1}">
+                    <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-plus"></i></button>
+                </form>
+            </div>`;
+        form.parentNode.replaceChild(wrap, form);
+    }).catch(()=>{});
+    return false;
+}
+
+function pdUpdateCartItemAjax(e, form){
+    e.preventDefault();
+    const token = form.querySelector('input[name="_token"]').value;
+    const qty = form.querySelector('input[name="quantity"]').value;
+    fetch(form.action, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': token
+        },
+        body: new URLSearchParams({ _method: 'PUT', quantity: qty })
+    }).then(r=>r.json()).then(res=>{
+        if(!res || !res.success) return false;
+        if(typeof window.__updateCartCount === 'function'){
+            window.__updateCartCount(res.cart.count);
+        }
+        const alertBox = form.closest('.alert');
+        const stock = parseInt(alertBox.dataset.stock || '999999', 10);
+        if(alertBox){
+            alertBox.querySelector('div').innerHTML = `<i class=\"bi bi-check-circle me-2\"></i>Carted (${res.item.quantity} ${res.item.quantity>1?'items':'item'})`;
+            const forms = alertBox.querySelectorAll('form');
+            if(forms.length >= 2){
+                const minusForm = forms[0];
+                const plusForm = forms[1];
+                const newQty = parseInt(res.item.quantity, 10);
+                minusForm.querySelector('input[name=quantity]').value = Math.max(1, newQty - 1);
+                plusForm.querySelector('input[name=quantity]').value = Math.min(stock, newQty + 1);
+                minusForm.querySelector('button').disabled = newQty <= 1;
+                plusForm.querySelector('button').disabled = newQty >= stock;
+            }
+        }
+    }).catch(()=>{});
+    return false;
+}
+</script>
 
 

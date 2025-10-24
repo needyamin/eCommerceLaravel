@@ -60,7 +60,7 @@
                                 </thead>
                                 <tbody>
                                     @foreach($cart->items as $item)
-                                        <tr>
+                                        <tr data-item-id="{{ $item->id }}" data-stock="{{ (int) $item->product->stock }}">
                                             <td>
                                                 <div class="d-flex align-items-center">
                                                     <div class="me-3">
@@ -91,7 +91,7 @@
                                                     <span class="fw-semibold">@currency($item->unit_price)</span>
                                             </td>
                                             <td>
-                                                <form action="{{ route('cart.items.update', $item->id) }}" method="post" class="d-flex align-items-center">
+                                                <form action="{{ route('cart.items.update', $item->id) }}" method="post" class="d-flex align-items-center cart-update-form">
                                                     @csrf
                                                     @method('PUT')
                                                     <div class="input-group" style="width: 120px;">
@@ -105,10 +105,10 @@
                                                 </form>
                                             </td>
                                             <td>
-                                                    <span class="fw-bold text-primary">@currency($item->line_total)</span>
+                                                    <span class="fw-bold text-primary item-line-total">@currency($item->line_total)</span>
                                             </td>
                                             <td>
-                                                <form action="{{ route('cart.items.remove', $item->id) }}" method="post" class="d-inline">
+                                                <form action="{{ route('cart.items.remove', $item->id) }}" method="post" class="d-inline cart-remove-form">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-outline-danger btn-sm" 
@@ -174,19 +174,19 @@
 
                         <div class="d-flex justify-content-between mb-2">
                             <span>Subtotal</span>
-                                <span>@currency($cart->subtotal)</span>
+                                <span id="cartSubtotal">@currency($cart->subtotal)</span>
                         </div>
                         @if($cart->coupon_discount > 0)
-                            <div class="d-flex justify-content-between mb-2">
+                            <div class="d-flex justify-content-between mb-2" id="cartDiscountRow">
                                 <span class="text-success">
                                     <i class="bi bi-ticket me-1"></i>Discount ({{ $cart->coupon->code }})
                                 </span>
-                                    <span class="text-success">-@currency($cart->coupon_discount)</span>
+                                    <span class="text-success" id="cartDiscount">-@currency($cart->coupon_discount)</span>
                             </div>
                         @endif
                         <div class="d-flex justify-content-between mb-2">
                             <span>Tax</span>
-                                <span>@currency($cart->tax_total)</span>
+                                <span id="cartTax">@currency($cart->tax_total)</span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span>Shipping</span>
@@ -195,7 +195,7 @@
                         <hr>
                         <div class="d-flex justify-content-between mb-4">
                             <span class="fw-bold fs-5">Total</span>
-                                <span class="fw-bold fs-5 text-primary">@currency($cart->grand_total)</span>
+                                <span class="fw-bold fs-5 text-primary" id="cartGrand">@currency($cart->grand_total)</span>
                         </div>
                         
                         <div class="d-grid gap-2">
@@ -216,6 +216,58 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // AJAX quantity update
+    document.querySelectorAll('.cart-update-form').forEach(function(form){
+        form.addEventListener('submit', function(e){
+            e.preventDefault();
+            const row = form.closest('tr');
+            const itemId = row.dataset.itemId;
+            const qty = form.querySelector('input[name="quantity"]').value;
+            fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value
+                },
+                body: new URLSearchParams({ _method: 'PUT', quantity: qty })
+            }).then(r=>r.json()).then(res=>{
+                if(!res || !res.success) return;
+                row.querySelector('.item-line-total').textContent = new Intl.NumberFormat(undefined, { style: 'currency', currency: '{{ $currentCurrency->code ?? 'USD' }}' }).format(res.item.line_total);
+                document.getElementById('cartSubtotal').textContent = new Intl.NumberFormat(undefined, { style: 'currency', currency: '{{ $currentCurrency->code ?? 'USD' }}' }).format(res.cart.subtotal);
+                document.getElementById('cartGrand').textContent = new Intl.NumberFormat(undefined, { style: 'currency', currency: '{{ $currentCurrency->code ?? 'USD' }}' }).format(res.cart.grand_total);
+                if(typeof window.__updateCartCount === 'function'){
+                    window.__updateCartCount(res.cart.count);
+                }
+            }).catch(()=>{});
+        });
+    });
+
+    // AJAX remove item
+    document.querySelectorAll('.cart-remove-form').forEach(function(form){
+        form.addEventListener('submit', function(e){
+            e.preventDefault();
+            if(!confirm('Are you sure you want to remove this item?')) return false;
+            fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value
+                },
+                body: new URLSearchParams({ _method: 'DELETE' })
+            }).then(r=>r.json()).then(res=>{
+                if(!res || !res.success) return;
+                const row = form.closest('tr');
+                if(row) row.remove();
+                document.getElementById('cartSubtotal').textContent = new Intl.NumberFormat(undefined, { style: 'currency', currency: '{{ $currentCurrency->code ?? 'USD' }}' }).format(res.cart.subtotal);
+                document.getElementById('cartGrand').textContent = new Intl.NumberFormat(undefined, { style: 'currency', currency: '{{ $currentCurrency->code ?? 'USD' }}' }).format(res.cart.grand_total);
+                if(typeof window.__updateCartCount === 'function'){
+                    window.__updateCartCount(res.cart.count);
+                }
+            }).catch(()=>{});
+        });
+    });
     const couponForm = document.getElementById('couponForm');
     const couponCode = document.getElementById('couponCode');
     const couponMessage = document.getElementById('couponMessage');
