@@ -34,11 +34,22 @@ class UserController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'phone' => 'nullable|string|max:20',
+            'email' => 'nullable|string|email|max:255|unique:users,email,' . $user->id,
+            'phone' => 'nullable|string|max:20|unique:users,phone,' . $user->id,
         ]);
 
-        $user->update($request->only(['name', 'email', 'phone']));
+        // Ensure at least one of email or phone present
+        $email = $request->input('email');
+        $phone = $request->input('phone');
+        if (empty($email) && empty($phone)) {
+            return back()->withErrors(['email' => 'Provide email or phone.','phone' => 'Provide email or phone.'])->withInput();
+        }
+
+        $user->update([
+            'name' => $request->input('name'),
+            'email' => $email ? strtolower($email) : null,
+            'phone' => $phone ?: null,
+        ]);
 
         return redirect()->route('admin.users.show', $user)
             ->with('success', 'User updated successfully');

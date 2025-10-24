@@ -10,16 +10,16 @@ class CurrencyManager
 
     public static function current(): Currency
     {
-        $code = session(self::SESSION_KEY);
-        $currency = null;
-        if ($code) {
-            $currency = Currency::where('code', $code)->where('is_active', true)->first();
-        }
-        return $currency ?: (Currency::default() ?: Currency::firstOrFail());
+        // Always use the default currency globally
+        return Currency::default() ?: Currency::firstOrFail();
     }
 
     public static function set(string $code): bool
     {
+        // Only allow admin to set currency for the application session
+        if (!auth('admin')->check()) {
+            return false;
+        }
         $currency = Currency::where('code', strtoupper($code))->where('is_active', true)->first();
         if (!$currency) {
             return false;

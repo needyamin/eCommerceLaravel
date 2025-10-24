@@ -2,7 +2,7 @@
     <div class="container">
         <!-- Brand -->
         <a class="navbar-brand text-primary fw-bold" href="{{ route('home') }}">
-            <i class="bi bi-shop me-2"></i>eCommerce Store
+            <i class="bi bi-shop me-2"></i>{{ $siteSettings->site_name ?? 'eCommerce Store' }}
         </a>
 
         <!-- Mobile Toggle -->
@@ -61,17 +61,7 @@
                 </li>
             </ul>
 
-                <!-- Currency Switcher -->
-                <form action="{{ route('currency.switch') }}" method="post" class="d-flex align-items-center me-2" id="currencyForm">
-                    @csrf
-                    <select name="code" class="form-select form-select-sm" onchange="this.form.submit()">
-                        @foreach(($activeCurrencies ?? []) as $c)
-                            <option value="{{ $c->code }}" {{ ($currentCurrency->code ?? 'USD') === $c->code ? 'selected' : '' }}>
-                                {{ $c->code }}
-                            </option>
-                        @endforeach
-                    </select>
-                </form>
+				<!-- Currency Switcher removed from frontend navigation -->
 
                 <!-- User Menu -->
                 <ul class="navbar-nav">

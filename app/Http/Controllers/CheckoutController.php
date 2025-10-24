@@ -12,11 +12,29 @@ use App\Http\Controllers\PaymentGateway\PaymentGatewayManager;
 
 class CheckoutController extends Controller
 {
+    protected function findCurrentCart(Request $request): ?Cart
+    {
+        $query = Cart::query()->with('items.product', 'coupon');
+        $sessionId = $request->session()->get('cart_session_id');
+        if (auth()->check()) {
+            $cart = (clone $query)->where('user_id', auth()->id())->first();
+            if ($cart) {
+                return $cart;
+            }
+        }
+        if ($sessionId) {
+            return (clone $query)->where('session_id', $sessionId)->first();
+        }
+        return null;
+    }
+
     public function show(Request $request)
     {
-        $cart = Cart::where('session_id', $request->session()->get('cart_session_id'))
-            ->with('items.product', 'coupon')
-            ->firstOrFail();
+        $cart = $this->findCurrentCart($request);
+
+        if (!$cart) {
+            return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
+        }
 
         $gatewayManager = new PaymentGatewayManager();
         $enabledGateways = $gatewayManager->getEnabledGateways();
@@ -27,23 +45,24 @@ class CheckoutController extends Controller
         ]);
     }
 
-	public function place(Request $request)
-	{
+    public function place(Request $request)
+    {
         $request->validate([
             'billing_name' => ['required', 'string', 'max:255'],
             'billing_email' => ['required', 'email'],
-            'gateway' => ['required', 'in:stripe,paypal'],
+            'gateway' => ['required', 'in:stripe,paypal,cod'],
         ]);
-		$cart = Cart::where('session_id', $request->session()->get('cart_session_id'))
-			->with('items.product')
-			->firstOrFail();
+        $cart = $this->findCurrentCart($request);
+        if (!$cart || $cart->items->isEmpty()) {
+            return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
+        }
 
 		$order = new Order();
 		$order->fill($request->only([
 			'billing_name', 'billing_email', 'billing_phone', 'billing_address', 'billing_city', 'billing_postcode', 'billing_country',
 			'shipping_name', 'shipping_phone', 'shipping_address', 'shipping_city', 'shipping_postcode', 'shipping_country',
 		]));
-		$order->number = strtoupper(Str::random(10));
+        $order->number = strtoupper(Str::random(10));
 		$order->user_id = auth()->id();
 		$order->status = 'pending';
 		$order->subtotal = $cart->subtotal;
@@ -52,7 +71,8 @@ class CheckoutController extends Controller
 		$order->shipping_total = 0;
 		$order->grand_total = $cart->grand_total;
 		$order->currency = 'USD';
-		$order->payment_status = 'unpaid';
+        $order->payment_method = $request->string('gateway');
+        $order->payment_status = 'unpaid';
 		$order->shipping_status = 'unshipped';
 		$order->save();
 

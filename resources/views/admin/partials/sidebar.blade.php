@@ -81,6 +81,18 @@
 					</a>
 				</li>
 				<li class="nav-item">
+					<a href="{{ route('admin.admins.index') }}" class="nav-link">
+						<i class="nav-icon bi bi-person-gear"></i>
+						<p>Administrators</p>
+					</a>
+				</li>
+				<li class="nav-item">
+					<a href="{{ route('admin.site-settings.index') }}" class="nav-link">
+						<i class="nav-icon bi bi-gear"></i>
+						<p>Site Settings</p>
+					</a>
+				</li>
+				<li class="nav-item">
 					<a href="{{ route('admin.otp-settings.index') }}" class="nav-link">
 						<i class="nav-icon bi bi-shield-lock"></i>
 						<p>OTP Settings</p>

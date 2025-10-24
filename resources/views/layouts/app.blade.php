@@ -4,12 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'eCommerce Store')</title>
+    <title>@yield('title', $siteSettings->meta_title ?? ($siteSettings->site_name ?? 'eCommerce Store'))</title>
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    @if(!empty($siteSettings->favicon_url))
+    <link rel="icon" href="{{ $siteSettings->favicon_url }}" />
+    @endif
     <!-- Custom CSS -->
     <style>
         .navbar-brand {
@@ -50,6 +53,7 @@
     @include('partials.nav')
     
     <main class="flex-grow-1">
+        <div class="container">
         @if (session('success'))
             <div class="alert alert-success alert-dismissible fade show m-3" role="alert">
                 <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
@@ -63,7 +67,8 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         @endif
-        
+        </div>
+
         @yield('content')
     </main>
     
@@ -71,6 +76,7 @@
     
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    @stack('scripts')
 </body>
 </html>
 

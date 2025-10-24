@@ -206,6 +206,7 @@
                             @php
                                 $hasStripe = isset($gateways['stripe']);
                                 $hasPaypal = isset($gateways['paypal']);
+                                $hasCod = true;
                             @endphp
 
                             @if(!$hasStripe && !$hasPaypal)
@@ -238,6 +239,15 @@
                                             </div>
                                         </div>
                                     @endif
+                                    <div class="col-md-6">
+                                        <div class="form-check border rounded p-3 h-100">
+                                            <input class="form-check-input" type="radio" name="gateway" id="gateway_cod" value="cod" {{ old('gateway') === 'cod' ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="gateway_cod">
+                                                <i class="bi bi-truck me-2"></i>Cash on Delivery
+                                            </label>
+                                            <div class="text-muted small mt-2">Pay with cash upon delivery.</div>
+                                        </div>
+                                    </div>
                                 </div>
                                 @error('gateway')
                                     <div class="invalid-feedback d-block">

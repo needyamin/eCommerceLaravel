@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Blade;
 use App\Support\CurrencyManager;
 use App\Models\Currency;
 use App\Models\EmailSetting;
+use App\Models\SiteSetting;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -35,6 +36,11 @@ class AppServiceProvider extends ServiceProvider
         view()->composer('*', function ($view) {
             $view->with('currentCurrency', CurrencyManager::current());
             $view->with('activeCurrencies', Currency::where('is_active', true)->get());
+            try {
+                $view->with('siteSettings', SiteSetting::get());
+            } catch (\Throwable $e) {
+                // ignored before migrations
+            }
         });
 
         // Dynamic mail configuration from DB settings (if available)

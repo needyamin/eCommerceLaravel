@@ -51,18 +51,24 @@
 
                         <div class="mb-3">
                             <label for="email" class="form-label fw-semibold">
-                                <i class="bi bi-envelope me-2"></i>Email Address
+                                <i class="bi bi-envelope me-2"></i>Email Address (optional)
                             </label>
                             <input id="email" type="email" 
                                    class="form-control form-control-lg @error('email') is-invalid @enderror" 
                                    name="email" value="{{ old('email') }}" 
-                                   placeholder="Enter your email address" required>
+                                   placeholder="Enter your email address (optional)">
                             @error('email')
                                 <div class="invalid-feedback">
                                     <i class="bi bi-exclamation-triangle me-1"></i>{{ $message }}
                                 </div>
                             @enderror
                         </div>
+
+                        @error('phone')
+                            <div class="alert alert-danger" role="alert">
+                                <i class="bi bi-exclamation-triangle me-1"></i>{{ $message }}
+                            </div>
+                        @enderror
 
                         <div class="row">
                             <div class="col-md-6 mb-3">

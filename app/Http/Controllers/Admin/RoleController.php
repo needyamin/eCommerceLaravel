@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Route as RouteFacade;
+use Spatie\Permission\PermissionRegistrar;
 
 class RoleController extends Controller
 {
@@ -18,8 +19,10 @@ class RoleController extends Controller
 
 	public function create()
 	{
-        $permissions = Permission::all();
         $routeNames = $this->adminRouteNames();
+        $permissions = Permission::where('guard_name','admin')
+            ->whereNotIn('name', $routeNames)
+            ->get();
         return view('admin.roles.create', compact('permissions','routeNames'));
 	}
 
@@ -28,20 +31,29 @@ class RoleController extends Controller
 		$validated = $request->validate([
 			'name' => 'required|string|max:255|unique:roles,name',
 		]);
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
         $role = Role::create(['name' => $validated['name'], 'guard_name' => 'admin']);
         $permissionNames = array_values(array_unique($request->input('permissions', [])));
         foreach ($permissionNames as $permName) {
             Permission::firstOrCreate(['name' => $permName, 'guard_name' => 'admin']);
         }
-        $role->syncPermissions($permissionNames);
+        // Force detach everything, then reattach to ensure removals are persisted
+        $role->permissions()->detach();
+        $permissions = Permission::where('guard_name', 'admin')
+            ->whereIn('name', $permissionNames)
+            ->get();
+        $role->syncPermissions($permissions);
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
 		return redirect()->route('admin.roles.index')->with('success', 'Role created');
 	}
 
 	public function edit(Role $role)
 	{
-        $permissions = Permission::all();
-        $assigned = $role->permissions->pluck('id')->toArray();
         $routeNames = $this->adminRouteNames();
+        $permissions = Permission::where('guard_name','admin')
+            ->whereNotIn('name', $routeNames)
+            ->get();
+        $assigned = $role->permissions->pluck('id')->toArray();
         return view('admin.roles.edit', compact('role', 'permissions', 'assigned','routeNames'));
 	}
 
@@ -63,12 +75,18 @@ class RoleController extends Controller
 		$validated = $request->validate([
 			'name' => 'required|string|max:255|unique:roles,name,' . $role->id,
 		]);
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
         $role->update(['name' => $validated['name']]);
         $permissionNames = array_values(array_unique($request->input('permissions', [])));
         foreach ($permissionNames as $permName) {
             Permission::firstOrCreate(['name' => $permName, 'guard_name' => 'admin']);
         }
-        $role->syncPermissions($permissionNames);
+        $role->permissions()->detach();
+        $permissions = Permission::where('guard_name', 'admin')
+            ->whereIn('name', $permissionNames)
+            ->get();
+        $role->syncPermissions($permissions);
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
 		return redirect()->route('admin.roles.index')->with('success', 'Role updated');
 	}
 

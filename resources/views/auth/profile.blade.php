@@ -3,132 +3,123 @@
 @section('title', 'My Profile')
 
 @section('content')
-<div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-8">My Profile</h1>
+<div class="container py-5">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <h1 class="h2 mb-0"><i class="bi bi-person-circle me-2 text-primary"></i>My Profile</h1>
+        <a href="{{ route('orders.index') }}" class="btn btn-outline-primary btn-sm"><i class="bi bi-receipt-cutoff me-1"></i>My Orders</a>
+    </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Profile Information -->
-        <div class="lg:col-span-2">
-            <div class="bg-white rounded-lg shadow overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h2 class="text-xl font-semibold">Profile Information</h2>
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h2 class="h5 mb-0"><i class="bi bi-person-lines-fill me-2"></i>Profile Information</h2>
                 </div>
-                <form action="{{ route('profile.update') }}" method="POST" class="p-6">
-                    @csrf
-                    @method('PUT')
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                            <input name="name" type="text" required
-                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 @error('name') border-red-500 @enderror"
-                                   value="{{ old('name', $user->name) }}">
-                            @error('name')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
+                <div class="card-body">
+                    <form action="{{ route('profile.update') }}" method="POST">
+                        @csrf
+                        @method('PUT')
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Full Name</label>
+                                <input name="name" type="text" required
+                                       class="form-control @error('name') is-invalid @enderror"
+                                       value="{{ old('name', $user->name) }}">
+                                @error('name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email Address (optional)</label>
+                                <input name="email" type="email"
+                                       class="form-control @error('email') is-invalid @enderror"
+                                       value="{{ old('email', $user->email) }}">
+                                @error('email')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Phone Number (optional)</label>
+                                <input name="phone" type="tel"
+                                       class="form-control @error('phone') is-invalid @enderror"
+                                       value="{{ old('phone', $user->phone) }}">
+                                @error('phone')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                            <input name="email" type="email" required
-                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 @error('email') border-red-500 @enderror"
-                                   value="{{ old('email', $user->email) }}">
-                            @error('email')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
+                        <div class="mt-4 d-flex gap-2">
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i>Update Profile</button>
                         </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                            <input name="phone" type="tel"
-                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 @error('phone') border-red-500 @enderror"
-                                   value="{{ old('phone', $user->phone) }}">
-                            @error('phone')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                    </div>
-                    <div class="mt-6">
-                        <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors">
-                            Update Profile
-                        </button>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
 
-            <!-- Change Password -->
-            <div class="bg-white rounded-lg shadow overflow-hidden mt-6">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h2 class="text-xl font-semibold">Change Password</h2>
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h2 class="h5 mb-0"><i class="bi bi-shield-lock me-2"></i>Change Password</h2>
                 </div>
-                <form action="{{ route('profile.change-password') }}" method="POST" class="p-6">
-                    @csrf
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
-                            <input name="current_password" type="password" required
-                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 @error('current_password') border-red-500 @enderror">
-                            @error('current_password')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
+                <div class="card-body">
+                    <form action="{{ route('profile.change-password') }}" method="POST">
+                        @csrf
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label">Current Password</label>
+                                <input name="current_password" type="password" required
+                                       class="form-control @error('current_password') is-invalid @enderror">
+                                @error('current_password')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">New Password</label>
+                                <input name="password" type="password" required
+                                       class="form-control @error('password') is-invalid @enderror">
+                                @error('password')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Confirm New Password</label>
+                                <input name="password_confirmation" type="password" required class="form-control">
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
-                            <input name="password" type="password" required
-                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 @error('password') border-red-500 @enderror">
-                            @error('password')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-danger"><i class="bi bi-key-fill me-1"></i>Change Password</button>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
-                            <input name="password_confirmation" type="password" required
-                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                    </div>
-                    <div class="mt-6">
-                        <button type="submit" class="bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700 transition-colors">
-                            Change Password
-                        </button>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
 
-        <!-- Sidebar -->
-        <div class="space-y-6">
-            <!-- Quick Actions -->
-            <div class="bg-white rounded-lg shadow overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h2 class="text-xl font-semibold">Quick Actions</h2>
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h2 class="h6 mb-0"><i class="bi bi-lightning-charge me-2"></i>Quick Actions</h2>
                 </div>
-                <div class="p-6 space-y-3">
-                    <a href="{{ route('orders.index') }}" class="block w-full bg-blue-600 text-white text-center py-2 px-4 rounded-md hover:bg-blue-700 transition-colors">
-                        View Orders
-                    </a>
-                    <a href="{{ route('cart.index') }}" class="block w-full bg-green-600 text-white text-center py-2 px-4 rounded-md hover:bg-green-700 transition-colors">
-                        View Cart
-                    </a>
-                    <a href="{{ route('addresses.index') }}" class="block w-full bg-purple-600 text-white text-center py-2 px-4 rounded-md hover:bg-purple-700 transition-colors">
-                        Manage Addresses
-                    </a>
+                <div class="card-body d-grid gap-2">
+                    <a href="{{ route('orders.index') }}" class="btn btn-outline-primary"><i class="bi bi-receipt me-1"></i>View Orders</a>
+                    <a href="{{ route('cart.index') }}" class="btn btn-outline-success"><i class="bi bi-cart3 me-1"></i>View Cart</a>
+                    <a href="{{ route('addresses.index') }}" class="btn btn-outline-secondary"><i class="bi bi-geo-alt me-1"></i>Manage Addresses</a>
                 </div>
             </div>
 
-            <!-- Account Stats -->
-            <div class="bg-white rounded-lg shadow overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h2 class="text-xl font-semibold">Account Stats</h2>
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h2 class="h6 mb-0"><i class="bi bi-bar-chart-line me-2"></i>Account Stats</h2>
                 </div>
-                <div class="p-6 space-y-3">
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Total Orders:</span>
-                        <span class="font-medium">{{ $user->orders->count() }}</span>
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>Total Orders</span>
+                        <span class="badge text-bg-primary rounded-pill">{{ $user->orders->count() }}</span>
                     </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Saved Addresses:</span>
-                        <span class="font-medium">{{ $user->addresses->count() }}</span>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>Saved Addresses</span>
+                        <span class="badge text-bg-secondary rounded-pill">{{ $user->addresses->count() }}</span>
                     </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Member Since:</span>
-                        <span class="font-medium">{{ $user->created_at->format('M Y') }}</span>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>Member Since</span>
+                        <span class="fw-medium">{{ $user->created_at->format('M Y') }}</span>
                     </div>
                 </div>
             </div>

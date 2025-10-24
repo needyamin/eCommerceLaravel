@@ -19,11 +19,17 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
+            'login' => ['required','string','max:255'], // email or phone
+            'password' => ['required','string'],
         ]);
 
-        $credentials = $request->only('email', 'password');
+        $login = $request->string('login');
+        $credentials = ['password' => $request->password];
+        if (filter_var($login, FILTER_VALIDATE_EMAIL)) {
+            $credentials['email'] = strtolower($login);
+        } else {
+            $credentials['phone'] = $login;
+        }
         $remember = $request->boolean('remember');
 
         if (Auth::attempt($credentials, $remember)) {
@@ -36,8 +42,8 @@ class AuthController extends Controller
         }
 
         return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
-        ])->onlyInput('email');
+            'login' => 'The provided credentials do not match our records.',
+        ])->onlyInput('login');
     }
 
     public function showRegisterForm()
@@ -47,18 +53,22 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'phone' => 'nullable|string|max:20',
-            'password' => ['required', 'confirmed', Password::defaults()],
+        $data = $request->validate([
+            'name' => ['required','string','max:255'],
+            'email' => ['nullable','string','email','max:255','unique:users,email'],
+            'phone' => ['nullable','string','max:20','unique:users,phone'],
+            'password' => ['required','confirmed', Password::defaults()],
         ]);
 
+        if (empty($data['email']) && empty($data['phone'])) {
+            return back()->withErrors(['email' => 'Provide email or phone.','phone' => 'Provide email or phone.'])->withInput();
+        }
+
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'password' => Hash::make($request->password),
+            'name' => $data['name'],
+            'email' => isset($data['email']) ? strtolower($data['email']) : null,
+            'phone' => $data['phone'] ?? null,
+            'password' => Hash::make($data['password']),
         ]);
 
         Auth::login($user);
@@ -87,13 +97,22 @@ class AuthController extends Controller
     {
         $user = Auth::user();
         
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'phone' => 'nullable|string|max:20',
+        $validated = $request->validate([
+            'name' => ['required','string','max:255'],
+            'email' => ['nullable','string','email','max:255','unique:users,email,' . $user->id],
+            'phone' => ['nullable','string','max:20','unique:users,phone,' . $user->id],
         ]);
 
-        $user->update($request->only(['name', 'email', 'phone']));
+        // Ensure at least one of email or phone remains present
+        if (empty($validated['email']) && empty($validated['phone'])) {
+            return back()->withErrors(['email' => 'Provide email or phone.','phone' => 'Provide email or phone.'])->withInput();
+        }
+
+        $user->update([
+            'name' => $validated['name'],
+            'email' => isset($validated['email']) ? strtolower($validated['email']) : null,
+            'phone' => $validated['phone'] ?? null,
+        ]);
 
         return redirect()->route('profile')->with('success', 'Profile updated successfully!');
     }

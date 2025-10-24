@@ -28,8 +28,8 @@ use App\Http\Controllers\OTP\EmailOtpController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// Currency switch
-Route::post('/currency/switch', [CurrencyController::class, 'switch'])->name('currency.switch');
+// Currency switch (locked to admin only)
+Route::middleware('auth:admin')->post('/currency/switch', [CurrencyController::class, 'switch'])->name('currency.switch');
 
 // OTP routes (public endpoints for demo)
 Route::post('/otp/request-email', [EmailOtpController::class, 'request'])->name('otp.request.email');
@@ -137,5 +137,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::resource('currencies', App\Http\Controllers\Admin\CurrencyController::class)->except(['show']);
             Route::post('currencies/{currency}/toggle', [App\Http\Controllers\Admin\CurrencyController::class, 'toggle'])->name('currencies.toggle');
             Route::post('currencies/{currency}/default', [App\Http\Controllers\Admin\CurrencyController::class, 'setDefault'])->name('currencies.default');
+
+            // Site Settings
+            Route::get('site-settings', [App\Http\Controllers\Admin\SiteSettingsController::class, 'index'])->name('site-settings.index');
+            Route::put('site-settings', [App\Http\Controllers\Admin\SiteSettingsController::class, 'update'])->name('site-settings.update');
+
+            // Administrators
+            Route::resource('admins', App\Http\Controllers\Admin\AdminController::class)->except(['show']);
     });
 });

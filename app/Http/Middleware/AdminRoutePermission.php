@@ -17,7 +17,7 @@ class AdminRoutePermission
 			return $next($request);
 		}
 		$user = auth('admin')->user();
-		if ($user && (method_exists($user, 'hasRole') && $user->hasRole('Super Admin') || $user->can($name))) {
+		if ($user && $user->hasPermissionTo($name, 'admin')) {
 			return $next($request);
 		}
 		abort(403);

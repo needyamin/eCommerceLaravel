@@ -129,7 +129,7 @@
 
     <!-- Products Grid -->
     @if($products->count() > 0)
-        <div class="row g-4">
+        <div id="productGrid" class="row g-4">
             @foreach($products as $product)
                 <div class="col-lg-3 col-md-6">
                     @include('products._card', ['product' => $product])
@@ -137,10 +137,14 @@
             @endforeach
         </div>
 
-        <!-- Pagination -->
+        <!-- Infinite Scroll Sentinel -->
+        <div id="infinite-scroll-sentinel" class="text-center text-muted py-4"></div>
+        <div id="pagination-data" data-next-url="{{ $products->nextPageUrl() ?? '' }}" hidden></div>
+
+        <!-- Visible Pagination Numbers -->
         <div class="row mt-5">
             <div class="col-12">
-                <nav aria-label="Products pagination">
+                <nav id="pagination-container" aria-label="Products pagination">
                     {{ $products->links() }}
                 </nav>
             </div>
@@ -168,4 +172,59 @@
 </div>
 @endsection
 
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    const grid = document.getElementById('productGrid');
+    const sentinel = document.getElementById('infinite-scroll-sentinel');
+    const dataEl = document.getElementById('pagination-data');
+    if(!grid || !sentinel || !dataEl) return;
+
+    let nextUrl = dataEl.dataset.nextUrl;
+    let loading = false;
+
+    const loadMore = async () => {
+        if (!nextUrl || loading) return;
+        loading = true;
+        sentinel.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>';
+        try {
+            const res = await fetch(nextUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'text/html' } });
+            const html = await res.text();
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const newGrid = doc.getElementById('productGrid');
+            const newCards = newGrid ? Array.from(newGrid.children) : [];
+            newCards.forEach(node => grid.appendChild(node));
+            const newDataEl = doc.getElementById('pagination-data');
+            nextUrl = newDataEl ? newDataEl.dataset.nextUrl : '';
+
+            // Update pagination numbers to reflect current page
+            const newPagination = doc.getElementById('pagination-container');
+            const paginationContainer = document.getElementById('pagination-container');
+            if (newPagination && paginationContainer) {
+                paginationContainer.innerHTML = newPagination.innerHTML;
+            }
+            if (!nextUrl) {
+                sentinel.innerHTML = '<span>No more products</span>';
+                observer.disconnect();
+            } else {
+                sentinel.innerHTML = '';
+            }
+        } catch(e){
+            sentinel.innerHTML = '';
+        } finally {
+            loading = false;
+        }
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
+            loadMore();
+        }
+    }, { rootMargin: '400px 0px 0px 0px' });
+
+    observer.observe(sentinel);
+});
+</script>
+@endpush
 

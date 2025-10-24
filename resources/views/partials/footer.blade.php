@@ -4,23 +4,23 @@
             <!-- Company Info -->
             <div class="col-lg-4 col-md-6 mb-4">
                 <h5 class="text-white mb-3">
-                    <i class="bi bi-shop me-2"></i>eCommerce Store
+                    <i class="bi bi-shop me-2"></i>{{ $siteSettings->site_name ?? 'eCommerce Store' }}
                 </h5>
                 <p class="text-light mb-3">
                     Your one-stop destination for quality products at great prices. 
                     We're committed to providing excellent service and fast delivery.
                 </p>
                 <div class="d-flex gap-3">
-                    <a href="#" class="text-light fs-4">
+                    <a href="{{ $siteSettings->social_facebook ?? '#' }}" class="text-light fs-4">
                         <i class="bi bi-facebook"></i>
                     </a>
-                    <a href="#" class="text-light fs-4">
+                    <a href="{{ $siteSettings->social_twitter ?? '#' }}" class="text-light fs-4">
                         <i class="bi bi-twitter"></i>
                     </a>
-                    <a href="#" class="text-light fs-4">
+                    <a href="{{ $siteSettings->social_instagram ?? '#' }}" class="text-light fs-4">
                         <i class="bi bi-instagram"></i>
                     </a>
-                    <a href="#" class="text-light fs-4">
+                    <a href="{{ $siteSettings->social_linkedin ?? '#' }}" class="text-light fs-4">
                         <i class="bi bi-linkedin"></i>
                     </a>
                 </div>
@@ -136,14 +136,14 @@
         <div class="row align-items-center">
             <div class="col-md-6">
                 <p class="text-light mb-0">
-                    &copy; {{ date('Y') }} eCommerce Store. All rights reserved.
+                    &copy; {{ date('Y') }} {{ $siteSettings->footer_text ?? ($siteSettings->site_name ?? 'eCommerce Store') . '. All rights reserved.' }}
                 </p>
             </div>
             <div class="col-md-6 text-md-end">
                 <div class="d-flex justify-content-md-end gap-3">
-                    <a href="#" class="text-light text-decoration-none">Privacy Policy</a>
-                    <a href="#" class="text-light text-decoration-none">Terms of Service</a>
-                    <a href="#" class="text-light text-decoration-none">Cookies</a>
+                    <a href="{{ $siteSettings->privacy_url ?? '#' }}" class="text-light text-decoration-none">Privacy Policy</a>
+                    <a href="{{ $siteSettings->terms_url ?? '#' }}" class="text-light text-decoration-none">Terms of Service</a>
+                    <a href="{{ $siteSettings->cookies_url ?? '#' }}" class="text-light text-decoration-none">Cookies</a>
                 </div>
             </div>
         </div>

@@ -18,14 +18,14 @@
                         @csrf
                         
                         <div class="mb-3">
-                            <label for="email" class="form-label fw-semibold">
-                                <i class="bi bi-envelope me-2"></i>Email Address
+                            <label for="login" class="form-label fw-semibold">
+                                <i class="bi bi-person-badge me-2"></i>Email or Phone
                             </label>
-                            <input id="email" type="email" 
-                                   class="form-control form-control-lg @error('email') is-invalid @enderror" 
-                                   name="email" value="{{ old('email') }}" 
-                                   placeholder="Enter your email" required autofocus>
-                            @error('email')
+                            <input id="login" type="text" 
+                                   class="form-control form-control-lg @error('login') is-invalid @enderror" 
+                                   name="login" value="{{ old('login') }}" 
+                                   placeholder="Enter email address or phone number" required autofocus>
+                            @error('login')
                                 <div class="invalid-feedback">
                                     <i class="bi bi-exclamation-triangle me-1"></i>{{ $message }}
                                 </div>
