@@ -51,17 +51,38 @@
                                 @endif
                             </td>
                             <td>
-                                <span class="badge badge-{{ $order->status === 'pending' ? 'warning' : ($order->status === 'delivered' ? 'success' : 'info') }}">
+                                @php
+                                    $statusClass = match($order->status){
+                                        'pending' => 'warning',
+                                        'processing' => 'info',
+                                        'cancelled' => 'danger',
+                                        'delivered' => 'success',
+                                        default => 'secondary'
+                                    };
+                                @endphp
+                                <span class="badge text-bg-{{ $statusClass }}">
                                     {{ ucfirst($order->status) }}
                                 </span>
                             </td>
                             <td>
-                                <span class="badge badge-{{ $order->payment_status === 'paid' ? 'success' : 'danger' }}">
+                                @php
+                                    $payClass = $order->payment_status === 'paid' ? 'success' : ($order->payment_status === 'refunded' ? 'secondary' : 'warning');
+                                @endphp
+                                <span class="badge text-bg-{{ $payClass }}">
                                     {{ ucfirst($order->payment_status) }}
                                 </span>
                             </td>
                             <td>
-                                <span class="badge badge-{{ $order->shipping_status === 'delivered' ? 'success' : 'warning' }}">
+                                @php
+                                    $shipClass = match($order->shipping_status){
+                                        'unshipped' => 'secondary',
+                                        'shipped' => 'info',
+                                        'delivered' => 'success',
+                                        'returned' => 'danger',
+                                        default => 'warning'
+                                    };
+                                @endphp
+                                <span class="badge text-bg-{{ $shipClass }}">
                                     {{ ucfirst($order->shipping_status) }}
                                 </span>
                             </td>

@@ -17,6 +17,17 @@
         </div>
     </div>
 
+    @if(!empty($removedItems))
+        <div class="alert alert-warning">
+            Some items were removed because they are out of stock or unavailable:
+            <ul class="mb-0">
+                @foreach($removedItems as $ri)
+                    <li>{{ $ri }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     @if($cart->items->isEmpty())
         <!-- Empty Cart -->
         <div class="row justify-content-center">
@@ -45,6 +56,12 @@
                         <h5 class="mb-0">
                             <i class="bi bi-list-ul me-2"></i>Cart Items ({{ $cart->items->count() }})
                         </h5>
+                        @if($cart->items->count() > 0)
+                        <form id="cartClearForm" action="{{ route('cart.clear') }}" method="post" class="d-inline float-end">
+                            @csrf
+                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Clear All</button>
+                        </form>
+                        @endif
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
@@ -59,8 +76,9 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($cart->items as $item)
-                                        <tr data-item-id="{{ $item->id }}" data-stock="{{ (int) $item->product->stock }}">
+                                    @foreach(($availableItems ?? $cart->items) as $item)
+                                        @php($oos = false)
+                                        <tr data-item-id="{{ $item->id }}" data-stock="{{ (int) ($item->product->stock ?? 0) }}">
                                             <td>
                                                 <div class="d-flex align-items-center">
                                                     <div class="me-3">
@@ -95,7 +113,7 @@
                                                     @csrf
                                                     @method('PUT')
                                                     <div class="input-group" style="width: 120px;">
-                                                        <input type="number" name="quantity" min="1" max="{{ $item->product->stock }}" 
+                                                        <input type="number" name="quantity" min="1" max="{{ (int) ($item->product->stock ?? 0) }}" 
                                                                value="{{ $item->quantity }}" 
                                                                class="form-control form-control-sm text-center">
                                                         <button type="submit" class="btn btn-outline-primary btn-sm">
@@ -105,14 +123,13 @@
                                                 </form>
                                             </td>
                                             <td>
-                                                    <span class="fw-bold text-primary item-line-total">@currency($item->line_total)</span>
+                                                    <span class="fw-bold item-line-total text-primary">@currency($item->line_total)</span>
                                             </td>
                                             <td>
                                                 <form action="{{ route('cart.items.remove', $item->id) }}" method="post" class="d-inline cart-remove-form">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-outline-danger btn-sm" 
-                                                            onclick="return confirm('Are you sure you want to remove this item?')">
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm">
                                                         <i class="bi bi-trash"></i>
                                                     </button>
                                                 </form>
@@ -210,10 +227,74 @@
                 </div>
             </div>
         </div>
+        @if(isset($unavailableItems) && $unavailableItems->count())
+        <div class="row mt-3">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0 text-warning"><i class="bi bi-exclamation-triangle me-2"></i>Unavailable Items (won't be checked out)</h6>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-warning">
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Price</th>
+                                        <th>Quantity</th>
+                                        <th>Total</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                @foreach($unavailableItems as $item)
+                                    <tr class="table-warning">
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-3">
+                                                    @if($item->product && $item->product->images->count() > 0)
+                                                        <img src="{{ asset('storage/' . $item->product->images->first()->image_path) }}" alt="{{ $item->product->name }}" class="rounded" style="width: 60px; height: 60px; object-fit: cover;">
+                                                    @else
+                                                        <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                                            <i class="bi bi-image text-muted"></i>
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-1 text-muted">{{ $item->product->name ?? 'Unavailable product' }}</h6>
+                                                    <small class="text-muted">{{ $item->product->sku ?? '' }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="text-muted">@currency($item->unit_price)</span></td>
+                                        <td>
+                                            <div class="text-muted">{{ $item->quantity }}</div>
+                                        </td>
+                                        <td><span class="text-muted text-decoration-line-through">@currency($item->line_total)</span></td>
+                                        <td>
+                                            <form action="{{ route('cart.items.remove', $item->id) }}" method="post" class="d-inline cart-remove-form">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i></button>
+                                            </form>
+                                            <div class="mt-1"><span class="badge bg-warning text-dark">Out of stock</span></div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
     @endif
 </div>
 @endsection
 
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // AJAX quantity update
@@ -243,11 +324,22 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // AJAX remove item
+    // AJAX remove item with SweetAlert2
     document.querySelectorAll('.cart-remove-form').forEach(function(form){
-        form.addEventListener('submit', function(e){
+        form.addEventListener('submit', async function(e){
             e.preventDefault();
-            if(!confirm('Are you sure you want to remove this item?')) return false;
+            try {
+                const result = await Swal.fire({
+                    title: 'Remove item?',
+                    text: 'This will remove the item from your cart.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, remove',
+                    cancelButtonText: 'Cancel'
+                });
+                if (!result.isConfirmed) return false;
+            } catch(_) { /* fallback continues */ }
+
             fetch(form.action, {
                 method: 'POST',
                 headers: {
@@ -264,6 +356,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('cartGrand').textContent = new Intl.NumberFormat(undefined, { style: 'currency', currency: '{{ $currentCurrency->code ?? 'USD' }}' }).format(res.cart.grand_total);
                 if(typeof window.__updateCartCount === 'function'){
                     window.__updateCartCount(res.cart.count);
+                }
+                if (window.Swal) {
+                    Swal.fire({ icon: 'success', title: 'Removed', timer: 1200, showConfirmButton: false });
                 }
             }).catch(()=>{});
         });
@@ -335,7 +430,43 @@ document.addEventListener('DOMContentLoaded', function() {
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>`;
     }
+    // Clear all with SweetAlert2
+    const clearForm = document.getElementById('cartClearForm');
+    if (clearForm) {
+        clearForm.addEventListener('submit', async function(e){
+            e.preventDefault();
+            try {
+                const result = await Swal.fire({
+                    title: 'Clear entire cart?',
+                    text: 'This will remove all items from your cart.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, clear',
+                    cancelButtonText: 'Cancel'
+                });
+                if (!result.isConfirmed) return false;
+            } catch(_) {}
+            fetch(clearForm.action, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': clearForm.querySelector('input[name="_token"]').value
+                }
+            }).then(r=>r.json()).then(res=>{
+                if(!res || !res.success) { window.location.reload(); return; }
+                document.querySelectorAll('table tbody tr').forEach(tr=>tr.remove());
+                document.getElementById('cartSubtotal').textContent = new Intl.NumberFormat(undefined, { style: 'currency', currency: '{{ $currentCurrency->code ?? 'USD' }}' }).format(res.cart.subtotal);
+                document.getElementById('cartGrand').textContent = new Intl.NumberFormat(undefined, { style: 'currency', currency: '{{ $currentCurrency->code ?? 'USD' }}' }).format(res.cart.grand_total);
+                if(typeof window.__updateCartCount === 'function'){
+                    window.__updateCartCount(0);
+                }
+                Swal.fire({ icon: 'success', title: 'Cart cleared', timer: 1200, showConfirmButton: false }).then(()=> window.location.reload());
+            }).catch(()=>{ window.location.reload(); });
+        });
+    }
 });
 </script>
+@endpush
 
 

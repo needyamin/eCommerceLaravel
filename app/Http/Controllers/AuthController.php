@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use App\Models\User;
 use App\Models\Cart;
+use App\Support\PointService;
+use App\Models\CoinSetting;
 
 class AuthController extends Controller
 {
@@ -37,6 +39,14 @@ class AuthController extends Controller
             
             // Merge session cart with user cart
             $this->mergeSessionCartWithUserCart($request);
+            // Ensure referral code exists for existing users
+            try {
+                $user = Auth::user();
+                if (empty($user->referral_code)) {
+                    $user->referral_code = strtoupper(substr(sha1($user->id . '|' . now()->timestamp), 0, 8));
+                    $user->save();
+                }
+            } catch (\Throwable $e) {}
             
             return redirect()->intended('/');
         }
@@ -71,6 +81,34 @@ class AuthController extends Controller
             'password' => Hash::make($data['password']),
         ]);
 
+        // Generate referral code if missing
+        if (empty($user->referral_code)) {
+            $user->referral_code = strtoupper(substr(sha1($user->id . '|' . now()->timestamp), 0, 8));
+            $user->save();
+        }
+
+        // Attach referrer & award signup bonus (respects Coin Settings flags)
+        try {
+            if ($request->session()->has('referral_code')) {
+                $code = (string) $request->session()->get('referral_code');
+                $referrer = User::where('referral_code', $code)->first();
+                if ($referrer && $referrer->id !== $user->id) {
+                    $user->referred_by_user_id = $referrer->id;
+                    $user->save();
+                    $bonus = 0; $enabledAll = true; $enabledReferral = true;
+                    try {
+                        $cs = CoinSetting::get();
+                        $enabledAll = (bool) ($cs->coins_enabled ?? true);
+                        $enabledReferral = (bool) ($cs->referral_enabled ?? true);
+                        $bonus = (int) max(0, (int) ($cs->referral_signup_bonus ?? 0));
+                    } catch (\Throwable $e) {}
+                    if ($enabledAll && $enabledReferral && $bonus > 0) {
+                        PointService::award($referrer, $bonus, 'referral_signup', 'Referral signup bonus', $user, ['referred_user_id' => $user->id]);
+                    }
+                }
+            }
+        } catch (\Throwable $e) { /* ignore */ }
+
         Auth::login($user);
 
         // Merge session cart with user cart
@@ -90,7 +128,26 @@ class AuthController extends Controller
     public function showProfile()
     {
         $user = Auth::user();
-        return view('auth.profile', compact('user'));
+        // Ensure referral code exists for display
+        try {
+            if (empty($user->referral_code)) {
+                $user->referral_code = strtoupper(substr(sha1($user->id . '|' . now()->timestamp), 0, 8));
+                $user->save();
+            }
+        } catch (\Throwable $e) {}
+        // Recompute coins from ledger to ensure accuracy
+        try {
+            $coins = \App\Models\UserPoint::where('user_id', $user->id)->sum('amount');
+            if ((int) ($user->coins_balance ?? 0) !== (int) $coins) {
+                $user->coins_balance = (int) $coins;
+                $user->save();
+            }
+        } catch (\Throwable $e) {
+            $coins = (int) ($user->coins_balance ?? 0);
+        }
+        $coinsBalance = (int) $coins;
+        $recentPoints = \App\Models\UserPoint::where('user_id', $user->id)->latest()->limit(20)->get();
+        return view('auth.profile', compact('user', 'coinsBalance', 'recentPoints'));
     }
 
     public function updateProfile(Request $request)

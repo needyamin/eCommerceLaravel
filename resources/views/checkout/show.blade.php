@@ -279,7 +279,7 @@
                                             <small class="text-muted">Qty: {{ $item->quantity }}</small>
                                         </div>
                                         <div class="text-end">
-                                            <small class="fw-semibold">${{ number_format($item->line_total, 2) }}</small>
+                                            <small class="fw-semibold">@currency($item->line_total)</small>
                                         </div>
                                     </div>
                                 @endforeach
@@ -305,12 +305,12 @@
                                 </div>
                                 <div class="d-flex justify-content-between mb-2">
                                     <span>Shipping</span>
-                                    <span class="text-success">FREE</span>
+                                    <span>@currency($shipping ?? 0)</span>
                                 </div>
                                 <hr>
                                 <div class="d-flex justify-content-between mb-4">
                                     <span class="fw-bold fs-5">Total</span>
-                                    <span class="fw-bold fs-5 text-primary">@currency($cart->grand_total)</span>
+                                    <span class="fw-bold fs-5 text-primary">@currency($cart->grand_total + ($shipping ?? 0))</span>
                                 </div>
                             </div>
                             

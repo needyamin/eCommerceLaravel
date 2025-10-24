@@ -44,6 +44,13 @@ Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
 Route::post('/register', [AuthController::class, 'register']);
+Route::get('/r/{code}', function ($code) {
+    session(['referral_code' => $code]);
+    return redirect()->route('register');
+})->name('referral');
+Route::get('/r', function () {
+    return redirect()->route('register');
+});
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     // Newsletter (public)
@@ -72,6 +79,7 @@ Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
 Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
 Route::put('/cart/items/{item}', [CartController::class, 'update'])->name('cart.items.update');
 Route::delete('/cart/items/{item}', [CartController::class, 'remove'])->name('cart.items.remove');
+Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 
 // Coupons
 Route::post('/coupons/apply', [CouponController::class, 'apply'])->name('coupons.apply');
@@ -109,6 +117,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('users', AdminUserController::class)->except(['create', 'store']);
         Route::post('users/{user}/reset-password', [AdminUserController::class, 'resetPassword'])->name('users.reset-password');
         Route::post('users/{user}/toggle-status', [AdminUserController::class, 'toggleStatus'])->name('users.toggle-status');
+        Route::post('users/{user}/coins/adjust', [AdminUserController::class, 'adjustCoins'])->name('users.coins.adjust');
+        Route::post('users/{user}/coins/reset', [AdminUserController::class, 'resetCoins'])->name('users.coins.reset');
+        Route::get('shipping-settings', [\App\Http\Controllers\Admin\ShippingSettingsController::class, 'index'])->name('shipping-settings.index');
+        Route::put('shipping-settings', [\App\Http\Controllers\Admin\ShippingSettingsController::class, 'update'])->name('shipping-settings.update');
         Route::get('email-settings', [AdminEmailSettingsController::class, 'index'])->name('email-settings.index');
         Route::put('email-settings', [AdminEmailSettingsController::class, 'update'])->name('email-settings.update');
             Route::resource('roles', AdminRoleController::class)->except(['show']);
@@ -144,5 +156,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             // Administrators
             Route::resource('admins', App\Http\Controllers\Admin\AdminController::class)->except(['show']);
+
+            // Coin Settings
+            Route::get('coin-settings', [App\Http\Controllers\Admin\CoinSettingsController::class, 'index'])->name('coin-settings.index');
+            Route::put('coin-settings', [App\Http\Controllers\Admin\CoinSettingsController::class, 'update'])->name('coin-settings.update');
     });
 });

@@ -121,9 +121,36 @@
                         <span>Member Since</span>
                         <span class="fw-medium">{{ $user->created_at->format('M Y') }}</span>
                     </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>Coins</span>
+                        <span class="badge text-bg-success rounded-pill">{{ isset($coinsBalance) ? $coinsBalance : ($user->coins_balance ?? 0) }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h2 class="h6 mb-0"><i class="bi bi-people me-2"></i>Refer & Earn</h2>
+                    @php($refCode = $user->referral_code ?? '')
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small mb-2">Share your referral link with friends. When they sign up, you earn bonus coins.</p>
+                    <div class="input-group">
+                        <input type="text" readonly class="form-control" value="{{ url('/r/' . ($user->referral_code ?? '')) }}">
+                        <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText('{{ url('/r/' . ($user->referral_code ?? '')) }}'); this.innerText='Copied!'; setTimeout(()=>this.innerText='Copy',1500);">Copy</button>
+                    </div>
+                    @if(empty($user->referral_code))
+                        <div class="text-danger small mt-2">Referral code will be generated after your next login.</div>
+                    @endif
                 </div>
             </div>
         </div>
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+console.log('Coins balance:', {{ isset($coinsBalance)?$coinsBalance:($user->coins_balance ?? 0) }});
+</script>
+@endpush

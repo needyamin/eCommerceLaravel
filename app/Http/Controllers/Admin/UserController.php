@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\UserAddress;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Support\PointService;
 
 class UserController extends Controller
 {
@@ -84,5 +85,32 @@ class UserController extends Controller
         // For now, we'll just return a message
         return redirect()->route('admin.users.show', $user)
             ->with('info', 'User status toggle feature can be implemented');
+    }
+
+    public function adjustCoins(Request $request, User $user)
+    {
+        $data = $request->validate([
+            'amount' => ['required','integer','not_in:0','between:-100000000,100000000'],
+            'reason' => ['nullable','string','max:255'],
+        ]);
+        try {
+            PointService::adjust($user, (int) $data['amount'], $data['reason'] ?? 'admin_adjust');
+            return redirect()->route('admin.users.show', $user)->with('success', 'Coins adjusted');
+        } catch (\Throwable $e) {
+            return redirect()->route('admin.users.show', $user)->with('error', 'Adjustment failed');
+        }
+    }
+
+    public function resetCoins(Request $request, User $user)
+    {
+        try {
+            \DB::transaction(function () use ($user) {
+                \App\Models\UserPoint::where('user_id', $user->id)->delete();
+                $user->update(['coins_balance' => 0]);
+            });
+            return redirect()->route('admin.users.show', $user)->with('success', 'Coins reset to 0');
+        } catch (\Throwable $e) {
+            return redirect()->route('admin.users.show', $user)->with('error', 'Reset failed');
+        }
     }
 }

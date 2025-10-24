@@ -1,8 +1,8 @@
 # 🛒 Laravel eCommerce System
 
-A comprehensive, modern eCommerce platform built with Laravel 11, featuring a beautiful storefront and powerful admin panel with role-based access control.
+A comprehensive, modern eCommerce platform built with Laravel 12, featuring a beautiful storefront and powerful admin panel with role-based access control.
 
-![Laravel](https://img.shields.io/badge/Laravel-11.x-red.svg)
+![Laravel](https://img.shields.io/badge/Laravel-12.x-red.svg)
 ![PHP](https://img.shields.io/badge/PHP-8.2+-blue.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 
@@ -13,17 +13,21 @@ A comprehensive, modern eCommerce platform built with Laravel 11, featuring a be
 - **Shopping Cart (AJAX)**: Add to cart, inline increase/decrease, and remove without page reload; live header count
 - **Coupons**: Apply/remove coupons (AJAX) with discount reflected in totals
 - **Checkout Process**: Secure checkout with validation and order creation, email notification
-- **Currency Switcher**: Session-based currency with @currency formatting across pages
+- **Payment Methods**: Stripe, PayPal, and Cash on Delivery (COD)
+- **Currency**: Default currency enforced globally via `@currency(...)` (frontend switching disabled)
+- **Infinite Scroll**: Products index auto-loads next page while retaining pagination controls
 - **Responsive Design**: Mobile-first Bootstrap 5 UI (storefront) with modern components
 - **User Authentication**: Login, register, profile update, password change
 
 ### 🔧 **Admin Panel**
-- **Dashboard**: Stats and quick access; Bootstrap 5 navbar/cards
+- **Dashboard**: Stats tiles + 14‑day Orders/Revenue charts; Recent Orders; Low Stock
 - **Products/Categories**: Full CRUD with images, hierarchical categories
-- **Orders**: Index/show/update status
-- **Roles/Permissions**: Spatie permissions with route-based checks
+- **Orders**: Index/show/update; colored badges for Status/Payment/Shipping
+- **Roles/Permissions**: Spatie permissions with route‑based checks; route permissions auto-listed
+- **Administrators**: Manage admin users and assign roles (Admin → Administrators)
+- **Site Settings**: Control site name/logo/favicon, meta title/description/keywords, footer text, legal & social links
 - **Payment Gateways**: Stripe/PayPal configure, enable/disable, test connection; logs
-- **Currencies**: CRUD, set default/toggle active, rates & formatting
+- **Currencies**: CRUD, set default/toggle active, rates & formatting (frontend users cannot switch)
 - **Newsletter**: Subscribers list, status toggle/remove; frontend subscribe forms
 - **OTP Settings**: Enable Email/SMS OTP, length, TTL, attempts, SMS gateway/API fields
 - **Email Settings**: Admin-managed SMTP (mailer/host/port/user/pass/encryption/from) applied at runtime
@@ -49,7 +53,7 @@ A comprehensive, modern eCommerce platform built with Laravel 11, featuring a be
 - **Clean Architecture**: Follows Laravel best practices and MVC pattern
 - **Extensible**: Easy to add new features and customize functionality
 - **Well Documented**: Comprehensive code comments and structure
-- **Modern Stack**: Built with latest Laravel 11 and PHP 8.2+
+- **Modern Stack**: Built with latest Laravel 12 and PHP 8.2+
 - **Security First**: Implements industry-standard security practices
 
 ### **For Business Owners**
@@ -78,7 +82,7 @@ A comprehensive, modern eCommerce platform built with Laravel 11, featuring a be
 ### 1. Clone the Repository
 ```bash
 git clone https://github.com/needyamin/eCommerceLaravel
-cd laravel-ecommerce
+cd eCommerceLaravel
 ```
 
 ### 2. Install Dependencies
@@ -109,6 +113,12 @@ DB_PASSWORD=your_password
 php artisan migrate --seed
 ```
 
+Optional seeders (recommended for admin RBAC and payments):
+```bash
+php artisan db:seed --class=Database\\Seeders\\AdminRoutePermissionsSeeder
+php artisan db:seed --class=Database\\Seeders\\PaymentGatewaySettingsSeeder
+```
+
 ### 6. Compile Assets (Optional)
 ```bash
 npm run dev
@@ -128,7 +138,7 @@ Visit `http://localhost:8000` to see your eCommerce store!
 ### Admin Account
 - **Email**: `admin@example.com`
 - **Password**: `password`
-- **Role**: Super Admin (full access)
+- **Role**: Super Admin
 
 ### Test User Account
 - **Email**: `test@example.com`
@@ -169,13 +179,11 @@ The admin panel uses AdminLTE theme. Customize the appearance by modifying:
 - `public/admin-assets/css/adminlte.css`
 
 ### Permission System
-Add new permissions by updating the `DatabaseSeeder.php`:
-```php
-$permissions = [
-    'admin.your-feature.index',
-    'admin.your-feature.create',
-    // ... more permissions
-];
+- Admin routes are protected by route‑name permissions (e.g., `admin.products.edit`).
+- Use Admin → Role & Permission to assign both named and route‑based permissions.
+- Seed all current admin route permissions and grant to Super Admin:
+```bash
+php artisan db:seed --class=Database\\Seeders\\AdminRoutePermissionsSeeder
 ```
 
 ### Email Configuration
@@ -220,6 +228,8 @@ Run the test suite:
 ```bash
 php artisan test
 ```
+
+Note: If using SQLite for tests, ensure `pdo_sqlite` is installed; or configure tests to use MySQL by setting `DB_CONNECTION=mysql` for the testing environment.
 
 Generate test data:
 ```bash

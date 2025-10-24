@@ -98,6 +98,18 @@
 						<p>OTP Settings</p>
 					</a>
 				</li>
+				<li class="nav-item">
+					<a href="{{ route('admin.coin-settings.index') }}" class="nav-link">
+						<i class="nav-icon bi bi-coin"></i>
+						<p>Coin Settings</p>
+					</a>
+				</li>
+				<li class="nav-item">
+					<a href="{{ route('admin.shipping-settings.index') }}" class="nav-link">
+						<i class="nav-icon bi bi-truck"></i>
+						<p>Shipping Settings</p>
+					</a>
+				</li>
 			</ul>
 		</nav>
 	</div>
