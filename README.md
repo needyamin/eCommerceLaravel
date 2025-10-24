@@ -9,20 +9,24 @@ A comprehensive, modern eCommerce platform built with Laravel 11, featuring a be
 ## ✨ Features
 
 ### 🛍️ **Storefront**
-- **Product Catalog**: Browse products by categories with advanced filtering
-- **Shopping Cart**: Add, update, and remove items with real-time calculations
-- **Checkout Process**: Secure checkout with form validation and order processing
-- **Order Management**: Track order history and view detailed order information
-- **Responsive Design**: Mobile-first design with Tailwind CSS
-- **User Authentication**: Secure user registration and login system
+- **Product Catalog**: Browse products by categories with advanced filtering & sorting
+- **Shopping Cart (AJAX)**: Add to cart, inline increase/decrease, and remove without page reload; live header count
+- **Coupons**: Apply/remove coupons (AJAX) with discount reflected in totals
+- **Checkout Process**: Secure checkout with validation and order creation, email notification
+- **Currency Switcher**: Session-based currency with @currency formatting across pages
+- **Responsive Design**: Mobile-first Bootstrap 5 UI (storefront) with modern components
+- **User Authentication**: Login, register, profile update, password change
 
 ### 🔧 **Admin Panel**
-- **Dashboard**: Comprehensive overview with statistics and quick actions
-- **Product Management**: Full CRUD operations for products with image uploads
-- **Category Management**: Hierarchical category system with parent-child relationships
-- **Order Management**: Process orders, update statuses, and manage customer information
-- **Role & Permission System**: Granular access control with route-based permissions
-- **AdminLTE Theme**: Professional admin interface with modern UI components
+- **Dashboard**: Stats and quick access; Bootstrap 5 navbar/cards
+- **Products/Categories**: Full CRUD with images, hierarchical categories
+- **Orders**: Index/show/update status
+- **Roles/Permissions**: Spatie permissions with route-based checks
+- **Payment Gateways**: Stripe/PayPal configure, enable/disable, test connection; logs
+- **Currencies**: CRUD, set default/toggle active, rates & formatting
+- **Newsletter**: Subscribers list, status toggle/remove; frontend subscribe forms
+- **OTP Settings**: Enable Email/SMS OTP, length, TTL, attempts, SMS gateway/API fields
+- **Email Settings**: Admin-managed SMTP (mailer/host/port/user/pass/encryption/from) applied at runtime
 
 ### 🔐 **Security & Authorization**
 - **Role-Based Access Control (RBAC)**: Using Spatie Laravel Permission
@@ -175,13 +179,16 @@ $permissions = [
 ```
 
 ### Email Configuration
-Configure email settings in `.env` for order notifications:
+You can configure SMTP at runtime from Admin → Email Settings (no .env edit required). For local setup via `.env`, use:
 ```env
 MAIL_MAILER=smtp
 MAIL_HOST=your-smtp-host
 MAIL_PORT=587
 MAIL_USERNAME=your-email
 MAIL_PASSWORD=your-password
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=no-reply@example.com
+MAIL_FROM_NAME="Your Store"
 ```
 
 ## 📚 API Documentation
@@ -203,6 +210,9 @@ The system includes RESTful API endpoints for mobile app integration:
 - `POST /api/cart/add` - Add item to cart
 - `GET /api/orders` - List user orders
 - `GET /api/orders/{id}` - Get order details
+
+### OTP
+- Email & SMS OTP request/verify endpoints (UI available under `/otp/email` and `/otp/sms`)
 
 ## 🧪 Testing
 
