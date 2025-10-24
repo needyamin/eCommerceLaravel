@@ -18,6 +18,11 @@ return [
         'token' => env('POSTMARK_TOKEN'),
     ],
 
+    'sms' => [
+        'gateway' => env('SMS_GATEWAY', 'mim_sms'),
+        'masking' => env('SMS_MASKING', ''),
+    ],
+
     'resend' => [
         'key' => env('RESEND_KEY'),
     ],

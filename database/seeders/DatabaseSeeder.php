@@ -120,5 +120,9 @@ class DatabaseSeeder extends Seeder
                 }
             });
         });
+
+        // Currencies
+        (new \Database\Seeders\CurrencySeeder())->run();
+        (new \Database\Seeders\AdminCurrencyPermissionsSeeder())->run();
     }
 }

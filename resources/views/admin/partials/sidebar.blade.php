@@ -74,6 +74,18 @@
 						<p>Payment Gateways</p>
 					</a>
 				</li>
+				<li class="nav-item">
+					<a href="{{ route('admin.currencies.index') }}" class="nav-link">
+						<i class="nav-icon bi bi-currency-exchange"></i>
+						<p>Currencies</p>
+					</a>
+				</li>
+				<li class="nav-item">
+					<a href="{{ route('admin.otp-settings.index') }}" class="nav-link">
+						<i class="nav-icon bi bi-shield-lock"></i>
+						<p>OTP Settings</p>
+					</a>
+				</li>
 			</ul>
 		</nav>
 	</div>

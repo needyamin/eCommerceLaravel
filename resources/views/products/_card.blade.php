@@ -38,10 +38,10 @@
         
         <div class="d-flex align-items-center justify-content-between mb-3">
             <div>
-                <span class="h5 text-primary mb-0">${{ number_format($product->price, 2) }}</span>
+                    <span class="h5 text-primary mb-0">@currency($product->price)</span>
                 @if($product->compare_at_price && $product->compare_at_price > $product->price)
                     <small class="text-muted text-decoration-line-through ms-2">
-                        ${{ number_format($product->compare_at_price, 2) }}
+                            @currency($product->compare_at_price)
                     </small>
                 @endif
             </div>

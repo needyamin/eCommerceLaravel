@@ -279,19 +279,19 @@
                             <div class="mb-3">
                                 <div class="d-flex justify-content-between mb-2">
                                     <span>Subtotal</span>
-                                    <span>${{ number_format($cart->subtotal, 2) }}</span>
+                                    <span>@currency($cart->subtotal)</span>
                                 </div>
                                 @if($cart->coupon_discount > 0)
                                     <div class="d-flex justify-content-between mb-2">
                                         <span class="text-success">
                                             <i class="bi bi-ticket me-1"></i>Discount ({{ $cart->coupon->code }})
                                         </span>
-                                        <span class="text-success">-${{ number_format($cart->coupon_discount, 2) }}</span>
+                                        <span class="text-success">-@currency($cart->coupon_discount)</span>
                                     </div>
                                 @endif
                                 <div class="d-flex justify-content-between mb-2">
                                     <span>Tax</span>
-                                    <span>${{ number_format($cart->tax_total, 2) }}</span>
+                                    <span>@currency($cart->tax_total)</span>
                                 </div>
                                 <div class="d-flex justify-content-between mb-2">
                                     <span>Shipping</span>
@@ -300,7 +300,7 @@
                                 <hr>
                                 <div class="d-flex justify-content-between mb-4">
                                     <span class="fw-bold fs-5">Total</span>
-                                    <span class="fw-bold fs-5 text-primary">${{ number_format($cart->grand_total, 2) }}</span>
+                                    <span class="fw-bold fs-5 text-primary">@currency($cart->grand_total)</span>
                                 </div>
                             </div>
                             

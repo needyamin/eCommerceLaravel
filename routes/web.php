@@ -22,8 +22,22 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\NewsletterController as FrontNewsletterController;
+use App\Http\Controllers\CurrencyController;
+use App\Http\Controllers\OTP\SmsOtpController;
+use App\Http\Controllers\OTP\EmailOtpController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// Currency switch
+Route::post('/currency/switch', [CurrencyController::class, 'switch'])->name('currency.switch');
+
+// OTP routes (public endpoints for demo)
+Route::post('/otp/request-email', [EmailOtpController::class, 'request'])->name('otp.request.email');
+Route::post('/otp/verify-email', [EmailOtpController::class, 'verify'])->name('otp.verify.email');
+Route::post('/otp/request-sms', [SmsOtpController::class, 'request'])->name('otp.request.sms');
+Route::post('/otp/verify-sms', [SmsOtpController::class, 'verify'])->name('otp.verify.sms');
+Route::view('/otp/email', 'auth.otp.email')->name('otp.form.email');
+Route::view('/otp/sms', 'auth.otp.sms')->name('otp.form.sms');
 
 // Authentication Routes
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -114,5 +128,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('payment-gateways/{gateway}', [App\Http\Controllers\Admin\PaymentGatewayController::class, 'update'])->name('payment-gateways.update');
             Route::post('payment-gateways/{gateway}/toggle-status', [App\Http\Controllers\Admin\PaymentGatewayController::class, 'toggleStatus'])->name('payment-gateways.toggle-status');
             Route::post('payment-gateways/{gateway}/test', [App\Http\Controllers\Admin\PaymentGatewayController::class, 'testConnection'])->name('payment-gateways.test');
+
+            // OTP Settings
+            Route::get('otp-settings', [App\Http\Controllers\Admin\OtpSettingsController::class, 'index'])->name('otp-settings.index');
+            Route::put('otp-settings', [App\Http\Controllers\Admin\OtpSettingsController::class, 'update'])->name('otp-settings.update');
+
+            // Currencies
+            Route::resource('currencies', App\Http\Controllers\Admin\CurrencyController::class)->except(['show']);
+            Route::post('currencies/{currency}/toggle', [App\Http\Controllers\Admin\CurrencyController::class, 'toggle'])->name('currencies.toggle');
+            Route::post('currencies/{currency}/default', [App\Http\Controllers\Admin\CurrencyController::class, 'setDefault'])->name('currencies.default');
     });
 });

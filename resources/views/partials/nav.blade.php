@@ -63,8 +63,20 @@
                 </li>
             </ul>
 
-            <!-- User Menu -->
-            <ul class="navbar-nav">
+                <!-- Currency Switcher -->
+                <form action="{{ route('currency.switch') }}" method="post" class="d-flex align-items-center me-2">
+                    @csrf
+                    <select name="code" class="form-select form-select-sm" onchange="this.form.submit()">
+                        @foreach(($activeCurrencies ?? []) as $c)
+                            <option value="{{ $c->code }}" {{ ($currentCurrency->code ?? 'USD') === $c->code ? 'selected' : '' }}>
+                                {{ $c->code }}
+                            </option>
+                        @endforeach
+                    </select>
+                </form>
+
+                <!-- User Menu -->
+                <ul class="navbar-nav">
                 @auth
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">

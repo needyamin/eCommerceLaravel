@@ -78,14 +78,14 @@
                     @endif
 
                     <div class="mb-4">
-                        <div class="d-flex align-items-center mb-2">
-                            <span class="h2 text-primary mb-0 me-3">${{ number_format($product->price, 2) }}</span>
-                            @if($product->compare_at_price && $product->compare_at_price > $product->price)
-                                <span class="text-muted text-decoration-line-through fs-5">
-                                    ${{ number_format($product->compare_at_price, 2) }}
-                                </span>
-                            @endif
-                        </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="h2 text-primary mb-0 me-3">@currency($product->price)</span>
+                                @if($product->compare_at_price && $product->compare_at_price > $product->price)
+                                    <span class="text-muted text-decoration-line-through fs-5">
+                                        @currency($product->compare_at_price)
+                                    </span>
+                                @endif
+                            </div>
                         @if($product->stock > 0)
                             <span class="badge bg-success fs-6">
                                 <i class="bi bi-check-circle me-1"></i>In Stock ({{ $product->stock }} available)
