@@ -29,36 +29,6 @@
     </div>
 </section>
 
-<!-- Top Categories -->
-<section class="py-5">
-    <div class="container">
-        <div class="row mb-4">
-            <div class="col-12 text-center">
-                <h2 class="fw-bold mb-2">Top Categories</h2>
-                <p class="text-muted mb-0">Browse what shoppers are exploring right now</p>
-            </div>
-        </div>
-        <div class="row g-4 justify-content-center">
-            @foreach($categories as $cat)
-                <div class="col-6 col-sm-4 col-md-3 col-lg-2 text-center">
-                    <a href="{{ route('categories.show', $cat->slug) }}" class="text-decoration-none">
-                        <div class="mx-auto mb-2" style="width: 96px; height: 96px;">
-                            @php $img = $cat->image ? asset('storage/' . $cat->image) : asset('admin-assets/assets/img/AdminLTELogo.png'); @endphp
-                            <img src="{{ $img }}" alt="{{ $cat->name }}" class="rounded-circle border" style="width: 96px; height: 96px; object-fit: cover;">
-                        </div>
-                        <div class="small fw-semibold text-body">{{ $cat->name }}</div>
-                    </a>
-                </div>
-            @endforeach
-        </div>
-    </div>
-    <style>
-        @media (min-width: 992px){
-            .rounded-circle.border{ box-shadow: 0 2px 8px rgba(0,0,0,.06); }
-        }
-    </style>
-</section>
-
 <!-- Features Section -->
 <section class="py-5 bg-light">
     <div class="container">
@@ -92,6 +62,37 @@
             </div>
         </div>
     </div>
+</section>
+
+<!-- Top Categories -->
+<section class="py-5">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12 text-center">
+                <h2 class="display-6 fw-bold mb-2"><i class="bi bi-collection me-2 text-primary"></i>Top Categories</h2>
+                <p class="text-muted mb-0">Browse what shoppers are exploring right now</p>
+            </div>
+        </div>
+        <div class="row g-3 g-md-4 justify-content-center">
+            @foreach($categories as $cat)
+                <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                    <a href="{{ route('categories.show', $cat->slug) }}" class="cat-item d-block text-center text-decoration-none p-3 h-100 border rounded-3 bg-white">
+                        @php $img = $cat->image ? asset('storage/' . $cat->image) : asset('admin-assets/assets/img/AdminLTELogo.png'); @endphp
+                        <div class="mx-auto mb-2 cat-avatar">
+                            <img src="{{ $img }}" alt="{{ $cat->name }}" class="rounded-circle" width="88" height="88" style="object-fit: cover;" />
+                        </div>
+                        <div class="small fw-semibold text-body text-truncate">{{ $cat->name }}</div>
+                    </a>
+                </div>
+            @endforeach
+        </div>
+    </div>
+    <style>
+        .cat-item{ transition: all .15s ease-in-out; }
+        .cat-item:hover{ transform: translateY(-2px); box-shadow: 0 .25rem .75rem rgba(0,0,0,.06); border-color: rgba(13,110,253,.35)!important; }
+        .cat-avatar{ width: 96px; height: 96px; border-radius: 50%; padding: 4px; background: linear-gradient(135deg, rgba(13,110,253,.25), rgba(13,110,253,.05)); display: flex; align-items: center; justify-content: center; }
+        @media (min-width: 992px){ .cat-item{ background-color:#fff; } }
+    </style>
 </section>
 
 <!-- Featured Products -->
