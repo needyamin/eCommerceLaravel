@@ -42,6 +42,15 @@
                                 </button>
                             @endif
                         </div>
+                        @if($product->images->count() > 1)
+                            <div class="d-flex gap-2 flex-wrap mt-3" id="productThumbnails">
+                                @foreach($product->images as $index => $image)
+                                    <button type="button" class="btn p-0 border-0 thumb-btn {{ $index === 0 ? 'thumb-active' : '' }}" data-bs-target="#productCarousel" data-bs-slide-to="{{ $index }}" aria-label="Slide {{ $index + 1 }}">
+                                        <img src="{{ asset('storage/' . $image->image_path) }}" alt="{{ $product->name }} thumbnail {{ $index + 1 }}" style="width: 80px; height: 60px; object-fit: cover;" class="rounded border">
+                                    </button>
+                                @endforeach
+                            </div>
+                        @endif
                     @else
                         <div class="d-flex align-items-center justify-content-center bg-light" style="height: 400px;">
                             <i class="bi bi-image text-muted display-1"></i>
@@ -211,15 +220,32 @@
     @if($related->count() > 0)
         <div class="row mt-5">
             <div class="col-12">
-                <h3 class="fw-bold mb-4">
+                <h3 class="fw-bold mb-3">
                     <i class="bi bi-grid me-2"></i>Related Products
                 </h3>
-                <div class="row g-4">
-                    @foreach($related as $relatedProduct)
-                        <div class="col-lg-3 col-md-6">
-                            @include('products._card', ['product' => $relatedProduct])
+                <div class="position-relative">
+                    <button type="button" class="btn btn-light border position-absolute top-50 start-0 translate-middle-y shadow-sm" id="relPrev" aria-label="Previous" style="z-index: 2;">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <style>
+                        #relatedScroller{ scrollbar-width: thin; }
+                        #relatedScroller::-webkit-scrollbar{ height:6px; }
+                        #relatedScroller::-webkit-scrollbar-track{ background: transparent; }
+                        #relatedScroller::-webkit-scrollbar-thumb{ background-color: rgba(0,0,0,.2); border-radius: 3px; }
+                        #relatedScroller.dragging{ cursor: grabbing; }
+                    </style>
+                    <div class="overflow-x-auto" id="relatedScroller">
+                        <div class="d-flex flex-nowrap gap-3 m-0 p-1" style="scroll-behavior: smooth;">
+                            @foreach($related as $relatedProduct)
+                                <div class="flex-shrink-0" style="width: 280px;">
+                                    @include('products._card', ['product' => $relatedProduct])
+                                </div>
+                            @endforeach
                         </div>
-                    @endforeach
+                    </div>
+                    <button type="button" class="btn btn-light border position-absolute top-50 end-0 translate-middle-y shadow-sm" id="relNext" aria-label="Next" style="z-index: 2;">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -227,6 +253,76 @@
 </div>
 @endsection
 <script>
+document.addEventListener('DOMContentLoaded', function(){
+    // Thumbnails sync with carousel
+    const carousel = document.getElementById('productCarousel');
+    if (carousel) {
+        carousel.addEventListener('slid.bs.carousel', function (e) {
+            const idx = e.to;
+            document.querySelectorAll('#productThumbnails .thumb-btn').forEach((btn, i) => {
+                const img = btn.querySelector('img');
+                if (i === idx) {
+                    btn.classList.add('thumb-active');
+                    img && img.classList.add('border-primary');
+                } else {
+                    btn.classList.remove('thumb-active');
+                    img && img.classList.remove('border-primary');
+                }
+            });
+        });
+    }
+
+    // Related slider controls
+    const scrollerWrap = document.getElementById('relatedScroller');
+    if (scrollerWrap) {
+        const scroller = scrollerWrap.firstElementChild;
+        const prev = document.getElementById('relPrev');
+        const next = document.getElementById('relNext');
+        const step = Math.min(360, Math.max(280, scrollerWrap.clientWidth * 0.6));
+        const updateButtons = () => {
+            if (!scroller) return;
+            if (prev) {
+                prev.disabled = scrollerWrap.scrollLeft <= 0;
+                prev.classList.toggle('d-none', prev.disabled);
+            }
+            const maxScroll = scroller.scrollWidth - scrollerWrap.clientWidth - 1;
+            next && (next.disabled = scrollerWrap.scrollLeft >= maxScroll);
+        };
+        prev && prev.addEventListener('click', (e) => { e.preventDefault(); scrollerWrap.scrollBy({ left: -step, behavior: 'smooth' }); });
+        next && next.addEventListener('click', (e) => { e.preventDefault(); scrollerWrap.scrollBy({ left: step, behavior: 'smooth' }); });
+        scrollerWrap.addEventListener('scroll', updateButtons, { passive: true });
+        window.addEventListener('resize', updateButtons);
+        setTimeout(updateButtons, 100);
+
+        // Drag-to-scroll (mouse + touch)
+        let isDown = false;
+        let startX = 0;
+        let startScrollLeft = 0;
+        const startDrag = (clientX) => {
+            isDown = true;
+            startX = clientX;
+            startScrollLeft = scrollerWrap.scrollLeft;
+            scrollerWrap.classList.add('dragging');
+        };
+        const onMove = (clientX) => {
+            if (!isDown) return;
+            const dx = clientX - startX;
+            scrollerWrap.scrollLeft = startScrollLeft - dx;
+        };
+        const endDrag = () => {
+            isDown = false;
+            scrollerWrap.classList.remove('dragging');
+        };
+        // Mouse
+        scrollerWrap.addEventListener('mousedown', (e) => { e.preventDefault(); startDrag(e.clientX); });
+        window.addEventListener('mousemove', (e) => onMove(e.clientX));
+        window.addEventListener('mouseup', endDrag);
+        // Touch
+        scrollerWrap.addEventListener('touchstart', (e) => { if (e.touches[0]) startDrag(e.touches[0].clientX); }, { passive: true });
+        scrollerWrap.addEventListener('touchmove', (e) => { if (e.touches[0]) onMove(e.touches[0].clientX); }, { passive: true });
+        scrollerWrap.addEventListener('touchend', endDrag);
+    }
+});
 function pdAddToCartAjax(e, form){
     e.preventDefault();
     const fd = new FormData(form);

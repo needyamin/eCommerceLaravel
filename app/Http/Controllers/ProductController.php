@@ -39,12 +39,27 @@ class ProductController extends Controller
 			$query->where('stock', '>', 0);
 		}
 		
-		// Price range filter
-		if ($minPrice = $request->get('min_price')) {
+		// Price range filter (robust parsing and min/max swap)
+		$minPrice = $request->filled('min_price') ? (float) $request->get('min_price') : null;
+		$maxPrice = $request->filled('max_price') ? (float) $request->get('max_price') : null;
+		if (!is_null($minPrice) && !is_null($maxPrice) && $minPrice > $maxPrice) {
+			[$minPrice, $maxPrice] = [$maxPrice, $minPrice];
+		}
+		if (!is_null($minPrice)) {
 			$query->where('price', '>=', $minPrice);
 		}
-		if ($maxPrice = $request->get('max_price')) {
+		if (!is_null($maxPrice)) {
 			$query->where('price', '<=', $maxPrice);
+		}
+
+		// On sale filter
+		if ($request->has('on_sale') && $request->get('on_sale') == '1') {
+			$query->whereNotNull('compare_at_price')->whereColumn('price', '<', 'compare_at_price');
+		}
+
+		// Has image filter
+		if ($request->has('has_image') && $request->get('has_image') == '1') {
+			$query->whereHas('images');
 		}
 		
 		// Sorting
@@ -71,8 +86,10 @@ class ProductController extends Controller
 				break;
 		}
 		
-		$products = $query->paginate(12)->withQueryString();
-		$categories = Category::where('is_active', true)->get();
+		$perPage = (int) $request->get('per_page', 12);
+		$perPage = max(6, min(60, $perPage));
+		$products = $query->paginate($perPage)->withQueryString();
+		$categories = Category::where('is_active', true)->orderBy('name')->get();
 		
 		return view('products.index', compact('products', 'categories'));
 	}
@@ -82,7 +99,9 @@ class ProductController extends Controller
 		$product = Product::with('images', 'category')->where('slug', $slug)->firstOrFail();
 		$related = Product::where('category_id', $product->category_id)
 			->where('id', '!=', $product->id)
-			->take(4)->get();
+			->latest()
+			->take(10)
+			->get();
 		return view('products.show', compact('product', 'related'));
 	}
 }

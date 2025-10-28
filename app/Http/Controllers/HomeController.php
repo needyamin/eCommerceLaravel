@@ -21,7 +21,10 @@ class HomeController extends Controller
 			->take(8)
 			->get();
 
-		$categories = Category::where('is_active', true)->get();
+		$categories = Category::where('is_active', true)
+			->latest()
+			->take(12)
+			->get();
 
 		return view('home.index', compact('featuredProducts', 'latestProducts', 'categories'));
 	}
