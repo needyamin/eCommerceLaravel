@@ -20,6 +20,11 @@ return new class extends Migration
             $table->unsignedTinyInteger('max_attempts')->default(5);
             $table->string('sms_gateway')->nullable();
             $table->string('sms_masking')->nullable();
+            $table->string('sms_api_url')->nullable();
+            $table->string('sms_api_key')->nullable();
+            $table->string('sms_username')->nullable();
+            $table->string('sms_password')->nullable();
+            $table->string('sms_sender')->nullable();
             $table->timestamps();
         });
     }

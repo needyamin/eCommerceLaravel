@@ -14,6 +14,9 @@ return new class extends Migration
             $table->boolean('free_shipping_enabled')->default(true);
             $table->decimal('free_shipping_min_total', 10, 2)->default(0);
             $table->json('country_rates')->nullable(); // {"United States": {"type":"flat","amount":5}, ...}
+            $table->boolean('global_rate_enabled')->default(false);
+            $table->string('global_rate_type', 20)->default('flat');
+            $table->decimal('global_rate_amount', 10, 2)->default(0);
             $table->timestamps();
         });
     }

@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ProductImage>
@@ -18,7 +19,8 @@ class ProductImageFactory extends Factory
     {
         return [
             'product_id' => null, // set in seeder
-            'path' => 'https://picsum.photos/seed/' . $this->faker->uuid . '/600/450',
+            // Store relative path under public storage; actual file is created in seeder
+            'path' => 'products/' . Str::uuid() . '.jpg',
             'position' => 0,
             'is_primary' => false,
         ];

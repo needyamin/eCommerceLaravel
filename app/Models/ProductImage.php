@@ -20,6 +20,13 @@ class ProductImage extends Model
         'is_primary' => 'boolean',
     ];
 
+    protected $appends = ['image_path'];
+
+    public function getImagePathAttribute(): ?string
+    {
+        return $this->path;
+    }
+
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);

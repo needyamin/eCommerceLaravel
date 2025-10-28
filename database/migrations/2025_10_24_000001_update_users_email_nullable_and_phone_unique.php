@@ -31,12 +31,16 @@ return new class extends Migration
             }
         }
 
-        Schema::table('users', function (Blueprint $table) {
-            // Ensure a unique index exists on phone for uniqueness (nullable unique allowed)
-            if (!self::indexExists('users', 'users_phone_unique')) {
-                $table->unique('phone');
+        if (Schema::hasColumn('users', 'phone')) {
+            // Create a stable index name so down() can reliably drop it later
+            try {
+                Schema::table('users', function (Blueprint $table) {
+                    $table->unique('phone', 'users_phone_unique');
+                });
+            } catch (\Throwable $e) {
+                // Index may already exist; ignore
             }
-        });
+        }
     }
 
     /**
@@ -46,12 +50,15 @@ return new class extends Migration
     {
         $driver = Schema::getConnection()->getDriverName();
 
-        Schema::table('users', function (Blueprint $table) {
-            // Drop unique index on phone if exists
-            if (self::indexExists('users', 'users_phone_unique')) {
-                $table->dropUnique('users_phone_unique');
+        if (Schema::hasColumn('users', 'phone')) {
+            try {
+                Schema::table('users', function (Blueprint $table) {
+                    $table->dropUnique('users_phone_unique');
+                });
+            } catch (\Throwable $e) {
+                // Index might not exist; ignore
             }
-        });
+        }
 
         if ($driver === 'mysql') {
             DB::statement('ALTER TABLE `users` MODIFY `email` VARCHAR(255) NOT NULL');
@@ -70,13 +77,7 @@ return new class extends Migration
         }
     }
 
-    protected static function indexExists(string $table, string $index): bool
-    {
-        $connection = Schema::getConnection();
-        $schemaManager = $connection->getDoctrineSchemaManager();
-        $indexes = $schemaManager->listTableIndexes($table);
-        return array_key_exists($index, $indexes);
-    }
+    // no-op helper removed to avoid doctrine/dbal dependency
 };
 
 
