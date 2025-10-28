@@ -22,4 +22,12 @@ class OrderController extends Controller
 			->findOrFail($id);
 		return view('orders.show', compact('order'));
 	}
+
+    public function showGuest(Order $order)
+    {
+        // Allow only guest orders (no user) via signed URL
+        abort_if(!is_null($order->user_id), 403);
+        $order->load('items.product');
+        return view('orders.show', compact('order'));
+    }
 }

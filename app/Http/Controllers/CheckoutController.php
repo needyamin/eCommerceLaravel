@@ -217,6 +217,11 @@ class CheckoutController extends Controller
 			}
 		}
 
-		return redirect()->route('orders.show', $order->id)->with('success', 'Order placed');
+		// For guests, send a signed link to view the order; for users, redirect to their orders
+		if (auth()->check()) {
+			return redirect()->route('orders.show', $order->id)->with('success', 'Order placed');
+		}
+		return redirect()->signedRoute('orders.guest.show', ['order' => $order->id], now()->addDays(15))
+			->with('success', 'Order placed');
 	}
 }

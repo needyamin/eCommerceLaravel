@@ -95,8 +95,14 @@ Route::get('/test-coupon', function() {
 Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout.show');
 Route::post('/checkout', [CheckoutController::class, 'place'])->name('checkout.place');
 
-Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-Route::get('/orders/{id}', [OrderController::class, 'show'])->name('orders.show');
+Route::middleware('auth')->group(function(){
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{id}', [OrderController::class, 'show'])->name('orders.show');
+});
+// Guest order view via signed URL (no auth)
+Route::get('/order/guest/{order}', [OrderController::class, 'showGuest'])
+    ->name('orders.guest.show')
+    ->middleware('signed');
 
 // Admin routes
 // Public theme previews (e.g., login/register pages)
