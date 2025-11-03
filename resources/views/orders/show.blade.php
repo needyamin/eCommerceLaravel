@@ -32,8 +32,8 @@
                                     <td class="fw-medium">{{ $item->product_name }}</td>
                                     <td class="text-muted">{{ $item->product_sku }}</td>
                                     <td>{{ $item->quantity }}</td>
-                                    <td>${{ number_format($item->unit_price, 2) }}</td>
-                                    <td class="fw-medium">${{ number_format($item->line_total, 2) }}</td>
+                                    <td>@currency($item->unit_price)</td>
+                                    <td class="fw-medium">@currency($item->line_total)</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -50,20 +50,20 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between mb-2">
                         <span class="text-muted">Subtotal</span>
-                        <span class="fw-medium">${{ number_format($order->subtotal, 2) }}</span>
+                        <span class="fw-medium">@currency($order->subtotal)</span>
                     </div>
                     <div class="d-flex justify-content-between mb-2">
                         <span class="text-muted">Tax</span>
-                        <span class="fw-medium">${{ number_format($order->tax_total, 2) }}</span>
+                        <span class="fw-medium">@currency($order->tax_total)</span>
                     </div>
                     <div class="d-flex justify-content-between mb-2">
                         <span class="text-muted">Shipping</span>
-                        <span class="fw-medium">${{ number_format($order->shipping_total, 2) }}</span>
+                        <span class="fw-medium">@currency($order->shipping_total)</span>
                     </div>
                     <hr>
                     <div class="d-flex justify-content-between">
                         <span class="fw-bold">Total</span>
-                        <span class="fw-bold">${{ number_format($order->grand_total, 2) }}</span>
+                        <span class="fw-bold">@currency($order->grand_total)</span>
                     </div>
                 </div>
             </div>

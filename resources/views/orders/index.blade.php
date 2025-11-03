@@ -36,7 +36,7 @@
                                         {{ ucfirst($order->status) }}
                                     </span>
                                 </td>
-                                <td>${{ number_format($order->grand_total, 2) }}</td>
+                                <td>@currency($order->grand_total)</td>
                                 <td>{{ $order->created_at->format('M d, Y') }}</td>
                                 <td class="text-end">
                                     <a href="{{ route('orders.show', $order->id) }}" class="btn btn-sm btn-outline-primary">

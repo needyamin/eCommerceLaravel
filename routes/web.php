@@ -51,22 +51,22 @@ Route::get('/r/{code}', function ($code) {
 Route::get('/r', function () {
     return redirect()->route('register');
 });
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::post('/user/logout', [AuthController::class, 'logout'])->name('logout');
 
     // Newsletter (public)
     Route::post('/newsletter/subscribe', [FrontNewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
     Route::post('/newsletter/unsubscribe', [FrontNewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
     Route::get('/newsletter/confirm/{token}', [FrontNewsletterController::class, 'confirm'])->name('newsletter.confirm');
 
-// User Profile Routes
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [AuthController::class, 'showProfile'])->name('profile');
-    Route::put('/profile', [AuthController::class, 'updateProfile'])->name('profile.update');
-    Route::put('/profile/password', [AuthController::class, 'changePassword'])->name('profile.change-password');
-    
+// User Profile Routes (prefixed with /user)
+Route::prefix('user')->middleware('auth')->group(function () {
+    Route::get('profile', [AuthController::class, 'showProfile'])->name('profile');
+    Route::put('profile', [AuthController::class, 'updateProfile'])->name('profile.update');
+    Route::put('profile/password', [AuthController::class, 'changePassword'])->name('profile.change-password');
+
     // Address Management
     Route::resource('addresses', AddressController::class);
-    Route::post('/addresses/{address}/set-default', [AddressController::class, 'setDefault'])->name('addresses.set-default');
+    Route::post('addresses/{address}/set-default', [AddressController::class, 'setDefault'])->name('addresses.set-default');
 });
 
 // Products and categories
@@ -86,18 +86,15 @@ Route::post('/coupons/apply', [CouponController::class, 'apply'])->name('coupons
 Route::post('/coupons/remove', [CouponController::class, 'remove'])->name('coupons.remove');
 Route::post('/coupons/validate', [CouponController::class, 'validate'])->name('coupons.validate');
 
-// Test route for debugging
-Route::get('/test-coupon', function() {
-    return view('test-coupon');
-})->name('test-coupon');
+//
 
 // Checkout and Orders
 Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout.show');
 Route::post('/checkout', [CheckoutController::class, 'place'])->name('checkout.place');
 
-Route::middleware('auth')->group(function(){
-    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-    Route::get('/orders/{id}', [OrderController::class, 'show'])->name('orders.show');
+Route::prefix('user')->middleware('auth')->group(function(){
+    Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('orders/{id}', [OrderController::class, 'show'])->name('orders.show');
 });
 // Guest order view via signed URL (no auth)
 Route::get('/order/guest/{order}', [OrderController::class, 'showGuest'])
