@@ -23,6 +23,14 @@ class OrderController extends Controller
 		return view('orders.show', compact('order'));
 	}
 
+    public function invoice(int $id)
+    {
+        $order = Order::with('items')
+            ->where('user_id', auth()->id())
+            ->findOrFail($id);
+        return view('orders.invoice', compact('order'));
+    }
+
     public function showGuest(Order $order)
     {
         // Allow only guest orders (no user) via signed URL

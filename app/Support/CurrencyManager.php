@@ -37,4 +37,15 @@ class CurrencyManager
             ? ($c->symbol . $formatted)
             : ($formatted . ' ' . $c->symbol);
     }
+
+    /**
+     * Convert a base amount to the current currency numeric value (no symbol, no formatting).
+     */
+    public static function convert(float $amount, ?Currency $currency = null, ?int $precisionOverride = null): float
+    {
+        $c = $currency ?: self::current();
+        $precision = $precisionOverride ?? (int) $c->precision;
+        $value = $amount * (float) $c->rate;
+        return round($value, $precision);
+    }
 }

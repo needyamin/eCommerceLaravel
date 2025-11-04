@@ -28,6 +28,13 @@
         </div>
 
         <div class="row g-3 mt-1">
+          <div class="col-md-4">
+            <label class="form-label">Enable Wishlist</label>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" role="switch" name="wishlist_enabled" value="1" id="wishlist_enabled_switch" {{ old('wishlist_enabled', (int) ($settings->wishlist_enabled ?? 1)) ? 'checked' : '' }}>
+              <label class="form-check-label" for="wishlist_enabled_switch">Show heart icon and wishlist features</label>
+            </div>
+          </div>
           <div class="col-md-6">
             <label class="form-label">Logo URL</label>
             <input type="text" name="logo_url" class="form-control @error('logo_url') is-invalid @enderror" value="{{ old('logo_url', $settings->logo_url) }}">

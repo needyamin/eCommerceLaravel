@@ -25,6 +25,7 @@ use App\Http\Controllers\NewsletterController as FrontNewsletterController;
 use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\OTP\SmsOtpController;
 use App\Http\Controllers\OTP\EmailOtpController;
+use App\Http\Controllers\WishlistController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -67,7 +68,15 @@ Route::prefix('user')->middleware('auth')->group(function () {
     // Address Management
     Route::resource('addresses', AddressController::class);
     Route::post('addresses/{address}/set-default', [AddressController::class, 'setDefault'])->name('addresses.set-default');
+
+    // (moved) wishlist index is now public
 });
+
+// Public wishlist index (guest or user)
+Route::get('/user/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
+
+// Public wishlist toggle (supports guest via session)
+Route::post('/wishlist/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
 
 // Products and categories
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
@@ -95,6 +104,7 @@ Route::post('/checkout', [CheckoutController::class, 'place'])->name('checkout.p
 Route::prefix('user')->middleware('auth')->group(function(){
     Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('orders/{id}', [OrderController::class, 'show'])->name('orders.show');
+    Route::get('orders/{id}/invoice', [OrderController::class, 'invoice'])->name('orders.invoice');
 });
 // Guest order view via signed URL (no auth)
 Route::get('/order/guest/{order}', [OrderController::class, 'showGuest'])
@@ -112,11 +122,31 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/login', [AdminLoginController::class, 'login'])->name('login.attempt');
     Route::post('/logout', [AdminLoginController::class, 'logout'])->name('logout');
 
+    // Lightweight admin AJAX routes (auth only, no permission gate)
+    Route::middleware('auth:admin')->group(function(){
+        // User lookup by id/email/phone for POS and tools
+        Route::get('users/lookup', [AdminUserController::class, 'lookup'])->name('users.lookup');
+    });
+
     Route::middleware(['auth:admin','admin.permission'])->group(function () {
+        // Allow /admin/users/{user} to accept ID, email, or phone
+        \Illuminate\Support\Facades\Route::bind('user', function ($value) {
+            return \App\Models\User::query()
+                ->where('id', $value)
+                ->orWhere('email', $value)
+                ->orWhere('phone', $value)
+                ->firstOrFail();
+        });
         Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::resource('categories', AdminCategoryController::class);
+        // Product helper endpoints must come before resource show route
+        Route::get('products/lookup', [AdminProductController::class, 'lookup'])->name('products.lookup');
+        Route::get('products/{product}/json', [AdminProductController::class, 'showJson'])->name('products.json');
         Route::resource('products', AdminProductController::class);
+        Route::get('orders/create', [AdminOrderController::class, 'create'])->name('orders.create');
+        Route::post('orders', [AdminOrderController::class, 'store'])->name('orders.store');
         Route::resource('orders', AdminOrderController::class)->only(['index', 'show', 'update']);
+        Route::get('orders/{order}/invoice', [AdminOrderController::class, 'invoice'])->name('orders.invoice');
         Route::resource('users', AdminUserController::class)->except(['create', 'store']);
         Route::post('users/{user}/reset-password', [AdminUserController::class, 'resetPassword'])->name('users.reset-password');
         Route::post('users/{user}/toggle-status', [AdminUserController::class, 'toggleStatus'])->name('users.toggle-status');
@@ -128,7 +158,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('email-settings', [AdminEmailSettingsController::class, 'update'])->name('email-settings.update');
             Route::resource('roles', AdminRoleController::class)->except(['show']);
             Route::resource('permissions', AdminPermissionController::class)->except(['show']);
-            Route::resource('coupons', AdminCouponController::class);
+            Route::resource('coupons', AdminCouponController::class)->except(['show']);
             Route::post('coupons/{coupon}/toggle-status', [AdminCouponController::class, 'toggleStatus'])->name('coupons.toggle-status');
 
             // Newsletter admin
@@ -147,6 +177,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
             // OTP Settings
             Route::get('otp-settings', [App\Http\Controllers\Admin\OtpSettingsController::class, 'index'])->name('otp-settings.index');
             Route::put('otp-settings', [App\Http\Controllers\Admin\OtpSettingsController::class, 'update'])->name('otp-settings.update');
+
+            // User Activity
+            Route::get('activities/carts', [App\Http\Controllers\Admin\UserActivityController::class, 'carts'])->name('activities.carts');
+            Route::get('activities/wishlists', [App\Http\Controllers\Admin\UserActivityController::class, 'wishlists'])->name('activities.wishlists');
+            Route::get('activities/sessions', [App\Http\Controllers\Admin\UserActivityController::class, 'sessions'])->name('activities.sessions');
+            Route::delete('activities/sessions/{id}', [App\Http\Controllers\Admin\UserActivityController::class, 'destroySession'])->name('activities.sessions.destroy');
+            Route::delete('activities/users/{user}/sessions', [App\Http\Controllers\Admin\UserActivityController::class, 'destroyUserSessions'])->name('activities.sessions.destroy-user');
+
+            // POS coupon preview
+            Route::get('coupons/preview', [App\Http\Controllers\Admin\CouponPreviewController::class, 'preview'])->name('coupons.preview');
 
             // Currencies
             Route::resource('currencies', App\Http\Controllers\Admin\CurrencyController::class)->except(['show']);

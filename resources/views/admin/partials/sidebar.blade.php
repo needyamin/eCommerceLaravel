@@ -75,6 +75,32 @@
 					</a>
 				</li>
 				<li class="nav-item">
+					<a href="#" class="nav-link">
+						<i class="nav-icon bi bi-activity"></i>
+						<p>Activity <i class="nav-arrow bi bi-chevron-right"></i></p>
+					</a>
+					<ul class="nav nav-treeview">
+						<li class="nav-item">
+							<a href="{{ route('admin.activities.carts') }}" class="nav-link">
+								<i class="nav-icon bi bi-cart-plus"></i>
+								<p>Cart Activity</p>
+							</a>
+						</li>
+						<li class="nav-item">
+							<a href="{{ route('admin.activities.wishlists') }}" class="nav-link">
+								<i class="nav-icon bi bi-heart"></i>
+								<p>Wishlist Activity</p>
+							</a>
+						</li>
+						<li class="nav-item">
+							<a href="{{ route('admin.activities.sessions') }}" class="nav-link">
+								<i class="nav-icon bi bi-person-lines-fill"></i>
+								<p>Login Activity</p>
+							</a>
+						</li>
+					</ul>
+				</li>
+				<li class="nav-item">
 					<a href="{{ route('admin.currencies.index') }}" class="nav-link">
 						<i class="nav-icon bi bi-currency-exchange"></i>
 						<p>Currencies</p>

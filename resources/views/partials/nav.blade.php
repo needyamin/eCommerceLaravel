@@ -37,6 +37,39 @@
                         <i class="bi bi-grid me-1"></i>Products
                     </a>
                 </li>
+                @php $wishlistEnabled = (\App\Models\SiteSetting::get()->wishlist_enabled ?? true); @endphp
+                @if($wishlistEnabled)
+                <li class="nav-item position-relative">
+                    @php
+                        $wishlistCount = 0;
+                        if (auth()->check()) {
+                            $wishlistCount = \App\Models\Wishlist::where('user_id', auth()->id())->count();
+                        } else {
+                            $sid = session('wishlist_session_id');
+                            if ($sid) {
+                                $wishlistCount = \App\Models\GuestWishlist::where('session_id', $sid)->count();
+                            }
+                        }
+                    @endphp
+                    @auth
+                        <a class="nav-link fw-semibold position-relative" href="{{ route('wishlist.index') }}">
+                            <i class="bi bi-heart me-1"></i>Wishlist
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger wishlist-count-badge {{ $wishlistCount > 0 ? '' : 'd-none' }}">
+                                {{ $wishlistCount > 0 ? $wishlistCount : '' }}
+                                <span class="visually-hidden">items in wishlist</span>
+                            </span>
+                        </a>
+                    @else
+                        <a class="nav-link fw-semibold position-relative" href="{{ route('wishlist.index') }}">
+                            <i class="bi bi-heart me-1"></i>Wishlist
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger wishlist-count-badge {{ $wishlistCount > 0 ? '' : 'd-none' }}">
+                                {{ $wishlistCount > 0 ? $wishlistCount : '' }}
+                                <span class="visually-hidden">items in wishlist</span>
+                            </span>
+                        </a>
+                    @endauth
+                </li>
+                @endif
                     <li class="nav-item">
                         <a class="nav-link fw-semibold position-relative" href="{{ route('cart.index') }}">
                         <i class="bi bi-cart me-1"></i>Cart
@@ -128,6 +161,19 @@
             }
         }
         window.__updateCartCount = updateCartCount;
+
+        function updateWishlistCount(count){
+            const badge = document.querySelector('.wishlist-count-badge');
+            if(!badge){ return; }
+            if(count > 0){
+                badge.textContent = count;
+                badge.classList.remove('d-none');
+            } else {
+                badge.textContent = '';
+                badge.classList.add('d-none');
+            }
+        }
+        window.__updateWishlistCount = updateWishlistCount;
     });
     </script>
 

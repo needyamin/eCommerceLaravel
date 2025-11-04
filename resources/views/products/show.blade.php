@@ -86,7 +86,7 @@
                         </p>
                     @endif
 
-                    <div class="mb-4">
+                    <div class="mb-4 d-flex align-items-center justify-content-between">
                             <div class="d-flex align-items-center mb-2">
                                 <span class="h2 text-primary mb-0 me-3">@currency($product->price)</span>
                                 @if($product->compare_at_price && $product->compare_at_price > $product->price)
@@ -104,6 +104,23 @@
                                 <i class="bi bi-x-circle me-1"></i>Out of Stock
                             </span>
                         @endif
+                            @php $settings = \App\Models\SiteSetting::get(); @endphp
+                            @if($settings->wishlist_enabled ?? true)
+                                <div class="ms-3">
+                                    @php
+                                        if (auth()->check()) {
+                                            $isWishlisted = \App\Models\Wishlist::where('user_id', auth()->id())->where('product_id', $product->id)->exists();
+                                        } else {
+                                            $sid = session('wishlist_session_id');
+                                            $isWishlisted = $sid ? \App\Models\GuestWishlist::where('session_id', $sid)->where('product_id', $product->id)->exists() : false;
+                                        }
+                                    @endphp
+                                    <button class="btn {{ $isWishlisted ? 'btn-danger' : 'btn-outline-danger' }} wishlist-toggle" data-product-id="{{ $product->id }}">
+                                        <i class="bi {{ $isWishlisted ? 'bi-heart-fill' : 'bi-heart' }} me-1"></i>
+                                        <span>{{ $isWishlisted ? 'Wishlisted' : 'Add to Wishlist' }}</span>
+                                    </button>
+                                </div>
+                            @endif
                     </div>
 
                     @if($product->short_description)
@@ -149,6 +166,9 @@
                                             <i class="bi bi-plus"></i>
                                         </button>
                                     </form>
+                                    <button class="btn btn-sm btn-outline-danger" title="Remove from cart" onclick="return pdRemoveCartItemAjax(event, {{ $cartItem->id }}, {{ (int) $product->id }}, {{ (int) $product->stock }});">
+                                        <i class="bi bi-x"></i>
+                                    </button>
                                 </div>
                             </div>
                             <a href="{{ route('cart.index') }}" class="btn btn-outline-primary btn-custom mb-4 w-100">
@@ -359,8 +379,21 @@ function pdAddToCartAjax(e, form){
                     <input type="hidden" name="quantity" value="${data.item.quantity + 1}">
                     <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-plus"></i></button>
                 </form>
+                <button class="btn btn-sm btn-outline-danger" title="Remove from cart" onclick="return pdRemoveCartItemAjax(event, ${data.item.id}, ${form.querySelector('input[name=product_id]').value}, ${parseInt(form.dataset.stock || '0', 10)});">
+                    <i class="bi bi-x"></i>
+                </button>
             </div>`;
         form.parentNode.replaceChild(wrap, form);
+        // Insert View Cart button right after the alert (ensure only one)
+        try {
+            const cardBody = wrap.closest('.card-body') || wrap.parentNode;
+            cardBody && cardBody.querySelectorAll('.js-view-cart-btn').forEach(n=>n.remove());
+            const viewBtn = document.createElement('a');
+            viewBtn.href = "{{ route('cart.index') }}";
+            viewBtn.className = 'btn btn-outline-primary btn-custom mb-4 w-100 js-view-cart-btn';
+            viewBtn.innerHTML = '<i class="bi bi-cart"></i> View Cart';
+            wrap.insertAdjacentElement('afterend', viewBtn);
+        } catch(_) {}
     }).catch(()=>{});
     return false;
 }
@@ -400,6 +433,54 @@ function pdUpdateCartItemAjax(e, form){
     }).catch(()=>{});
     return false;
 }
+
+function pdRemoveCartItemAjax(e, itemId, productId, stock){
+    e.preventDefault();
+    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    fetch(`${window.location.origin}/cart/items/${itemId}`, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': token
+        },
+        body: new URLSearchParams({ _method: 'DELETE' })
+    }).then(r=>r.json()).then(res=>{
+        if(!res || !res.success) return false;
+        if(typeof window.__updateCartCount === 'function'){
+            window.__updateCartCount(res.cart.count);
+        }
+        // Swap alert with Add to Cart form and remove any adjacent View Cart button
+        const alertBox = document.querySelector('.alert.alert-success[data-item-id]');
+        if(alertBox){
+            const cardBody = alertBox.closest('.card-body') || alertBox.parentNode;
+            cardBody && cardBody.querySelectorAll('.js-view-cart-btn').forEach(n=>n.remove());
+            const formHtml = `
+            <form action="{{ route('cart.add') }}" method="post" class="mb-4" onsubmit="return pdAddToCartAjax(event, this)" data-stock="${stock}">
+                <input type="hidden" name="_token" value="${token}">
+                <input type="hidden" name="product_id" value="${productId}">
+                <div class="row align-items-end">
+                    <div class="col-md-4 mb-3">
+                        <label for="quantity" class="form-label fw-semibold">Quantity</label>
+                        <input type="number" min="1" max="${stock}" name="quantity" value="1" class="form-control form-control-lg" id="quantity" required>
+                    </div>
+                    <div class="col-md-8 mb-3">
+                        <button type="submit" class="btn btn-primary btn-lg w-100 btn-custom" ${stock <= 0 ? 'disabled' : ''}>
+                            <i class="bi bi-cart-plus me-2"></i>
+                            ${stock <= 0 ? 'Out of Stock' : 'Add to Cart'}
+                        </button>
+                    </div>
+                </div>
+            </form>`;
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = formHtml;
+            alertBox.parentNode.replaceChild(wrapper.firstElementChild, alertBox);
+        }
+    }).catch(()=>{});
+    return false;
+}
 </script>
+
+ 
 
 

@@ -76,6 +76,98 @@
     
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    (function(){
+        if(window.__wishlistListenerBound) return; // avoid duplicates
+        window.__wishlistListenerBound = true;
+        document.addEventListener('click', function(e){
+            const btn = e.target.closest('.wishlist-toggle');
+            if(!btn) return;
+            e.preventDefault();
+            const pid = btn.getAttribute('data-product-id');
+            fetch("{{ route('wishlist.toggle') }}", {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({ product_id: pid })
+            }).then(async r=>{
+                let res = null;
+                try { res = await r.json(); } catch(e) {}
+                if(!r.ok) throw new Error('Request failed');
+                return res;
+            }).then(res=>{
+                if(!res || !res.success) return;
+                const icon = btn.querySelector('i');
+                const label = btn.querySelector('span');
+                if(res.state === 'added'){
+                    icon && icon.classList.remove('bi-heart');
+                    icon && icon.classList.add('bi-heart-fill');
+                    btn.classList.remove('btn-outline-danger');
+                    btn.classList.add('btn-danger');
+                    if(label){ label.textContent = 'Wishlisted'; }
+                } else {
+                    icon && icon.classList.remove('bi-heart-fill');
+                    icon && icon.classList.add('bi-heart');
+                    btn.classList.add('btn-outline-danger');
+                    btn.classList.remove('btn-danger');
+                    if(label){ label.textContent = 'Add to Wishlist'; }
+                }
+                if(typeof window.__updateWishlistCount === 'function' && typeof res.count !== 'undefined'){
+                    window.__updateWishlistCount(res.count);
+                }
+            }).catch(()=>{});
+        });
+    })();
+    (function(){
+        if(window.__cartRemoveListenerBound) return; // avoid duplicates
+        window.__cartRemoveListenerBound = true;
+        document.addEventListener('click', function(e){
+            const btn = e.target.closest('[data-cart-remove]');
+            if(!btn) return;
+            e.preventDefault();
+            const itemId = btn.getAttribute('data-cart-remove');
+            const pid = btn.getAttribute('data-product-id');
+            const stock = parseInt(btn.getAttribute('data-stock') || '0', 10);
+            const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            fetch(`${window.location.origin}/cart/items/${itemId}`, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': token
+                },
+                body: new URLSearchParams({ _method: 'DELETE' })
+            }).then(r=>r.json()).then(res=>{
+                if(!res || !res.success) return;
+                if(typeof window.__updateCartCount === 'function'){
+                    window.__updateCartCount(res.cart.count);
+                }
+                const alertBox = btn.closest('.alert.alert-success');
+                if(alertBox){
+                    const container = alertBox.closest('.card-body') || alertBox.parentNode;
+                    container && container.querySelectorAll('.js-view-cart-btn').forEach(n=>n.remove());
+                    const wrapper = document.createElement('div');
+                    wrapper.innerHTML = `
+                        <form action="{{ route('cart.add') }}" method="post" onsubmit="return addToCartAjax(event, this)">
+                            <input type="hidden" name="_token" value="${token}">
+                            <input type="hidden" name="product_id" value="${pid}">
+                            <button class="btn btn-primary w-100 btn-custom" ${stock <= 0 ? 'disabled' : ''}>
+                                <i class="bi bi-cart-plus me-2"></i>
+                                ${stock <= 0 ? 'Out of Stock' : 'Add to Cart'}
+                            </button>
+                        </form>`;
+                    const formNode = wrapper.firstElementChild;
+                    alertBox.parentNode.replaceChild(formNode, alertBox);
+                }
+            }).catch(()=>{});
+        });
+    })();
+    </script>
     @stack('scripts')
 </body>
 </html>

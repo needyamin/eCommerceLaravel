@@ -8,6 +8,10 @@ use App\Models\UserAddress;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Support\PointService;
+use App\Models\Wishlist;
+use App\Models\CartItem;
+use App\Models\SessionEntry;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -23,7 +27,33 @@ class UserController extends Controller
     public function show(User $user)
     {
         $user->load(['addresses', 'orders.items.product']);
-        return view('admin.users.show', compact('user'));
+
+        // Wishlist (latest 20)
+        $wishlists = Wishlist::with('product')
+            ->where('user_id', $user->id)
+            ->latest()
+            ->take(20)
+            ->get();
+
+        // Cart items deduped by product (latest id per product)
+        $cartItemIds = DB::table('cart_items')
+            ->join('carts', 'cart_items.cart_id', '=', 'carts.id')
+            ->where('carts.user_id', $user->id)
+            ->select(DB::raw('MAX(cart_items.id) as id'))
+            ->groupBy('cart_items.product_id')
+            ->pluck('id');
+        $cartItems = CartItem::with('product')
+            ->whereIn('id', $cartItemIds)
+            ->orderByDesc('created_at')
+            ->get();
+
+        // Sessions for this user
+        $sessions = SessionEntry::where('user_id', $user->id)
+            ->orderByDesc('last_activity')
+            ->take(50)
+            ->get();
+
+        return view('admin.users.show', compact('user', 'wishlists', 'cartItems', 'sessions'));
     }
 
     public function edit(User $user)
@@ -112,5 +142,27 @@ class UserController extends Controller
         } catch (\Throwable $e) {
             return redirect()->route('admin.users.show', $user)->with('error', 'Reset failed');
         }
+    }
+
+    public function lookup(Request $request)
+    {
+        $request->validate(['identifier' => ['required','string','max:191']]);
+        $id = $request->string('identifier');
+        $user = User::where('id', $id)
+            ->orWhere('email', $id)
+            ->orWhere('phone', $id)
+            ->first();
+        if(!$user){
+            return response()->json(['found' => false], 404);
+        }
+        return response()->json([
+            'found' => true,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => $user->phone,
+            ],
+        ]);
     }
 }

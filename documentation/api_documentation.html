@@ -167,6 +167,35 @@
 
   <h3><span class="tag post">POST</span> /cart/clear</h3>
 
+  <h2>Wishlist</h2>
+  <p>The wishlist feature can be enabled/disabled in admin Site Settings. Guests can toggle wishlist items using an API session header similar to cart.</p>
+
+  <h3><span class="tag get">GET</span> /wishlist</h3>
+  <p>List current user's wishlist items (auth only).</p>
+  <table>
+    <tr><th>Headers</th><td><code>Authorization: Bearer &lt;token&gt;</code></td></tr>
+  </table>
+  <pre>{
+  "items": [{
+    "product": {"id": 10, "name": "Product A", "slug": "product-a", "sku": "SKU-A"}
+  }],
+  "count": 1
+}</pre>
+
+  <h3><span class="tag post">POST</span> /wishlist/toggle</h3>
+  <p>Add/remove a product from wishlist. Works for guests or authenticated users.</p>
+  <table>
+    <tr><th>Headers (guest)</th><td><code>X-Wishlist-Session: &lt;uuid&gt;</code> (optional)</td></tr>
+    <tr><th>Headers (auth)</th><td><code>Authorization: Bearer &lt;token&gt;</code></td></tr>
+    <tr><th>Body</th><td><code>product_id</code> (int, required)</td></tr>
+  </table>
+  <pre>{
+  "success": true,
+  "state": "added", // or "removed"
+  "count": 3,
+  "wishlist_session": "0c5a..." // present if API created a new guest session
+}</pre>
+
   <h2>Coupons</h2>
   <h3><span class="tag post">POST</span> /coupons/validate</h3>
   <table>
@@ -246,6 +275,7 @@
     <tr><td><code>Authorization</code></td><td><code>Bearer &lt;token&gt;</code> (for authenticated endpoints)</td></tr>
     <tr><td><code>Content-Type</code></td><td><code>application/json</code> (for JSON requests)</td></tr>
     <tr><td><code>X-Cart-Session</code></td><td>Guest cart session UUID (when not using auth)</td></tr>
+    <tr><td><code>X-Wishlist-Session</code></td><td>Guest wishlist session UUID (when not using auth)</td></tr>
   </table>
 
   <h2>Errors</h2>

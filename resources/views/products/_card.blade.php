@@ -23,6 +23,23 @@
                 -{{ $discount }}%
             </span>
         @endif
+
+        @php $settings = \App\Models\SiteSetting::get(); @endphp
+        @if($settings->wishlist_enabled ?? true)
+            <div class="position-absolute bottom-0 start-0 m-2" style="z-index: 3; left: 0.5rem; bottom: 0.5rem;">
+                @php
+                    if (auth()->check()) {
+                        $wished = \App\Models\Wishlist::where('user_id', auth()->id())->where('product_id', $product->id)->exists();
+                    } else {
+                        $sid = session('wishlist_session_id');
+                        $wished = $sid ? \App\Models\GuestWishlist::where('session_id', $sid)->where('product_id', $product->id)->exists() : false;
+                    }
+                @endphp
+                <button class="btn btn-sm {{ $wished ? 'btn-danger' : 'btn-outline-danger' }} wishlist-toggle" data-product-id="{{ $product->id }}" title="{{ $wished ? 'Remove from wishlist' : 'Add to wishlist' }}">
+                    <i class="bi {{ $wished ? 'bi-heart-fill' : 'bi-heart' }}"></i>
+                </button>
+            </div>
+        @endif
     </div>
     
     <div class="card-body d-flex flex-column">
@@ -74,7 +91,15 @@
                 }
             @endphp
 
-            @if($cartItem)
+            @if(request('select') == '1')
+                <div class="input-group mb-2">
+                    <span class="input-group-text">Qty</span>
+                    <input type="number" class="form-control" value="1" min="1" data-select-qty>
+                </div>
+                <button type="button" class="btn btn-outline-primary w-100 btn-custom" data-select-product-id="{{ $product->id }}" data-product-name="{{ $product->name }}" data-product-sku="{{ $product->sku }}" data-product-price="{{ number_format(\App\Support\CurrencyManager::convert((float) $product->price), 2, '.', '') }}">
+                    <i class="bi bi-check2-circle me-1"></i> Select This Product
+                </button>
+            @elseif($cartItem)
                 <div class="d-grid gap-2">
                     <div class="alert alert-success py-2 mb-2 d-flex justify-content-between align-items-center" data-stock="{{ (int) $product->stock }}" data-item-id="{{ $cartItem->id }}">
                         <div>
@@ -98,6 +123,9 @@
                                     <i class="bi bi-plus"></i>
                                 </button>
                             </form>
+                            <button class="btn btn-sm btn-outline-danger" title="Remove from cart" data-cart-remove="{{ $cartItem->id }}" data-product-id="{{ $product->id }}" data-stock="{{ (int) $product->stock }}">
+                                <i class="bi bi-x"></i>
+                            </button>
                         </div>
                     </div>
                     <a href="{{ route('cart.index') }}" class="btn btn-outline-primary btn-custom w-100">
@@ -148,9 +176,12 @@ function addToCartAjax(e, form){
                 <div class="d-flex align-items-center gap-1">
                     <button class="btn btn-sm btn-outline-secondary" data-qty-change="-1"><i class="bi bi-dash"></i></button>
                     <button class="btn btn-sm btn-outline-secondary" data-qty-change="1"><i class="bi bi-plus"></i></button>
+                    <button class="btn btn-sm btn-outline-danger" title="Remove from cart" data-cart-remove="${data.item.id}" data-product-id="{{ $product->id }}" data-stock="{{ (int) $product->stock }}">
+                        <i class="bi bi-x"></i>
+                    </button>
                 </div>
             </div>
-            <a href="{{ route('cart.index') }}" class="btn btn-outline-primary btn-custom w-100">
+            <a href="{{ route('cart.index') }}" class="btn btn-outline-primary btn-custom w-100 js-view-cart-btn">
                 <i class="bi bi-cart"></i> View Cart
             </a>
         `;
@@ -225,6 +256,9 @@ function updateCartItemAjax(e, form){
     }).catch(()=>{});
     return false;
 }
+
 </script>
+
+ 
 
 

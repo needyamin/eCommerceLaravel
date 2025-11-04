@@ -4,7 +4,14 @@
 
 @section('content')
 <div class="container py-5">
+    @if(request('select') == '1')
+    <style>
+      header, nav.navbar, footer, .site-header, .site-footer { display:none !important; }
+      body { padding-top: 0 !important; }
+    </style>
+    @endif
     <!-- Page Header -->
+    @if(request('select') != '1')
     <div class="row mb-4 align-items-end">
         <div class="col-lg-8 col-12">
             <h1 class="display-5 fw-bold mb-2">Our Products</h1>
@@ -34,6 +41,19 @@
             </div>
         </div>
     </div>
+    @endif
+
+    @if(request('select') == '1')
+    <div class="alert alert-info d-flex justify-content-between align-items-center">
+        <div>
+            <i class="bi bi-hand-index-thumb me-2"></i>
+            Select products to add to the POS. Use filters and pagination freely. Click "Done" when finished.
+        </div>
+        <div>
+            <button class="btn btn-sm btn-outline-secondary" id="posSelectDoneBtn"><i class="bi bi-check2"></i> Done</button>
+        </div>
+    </div>
+    @endif
 
     <div class="row">
         <!-- Sidebar Filters -->
@@ -44,6 +64,9 @@
                 </div>
                 <div class="card-body">
                     <form method="GET" action="{{ route('products.index') }}" class="d-grid gap-3">
+                        @if(request('select') == '1')
+                        <input type="hidden" name="select" value="1">
+                        @endif
                         <div>
                             <label class="form-label fw-semibold">Search</label>
                             <input type="text" name="q" value="{{ request('q') }}" class="form-control" placeholder="Search products..." />
@@ -110,7 +133,7 @@
                                 </select>
                             </div>
                             <button type="submit" class="btn btn-primary"><i class="bi bi-funnel me-1"></i>Apply filters</button>
-                            <a href="{{ route('products.index') }}" class="btn btn-outline-secondary"><i class="bi bi-x-circle me-1"></i>Clear all</a>
+                            <a href="{{ request('select') == '1' ? route('products.index', ['select' => 1]) : route('products.index') }}" class="btn btn-outline-secondary"><i class="bi bi-x-circle me-1"></i>Clear all</a>
                         </div>
                     </form>
                 </div>
@@ -278,5 +301,39 @@ document.addEventListener('DOMContentLoaded', function(){
     observer.observe(sentinel);
 });
 </script>
+@if(request('select') == '1')
+<script>
+document.addEventListener('click', function(e){
+  const btn = e.target.closest('[data-select-product-id]');
+  if(!btn) return;
+  e.preventDefault();
+  const pid = btn.getAttribute('data-select-product-id');
+  const name = btn.getAttribute('data-product-name') || '';
+  const sku = btn.getAttribute('data-product-sku') || '';
+  const price = parseFloat(btn.getAttribute('data-product-price')||'0');
+  let qty = 1;
+  const card = btn.closest('.card');
+  if(card){
+    const qEl = card.querySelector('[data-select-qty]');
+    if(qEl){ qty = Math.max(1, parseInt(qEl.value||'1',10)); }
+  }
+  try {
+    if(window.opener){
+      window.opener.postMessage({ type: 'POS_SELECT_PRODUCT', product_id: pid, name, sku, price, quantity: qty }, '*');
+    }
+    // Visual feedback
+    btn.classList.remove('btn-outline-primary');
+    btn.classList.add('btn-success');
+    btn.innerHTML = '<i class="bi bi-check2"></i> Added';
+    setTimeout(()=>{
+      btn.classList.remove('btn-success');
+      btn.classList.add('btn-outline-primary');
+      btn.innerHTML = '<i class="bi bi-check2-circle me-1"></i> Select This Product';
+    }, 800);
+  } catch(_) {}
+});
+document.getElementById('posSelectDoneBtn')?.addEventListener('click', function(){ try{ window.close(); }catch(_){} });
+</script>
+@endif
 @endpush
 

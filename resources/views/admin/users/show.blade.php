@@ -124,6 +124,91 @@
                 </div>
             </div>
         </div>
+
+        <div class="card mt-3">
+            <div class="card-header"><h3 class="card-title">Wishlist ({{ $wishlists->count() }})</h3></div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped mb-0">
+                        <thead><tr><th>Product</th><th>Added</th></tr></thead>
+                        <tbody>
+                        @forelse($wishlists as $w)
+                            <tr>
+                                <td>
+                                    @if($w->product)
+                                        <a href="{{ route('products.show', $w->product->slug) }}" target="_blank">{{ $w->product->name }}</a>
+                                    @else
+                                        <span class="text-muted">(deleted product)</span>
+                                    @endif
+                                </td>
+                                <td>{{ $w->created_at->format('Y-m-d H:i') }}</td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="2" class="text-center text-muted py-3">No wishlist items</td></tr>
+                        @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header"><h3 class="card-title">Recent Cart Items ({{ $cartItems->count() }})</h3></div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped mb-0">
+                        <thead><tr><th>Product</th><th>Qty</th><th>Added</th></tr></thead>
+                        <tbody>
+                        @forelse($cartItems as $ci)
+                            <tr>
+                                <td>
+                                    @if($ci->product)
+                                        <a href="{{ route('products.show', $ci->product->slug) }}" target="_blank">{{ $ci->product->name }}</a>
+                                    @else
+                                        <span class="text-muted">(deleted product)</span>
+                                    @endif
+                                </td>
+                                <td>{{ (int) $ci->quantity }}</td>
+                                <td>{{ $ci->created_at->format('Y-m-d H:i') }}</td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="3" class="text-center text-muted py-3">No recent cart items</td></tr>
+                        @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="card-title mb-0">Login Sessions ({{ $sessions->count() }})</h3>
+                <form action="{{ route('admin.activities.sessions.destroy-user', $user) }}" method="post" onsubmit="return confirm('Destroy all sessions for this user?')">
+                    @csrf
+                    @method('DELETE')
+                    <button class="btn btn-sm btn-outline-danger"><i class="bi bi-x-circle"></i> Destroy All</button>
+                </form>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped mb-0">
+                        <thead><tr><th>IP</th><th>User Agent</th><th>Last Activity</th><th>Session</th></tr></thead>
+                        <tbody>
+                        @forelse($sessions as $s)
+                            <tr>
+                                <td><code>{{ $s->ip_address ?? '—' }}</code></td>
+                                <td class="small" title="{{ $s->user_agent }}">{{ Str::limit($s->user_agent, 60) }}</td>
+                                <td>{{ \Carbon\Carbon::createFromTimestamp($s->last_activity)->format('Y-m-d H:i') }}</td>
+                                <td class="small"><code>{{ $s->id }}</code></td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="4" class="text-center text-muted py-3">No sessions</td></tr>
+                        @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 @endsection

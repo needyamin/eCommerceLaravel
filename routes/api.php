@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\CartController as ApiCartController;
 use App\Http\Controllers\Api\OrderController as ApiOrderController;
 use App\Http\Controllers\Api\AddressController as ApiAddressController;
 use App\Http\Controllers\Api\CouponController as ApiCouponController;
+use App\Http\Controllers\Api\WishlistController as ApiWishlistController;
 
 // Public endpoints
 Route::post('/register', [ApiAuthController::class, 'register']);
@@ -24,6 +25,9 @@ Route::post('/cart/add', [ApiCartController::class, 'add']);
 Route::put('/cart/items/{item}', [ApiCartController::class, 'update']);
 Route::delete('/cart/items/{item}', [ApiCartController::class, 'remove']);
 Route::post('/cart/clear', [ApiCartController::class, 'clear']);
+
+// Wishlist (guest toggle + auth list)
+Route::post('/wishlist/toggle', [ApiWishlistController::class, 'toggle']);
 
 Route::post('/coupons/apply', [ApiCouponController::class, 'apply']);
 Route::post('/coupons/remove', [ApiCouponController::class, 'remove']);
@@ -48,6 +52,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/orders', [ApiOrderController::class, 'index']);
     Route::get('/orders/{id}', [ApiOrderController::class, 'show']);
     Route::post('/checkout', [ApiOrderController::class, 'place']);
+
+    // Wishlist (auth list)
+    Route::get('/wishlist', [ApiWishlistController::class, 'index']);
 });
 
 

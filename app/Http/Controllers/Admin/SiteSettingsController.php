@@ -28,11 +28,13 @@ class SiteSettingsController extends Controller
             'privacy_url' => ['nullable','string','max:255'],
             'terms_url' => ['nullable','string','max:255'],
             'cookies_url' => ['nullable','string','max:255'],
+            'wishlist_enabled' => ['nullable','boolean'],
             'social_facebook' => ['nullable','string','max:255'],
             'social_twitter' => ['nullable','string','max:255'],
             'social_instagram' => ['nullable','string','max:255'],
             'social_linkedin' => ['nullable','string','max:255'],
         ]);
+        $data['wishlist_enabled'] = (bool) ($request->input('wishlist_enabled') ?? false);
         $settings = SiteSetting::get();
         $settings->update($data);
         return back()->with('success','Site settings updated.');

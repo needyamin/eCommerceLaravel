@@ -20,8 +20,11 @@
 
 @section('content')
 <div class="card">
-    <div class="card-header">
-        <h3 class="card-title">All Orders</h3>
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h3 class="card-title mb-0">All Orders</h3>
+        <a href="{{ route('admin.orders.create') }}" class="btn btn-sm btn-primary">
+            <i class="bi bi-bag-plus me-1"></i> Create Order
+        </a>
     </div>
     <div class="card-body">
         <div class="table-responsive">

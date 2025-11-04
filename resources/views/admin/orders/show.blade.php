@@ -26,6 +26,13 @@
             <div class="card-header">
                 <h3 class="card-title">Order Items</h3>
             </div>
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div></div>
+                <div class="d-flex gap-2">
+                    <a href="{{ route('admin.orders.invoice', $order) }}" target="_blank" class="btn btn-sm btn-primary"><i class="bi bi-file-earmark-text me-1"></i> Invoice</a>
+                    <a href="{{ route('admin.orders.invoice', $order) }}?print=1" target="_blank" class="btn btn-sm btn-outline-secondary"><i class="bi bi-printer me-1"></i> Print / PDF</a>
+                </div>
+            </div>
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-bordered">
@@ -44,8 +51,8 @@
                                     <td>{{ $item->product_name }}</td>
                                     <td>{{ $item->product_sku }}</td>
                                     <td>{{ $item->quantity }}</td>
-                                    <td>${{ number_format($item->unit_price, 2) }}</td>
-                                    <td>${{ number_format($item->line_total, 2) }}</td>
+                                    <td>@currency($item->unit_price)</td>
+                                    <td>@currency($item->line_total)</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -63,20 +70,26 @@
             <div class="card-body">
                 <div class="row mb-2">
                     <div class="col-6"><strong>Subtotal:</strong></div>
-                    <div class="col-6 text-right">${{ number_format($order->subtotal, 2) }}</div>
+                    <div class="col-6 text-right">@currency($order->subtotal)</div>
                 </div>
+                @if((float)$order->discount_total > 0)
+                <div class="row mb-2">
+                    <div class="col-6"><strong>Discount:</strong></div>
+                    <div class="col-6 text-right">-@currency($order->discount_total)</div>
+                </div>
+                @endif
                 <div class="row mb-2">
                     <div class="col-6"><strong>Tax:</strong></div>
-                    <div class="col-6 text-right">${{ number_format($order->tax_total, 2) }}</div>
+                    <div class="col-6 text-right">@currency($order->tax_total)</div>
                 </div>
                 <div class="row mb-2">
                     <div class="col-6"><strong>Shipping:</strong></div>
-                    <div class="col-6 text-right">${{ number_format($order->shipping_total, 2) }}</div>
+                    <div class="col-6 text-right">@currency($order->shipping_total)</div>
                 </div>
                 <hr>
                 <div class="row">
                     <div class="col-6"><strong>Total:</strong></div>
-                    <div class="col-6 text-right"><strong>${{ number_format($order->grand_total, 2) }}</strong></div>
+                    <div class="col-6 text-right"><strong>@currency($order->grand_total)</strong></div>
                 </div>
             </div>
         </div>

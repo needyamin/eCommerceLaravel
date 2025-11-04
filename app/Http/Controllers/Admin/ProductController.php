@@ -74,4 +74,36 @@ class ProductController extends Controller
         $product->delete();
         return redirect()->route('admin.products.index')->with('success', 'Product deleted');
     }
+
+    public function lookup(Request $request)
+    {
+        $q = trim((string) $request->get('q', ''));
+        $query = Product::query()->where('is_active', true);
+        if ($q !== '') {
+            $query->where(function($qq) use ($q){
+                $qq->where('name','like',"%$q%")
+                   ->orWhere('sku','like',"%$q%")
+                   ->orWhere('id', $q);
+            });
+        }
+        $products = $query->orderBy('name')->take(20)->get(['id','name','sku','price','stock']);
+        return response()->json(['data' => $products]);
+    }
+
+    public function showJson(Product $product)
+    {
+        $base = number_format((float) $product->price, 2, '.', '');
+        $display = number_format(\App\Support\CurrencyManager::convert((float) $product->price), 2, '.', '');
+        return response()->json([
+            'id' => $product->id,
+            'name' => $product->name,
+            'sku' => $product->sku,
+            'base_price' => $base,
+            'display_price' => $display,
+            // keep price for backward compatibility (display currency)
+            'price' => $display,
+            'stock' => (int) $product->stock,
+            'is_active' => (bool) $product->is_active,
+        ]);
+    }
 }

@@ -4,9 +4,15 @@
 
 @section('content')
 <div class="container py-5">
-    <div class="mb-4">
-        <h1 class="h2 mb-1"><i class="bi bi-receipt-cutoff me-2 text-primary"></i>Order {{ $order->number }}</h1>
-        <p class="text-muted mb-0">Placed on {{ $order->created_at->format('F d, Y \a\t g:i A') }}</p>
+    <div class="mb-4 d-flex justify-content-between align-items-start flex-wrap gap-2">
+        <div>
+            <h1 class="h2 mb-1"><i class="bi bi-receipt-cutoff me-2 text-primary"></i>Order {{ $order->number }}</h1>
+            <p class="text-muted mb-0">Placed on {{ $order->created_at->format('F d, Y \a\t g:i A') }}</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary" target="_blank" href="{{ route('orders.invoice', $order->id) }}"><i class="bi bi-file-earmark-text me-1"></i> Invoice</a>
+            <a class="btn btn-primary" target="_blank" href="{{ route('orders.invoice', $order->id) }}?print=1"><i class="bi bi-printer me-1"></i> Print / PDF</a>
+        </div>
     </div>
 
     <div class="row g-4">
