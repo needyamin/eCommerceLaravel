@@ -2,6 +2,34 @@
 
 @section('title', $product->name)
 
+@push('styles')
+<style>
+.rating-input {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: 5px;
+}
+.rating-input input[type="radio"] {
+    display: none;
+}
+.rating-input label {
+    cursor: pointer;
+    color: #ddd;
+    font-size: 1.5rem;
+    transition: color 0.2s;
+}
+.rating-input input[type="radio"]:checked ~ label,
+.rating-input label:hover,
+.rating-input label:hover ~ label {
+    color: #ffc107;
+}
+.rating-input input[type="radio"]:checked ~ label {
+    color: #ffc107;
+}
+</style>
+@endpush
+
 @section('content')
 <div class="container py-5">
     <!-- Breadcrumb -->
@@ -236,6 +264,102 @@
         </div>
     @endif
 
+    <!-- Reviews Section -->
+    @if($settings->reviews_enabled ?? true)
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="bi bi-star me-2"></i>Reviews & Ratings
+                            @if($product->total_reviews > 0)
+                                <span class="badge bg-primary ms-2">{{ $product->total_reviews }} Review{{ $product->total_reviews > 1 ? 's' : '' }}</span>
+                                <span class="ms-2">
+                                    @for($i = 1; $i <= 5; $i++)
+                                        <i class="bi bi-star{{ $i <= round($product->average_rating) ? '-fill text-warning' : '' }}"></i>
+                                    @endfor
+                                    <span class="ms-1">({{ number_format($product->average_rating, 1) }})</span>
+                                </span>
+                            @endif
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Review Form -->
+                        @if(auth()->check() && !$userHasReviewed && ($userCanReview || !($settings->reviews_require_purchase ?? false)))
+                            <div class="mb-4 p-3 bg-light rounded">
+                                <h6 class="mb-3">Write a Review</h6>
+                                <form action="{{ route('reviews.store', $product) }}" method="POST">
+                                    @csrf
+                                    <div class="mb-3">
+                                        <label class="form-label">Rating</label>
+                                        <div class="rating-input">
+                                            @for($i = 5; $i >= 1; $i--)
+                                                <input type="radio" name="rating" value="{{ $i }}" id="rating{{ $i }}" required>
+                                                <label for="rating{{ $i }}" class="star-label"><i class="bi bi-star-fill"></i></label>
+                                            @endfor
+                                        </div>
+                                        @error('rating')<div class="text-danger small">{{ $message }}</div>@enderror
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Review Title (Optional)</label>
+                                        <input type="text" name="title" class="form-control" value="{{ old('title') }}" maxlength="255">
+                                        @error('title')<div class="text-danger small">{{ $message }}</div>@enderror
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Your Review</label>
+                                        <textarea name="comment" class="form-control" rows="4" required minlength="10" maxlength="1000">{{ old('comment') }}</textarea>
+                                        <small class="text-muted">Minimum 10 characters</small>
+                                        @error('comment')<div class="text-danger small">{{ $message }}</div>@enderror
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Submit Review</button>
+                                </form>
+                            </div>
+                        @elseif(auth()->check() && $userHasReviewed)
+                            <div class="alert alert-info mb-4">
+                                <i class="bi bi-info-circle me-2"></i>You have already reviewed this product.
+                            </div>
+                        @elseif(!auth()->check() && !($settings->reviews_allow_anonymous ?? false))
+                            <div class="alert alert-warning mb-4">
+                                <i class="bi bi-exclamation-triangle me-2"></i>Please <a href="{{ route('login') }}">login</a> to write a review.
+                            </div>
+                        @endif
+
+                        <!-- Reviews List -->
+                        @if($product->approvedReviews->count() > 0)
+                            <div class="reviews-list">
+                                <h6 class="mb-3">Customer Reviews</h6>
+                                @foreach($product->approvedReviews->take(10) as $review)
+                                    <div class="review-item border-bottom pb-3 mb-3">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div>
+                                                <strong>{{ $review->user->name ?? 'Anonymous' }}</strong>
+                                                @if($review->is_verified_purchase)
+                                                    <span class="badge bg-success ms-2"><i class="bi bi-check-circle me-1"></i>Verified Purchase</span>
+                                                @endif
+                                            </div>
+                                            <div class="text-muted small">{{ $review->created_at->format('M d, Y') }}</div>
+                                        </div>
+                                        <div class="mb-2">
+                                            @for($i = 1; $i <= 5; $i++)
+                                                <i class="bi bi-star{{ $i <= $review->rating ? '-fill text-warning' : '' }}"></i>
+                                            @endfor
+                                        </div>
+                                        @if($review->title)
+                                            <h6 class="mb-2">{{ $review->title }}</h6>
+                                        @endif
+                                        <p class="mb-0">{{ $review->comment }}</p>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <p class="text-muted mb-0">No reviews yet. Be the first to review this product!</p>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <!-- Related Products -->
     @if($related->count() > 0)
         <div class="row mt-5">
@@ -248,10 +372,9 @@
                         <i class="bi bi-chevron-left"></i>
                     </button>
                     <style>
-                        #relatedScroller{ scrollbar-width: thin; }
-                        #relatedScroller::-webkit-scrollbar{ height:6px; }
-                        #relatedScroller::-webkit-scrollbar-track{ background: transparent; }
-                        #relatedScroller::-webkit-scrollbar-thumb{ background-color: rgba(0,0,0,.2); border-radius: 3px; }
+                        /* Hide scrollbar but keep scroll functionality */
+                        #relatedScroller{ -ms-overflow-style: none; scrollbar-width: none; }
+                        #relatedScroller::-webkit-scrollbar{ display: none; }
                         #relatedScroller.dragging{ cursor: grabbing; }
                     </style>
                     <div class="overflow-x-auto" id="relatedScroller">

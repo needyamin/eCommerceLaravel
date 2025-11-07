@@ -10,6 +10,7 @@ use App\Models\Admin;
 use App\Models\Currency;
 use App\Models\Coupon;
 use App\Models\PaymentGatewaySetting;
+use App\Models\SiteSetting;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
@@ -47,69 +48,11 @@ class DatabaseSeeder extends Seeder
         // Roles & Permissions (idempotent)
         $super = Role::firstOrCreate(['name' => 'Super Admin', 'guard_name' => 'admin']);
         
-        // Create specific route-based permissions
-        $permissions = [
-            'admin.dashboard',
-            'admin.categories.index',
-            'admin.categories.create',
-            'admin.categories.store',
-            'admin.categories.show',
-            'admin.categories.edit',
-            'admin.categories.update',
-            'admin.categories.destroy',
-            'admin.products.index',
-            'admin.products.create',
-            'admin.products.store',
-            'admin.products.show',
-            'admin.products.edit',
-            'admin.products.update',
-            'admin.products.destroy',
-            'admin.orders.index',
-            'admin.orders.show',
-            'admin.orders.update',
-            'admin.users.index',
-            'admin.users.show',
-            'admin.users.edit',
-            'admin.users.update',
-            'admin.users.destroy',
-            'admin.users.reset-password',
-            'admin.users.toggle-status',
-            'admin.email-settings.index',
-            'admin.email-settings.update',
-            'admin.roles.index',
-            'admin.roles.create',
-            'admin.roles.store',
-            'admin.roles.edit',
-            'admin.roles.update',
-            'admin.roles.destroy',
-            'admin.permissions.index',
-            'admin.permissions.create',
-            'admin.permissions.store',
-            'admin.permissions.edit',
-            'admin.permissions.update',
-            'admin.permissions.destroy',
-        ];
+        // Use AdminRoutePermissionsSeeder to automatically discover all admin routes
+        $this->call(AdminRoutePermissionsSeeder::class);
         
-        foreach ($permissions as $permission) {
-            Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'admin']);
-        }
-        
-        $super->givePermissionTo(Permission::where('guard_name', 'admin')->get());
-
-        // Payment gateway permissions
-        $paymentGatewayPermissions = [
-            'admin.payment-gateways.index',
-            'admin.payment-gateways.show',
-            'admin.payment-gateways.update',
-            'admin.payment-gateways.toggle-status',
-            'admin.payment-gateways.test',
-        ];
-        foreach ($paymentGatewayPermissions as $name) {
-            Permission::firstOrCreate([
-                'name' => $name,
-                'guard_name' => 'admin',
-            ]);
-        }
+        // Ensure Super Admin has all permissions
+        $super->syncPermissions(Permission::where('guard_name', 'admin')->pluck('name')->toArray());
 
         $admin = Admin::where('email', 'admin@example.com')->first();
         if ($admin && !$admin->hasRole('Super Admin')) {
@@ -293,5 +236,28 @@ class DatabaseSeeder extends Seeder
         foreach ($coupons as $data) {
             Coupon::updateOrCreate(['code' => $data['code']], $data);
         }
+
+        // Site Settings - Set default review settings
+        $siteSettings = SiteSetting::get();
+        if (!$siteSettings->reviews_enabled) {
+            $siteSettings->update([
+                'reviews_enabled' => true,
+                'reviews_require_purchase' => false,
+                'reviews_require_approval' => true,
+                'reviews_allow_anonymous' => false,
+            ]);
+        }
+        
+        // Set default newsletter settings
+        if (!$siteSettings->newsletter_enabled) {
+            $siteSettings->update([
+                'newsletter_enabled' => true,
+                'newsletter_double_opt_in' => true,
+                'newsletter_send_welcome_email' => true,
+            ]);
+        }
+
+        // Pages
+        $this->call(PageSeeder::class);
     }
 }

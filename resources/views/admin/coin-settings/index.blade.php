@@ -32,12 +32,6 @@
       </div>
       <div class="col-md-3">
         <div class="form-check form-switch">
-          <input class="form-check-input" type="checkbox" id="cod_bonus_enabled" name="cod_bonus_enabled" value="1" {{ $settings->cod_bonus_enabled ? 'checked' : '' }}>
-          <label class="form-check-label" for="cod_bonus_enabled">Enable COD Bonus</label>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="form-check form-switch">
           <input class="form-check-input" type="checkbox" id="referral_enabled" name="referral_enabled" value="1" {{ $settings->referral_enabled ? 'checked' : '' }}>
           <label class="form-check-label" for="referral_enabled">Enable Referral Bonus</label>
         </div>

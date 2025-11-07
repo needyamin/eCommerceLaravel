@@ -14,18 +14,30 @@ class AdminRoutePermissionsSeeder extends Seeder
         $names = [];
         foreach (Route::getRoutes() as $route) {
             $name = $route->getName();
-            if ($name && str_starts_with($name, 'admin.') && !str_starts_with($name, 'admin.theme') && !str_starts_with($name, 'admin.login')) {
+            // Include all admin routes except theme previews and login/logout
+            if ($name && 
+                str_starts_with($name, 'admin.') && 
+                !str_starts_with($name, 'admin.theme') && 
+                $name !== 'admin.login' && 
+                $name !== 'admin.login.attempt' &&
+                $name !== 'admin.logout') {
                 $names[] = $name;
             }
         }
         $names = array_values(array_unique($names));
 
+        // Create permissions for all admin routes
         foreach ($names as $perm) {
             Permission::firstOrCreate(['name' => $perm, 'guard_name' => 'admin']);
         }
 
+        // Sync all permissions to Super Admin role
         $role = Role::firstOrCreate(['name' => 'Super Admin', 'guard_name' => 'admin']);
-        $role->syncPermissions(Permission::where('guard_name', 'admin')->pluck('name')->toArray());
+        $allPermissions = Permission::where('guard_name', 'admin')->pluck('name')->toArray();
+        $role->syncPermissions($allPermissions);
+
+        $this->command->info('Created ' . count($names) . ' admin route permissions.');
+        $this->command->info('Synced ' . count($allPermissions) . ' permissions to Super Admin role.');
     }
 }
 

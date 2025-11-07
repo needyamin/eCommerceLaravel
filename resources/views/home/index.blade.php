@@ -32,36 +32,78 @@
 <!-- Features Section -->
 <section class="py-5 bg-light">
     <div class="container">
-        <div class="row text-center">
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-body">
-                        <i class="bi bi-truck text-primary fs-1 mb-3"></i>
-                        <h5 class="card-title">Free Shipping</h5>
-                        <p class="card-text">Free shipping on orders over $50. Fast and reliable delivery to your doorstep.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-body">
-                        <i class="bi bi-shield-check text-primary fs-1 mb-3"></i>
-                        <h5 class="card-title">Secure Payment</h5>
-                        <p class="card-text">Your payment information is secure with our encrypted checkout process.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-body">
-                        <i class="bi bi-headset text-primary fs-1 mb-3"></i>
-                        <h5 class="card-title">24/7 Support</h5>
-                        <p class="card-text">Our customer support team is here to help you 24 hours a day, 7 days a week.</p>
-                    </div>
-                </div>
+        <div class="row text-center mb-4">
+            <div class="col-12">
+                <h2 class="display-6 fw-bold mb-2"><i class="bi bi-headset me-2 text-primary"></i>Customer Service</h2>
+                <p class="text-muted mb-0">We're here to help you with any questions or concerns</p>
             </div>
         </div>
+        <div class="row g-3 justify-content-center">
+            @php
+                $helpCenterPage = \App\Models\Page::where('slug', 'help-center')->where('is_active', true)->first();
+                $shippingInfoPage = \App\Models\Page::where('slug', 'shipping-info')->where('is_active', true)->first();
+                $returnsPage = \App\Models\Page::where('slug', 'returns')->where('is_active', true)->first();
+                $contactUsPage = \App\Models\Page::where('slug', 'contact-us')->where('is_active', true)->first();
+            @endphp
+            
+            @if($helpCenterPage)
+            <div class="col-6 col-md-3">
+                <a href="{{ route('pages.show', $helpCenterPage->slug) }}" class="card h-100 text-decoration-none border-0 shadow-sm text-center p-4 customer-service-link">
+                    <div class="card-body">
+                        <i class="bi bi-question-circle text-primary fs-1 mb-3"></i>
+                        <h5 class="card-title text-dark">Help Center</h5>
+                        <p class="card-text text-muted small mb-0">Find answers to common questions</p>
+                    </div>
+                </a>
+            </div>
+            @endif
+            
+            @if($shippingInfoPage)
+            <div class="col-6 col-md-3">
+                <a href="{{ route('pages.show', $shippingInfoPage->slug) }}" class="card h-100 text-decoration-none border-0 shadow-sm text-center p-4 customer-service-link">
+                    <div class="card-body">
+                        <i class="bi bi-truck text-primary fs-1 mb-3"></i>
+                        <h5 class="card-title text-dark">Shipping Info</h5>
+                        <p class="card-text text-muted small mb-0">Delivery options and rates</p>
+                    </div>
+                </a>
+            </div>
+            @endif
+            
+            @if($returnsPage)
+            <div class="col-6 col-md-3">
+                <a href="{{ route('pages.show', $returnsPage->slug) }}" class="card h-100 text-decoration-none border-0 shadow-sm text-center p-4 customer-service-link">
+                    <div class="card-body">
+                        <i class="bi bi-arrow-clockwise text-primary fs-1 mb-3"></i>
+                        <h5 class="card-title text-dark">Returns</h5>
+                        <p class="card-text text-muted small mb-0">Return policy and process</p>
+                    </div>
+                </a>
+            </div>
+            @endif
+            
+            @if($contactUsPage)
+            <div class="col-6 col-md-3">
+                <a href="{{ route('pages.show', $contactUsPage->slug) }}" class="card h-100 text-decoration-none border-0 shadow-sm text-center p-4 customer-service-link">
+                    <div class="card-body">
+                        <i class="bi bi-telephone text-primary fs-1 mb-3"></i>
+                        <h5 class="card-title text-dark">Contact Us</h5>
+                        <p class="card-text text-muted small mb-0">Get in touch with our team</p>
+                    </div>
+                </a>
+            </div>
+            @endif
+        </div>
     </div>
+    <style>
+        .customer-service-link {
+            transition: all 0.3s ease;
+        }
+        .customer-service-link:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+        }
+    </style>
 </section>
 
 <!-- Top Categories -->

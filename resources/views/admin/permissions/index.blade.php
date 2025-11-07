@@ -4,35 +4,38 @@
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-3">
-	<h1 class="h4 m-0">Permissions</h1>
-	<a href="{{ route('admin.permissions.create') }}" class="btn btn-primary">New Permission</a>
+    <h1 class="h4 m-0">Permissions</h1>
+    <a href="{{ route('admin.permissions.create') }}" class="btn btn-primary">New Permission</a>
+  </div>
+
+<div class="card">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table id="permissionsTable" class="table table-bordered mb-0" style="width:100%">
+        <thead>
+          <tr><th>Name</th><th>Actions</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
-<table class="table table-bordered">
-	<thead>
-		<tr>
-			<th>Name</th>
-			<th>Actions</th>
-		</tr>
-	</thead>
-	<tbody>
-		@foreach($permissions as $permission)
-		<tr>
-			<td>{{ $permission->name }}</td>
-			<td>
-				<a href="{{ route('admin.permissions.edit', $permission) }}" class="btn btn-sm btn-link">Edit</a>
-				<form action="{{ route('admin.permissions.destroy', $permission) }}" method="post" class="d-inline" onsubmit="return confirm('Delete this permission?')">
-					@csrf
-					@method('DELETE')
-					<button class="btn btn-sm btn-link text-danger">Delete</button>
-				</form>
-			</td>
-		</tr>
-		@endforeach
-	</tbody>
-</table>
-
-{{ $permissions->links() }}
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  $('#permissionsTable').DataTable({
+    processing: true,
+    serverSide: true,
+    ajax: { url: '{{ route('admin.datatables', 'permissions') }}' },
+    columns: [
+      { data: 'name', name: 'name' },
+      { data: 'actions', name: 'actions', orderable: false, searchable: false }
+    ]
+  });
+});
+</script>
+@endpush
 @endsection
 
 

@@ -4,45 +4,71 @@
 
 @section('content')
 <div class="card">
-	<div class="card-header d-flex justify-content-between align-items-center">
-		<h3 class="card-title m-0">Products</h3>
-		<a href="{{ route('admin.products.create') }}" class="btn btn-primary">New Product</a>
-	</div>
-	<div class="card-body p-0">
-		<table class="table table-striped mb-0">
-			<thead>
-				<tr>
-					<th>Name</th>
-					<th class="text-center">Category</th>
-					<th class="text-center">Price</th>
-					<th class="text-center">Active</th>
-					<th class="text-center" style="width:160px">Actions</th>
-				</tr>
-			</thead>
-			<tbody>
-			@foreach($products as $product)
-				<tr>
-					<td>{{ $product->name }}</td>
-					<td class="text-center">{{ optional($product->category)->name }}</td>
-					<td class="text-center">${{ number_format($product->price, 2) }}</td>
-					<td class="text-center">
-						<span class="badge {{ $product->is_active ? 'text-bg-success' : 'text-bg-secondary' }}">{{ $product->is_active ? 'Yes' : 'No' }}</span>
-					</td>
-					<td class="text-center">
-						<a href="{{ route('admin.products.edit', $product) }}" class="btn btn-sm btn-outline-primary">Edit</a>
-						<form action="{{ route('admin.products.destroy', $product) }}" method="post" class="d-inline" onsubmit="return confirm('Delete this product?')">
-							@csrf
-							@method('DELETE')
-							<button class="btn btn-sm btn-outline-danger">Delete</button>
-						</form>
-					</td>
-				</tr>
-			@endforeach
-			</tbody>
-		</table>
-	</div>
-	<div class="card-footer">{{ $products->links() }}</div>
+    <div class="card-header d-flex flex-wrap gap-2 justify-content-between align-items-center">
+        <h3 class="card-title m-0">Products</h3>
+        <div class="d-flex gap-2 align-items-center ms-auto">
+            <select id="filter_category" class="form-select form-select-sm" style="min-width: 180px;">
+                <option value="">All Categories</option>
+                @foreach(\App\Models\Category::orderBy('name')->get(['id','name']) as $c)
+                    <option value="{{ $c->id }}">{{ $c->name }}</option>
+                @endforeach
+            </select>
+            <select id="filter_active" class="form-select form-select-sm" style="min-width: 140px;">
+                <option value="">All Status</option>
+                <option value="1">Active</option>
+                <option value="0">Inactive</option>
+            </select>
+            <a href="{{ route('admin.products.create') }}" class="btn btn-primary btn-sm">New Product</a>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table id="productsTable" class="table table-striped mb-0 align-middle" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Active</th>
+                        <th style="width:160px">Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    const table = $('#productsTable').DataTable({
+        processing: true,
+        serverSide: true,
+        searching: true,
+        lengthChange: true,
+        ajax: {
+            url: '{{ route('admin.datatables', 'products') }}',
+            data: function(d){
+                d.category_id = document.getElementById('filter_category').value || '';
+                d.is_active = document.getElementById('filter_active').value || '';
+            }
+        },
+        columns: [
+            { data: 'name', name: 'name' },
+            { data: 'category', name: 'category', orderable: true, searchable: true },
+            { data: 'price', name: 'price', className: 'text-center', orderable: true, searchable: false },
+            { data: 'is_active', name: 'is_active', className: 'text-center', orderable: true, searchable: false },
+            { data: 'actions', name: 'actions', orderable: false, searchable: false, className: 'text-center' }
+        ],
+        order: [[0, 'asc']],
+    });
+
+    document.getElementById('filter_category').addEventListener('change', ()=>table.ajax.reload());
+    document.getElementById('filter_active').addEventListener('change', ()=>table.ajax.reload());
+});
+</script>
+@endpush
 @endsection
 
 

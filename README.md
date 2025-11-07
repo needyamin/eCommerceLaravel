@@ -10,43 +10,67 @@ A comprehensive, modern eCommerce platform built with Laravel 12, featuring a be
 
 ### 🛍️ **Storefront**
 - **Product Catalog**: Browse products by categories with advanced filtering & sorting
+- **Live Search**: Real-time product search with dropdown results (triggers after 3 characters, shows up to 20 products with images, prices, categories, and stock status)
 - **Shopping Cart (AJAX)**: Add to cart, inline increase/decrease, and remove without page reload; live header count
 - **Coupons**: Apply/remove coupons (AJAX) with discount reflected in totals
 - **Checkout Process**: Secure checkout with validation and order creation, email notification
-- **Payment Methods**: Stripe, PayPal, and Cash on Delivery (COD)
+- **Payment Methods**: Stripe, PayPal, and Cash on Delivery (COD) - all configurable from admin panel
 - **Currency**: Default currency enforced globally via `@currency(...)` (frontend switching disabled)
 - **Coins (Loyalty Points)**: Earn coins for add‑to‑cart, order placement, COD choice, and referral sign‑ups. Balance shown on profile; admin can adjust/reset.
+- **Product Reviews & Ratings**: Customers can leave reviews with ratings (1-5 stars), verified purchase badges, and admin moderation
+- **Newsletter**: Email subscription system with double opt-in support and welcome emails
+- **Pages System**: Customizable content pages (Help Center, Shipping Info, Returns, Contact Us) with rich text editor
+- **Wishlist**: Add products to wishlist (supports both authenticated users and guests)
 - **Responsive Design**: Mobile-first Bootstrap 5 UI (storefront) with modern components
 - **User Authentication**: Login, register, profile update, password change
+- **User Profile**: View orders, addresses, reviews, and coin balance
 
 ### 🔧 **Admin Panel**
 - **Dashboard**: Stats tiles + 14‑day Orders/Revenue charts; Recent Orders; Low Stock
-- **Products/Categories**: Full CRUD with images, hierarchical categories
+- **Products/Categories**: Full CRUD with images, hierarchical categories, rich text editor for descriptions
 - **Orders**: Index/show/update; colored badges for Status/Payment/Shipping
+- **Users**: View user details, orders, cart items, wishlist, sessions; adjust/reset coins
 - **Roles/Permissions**: Spatie permissions with route‑based checks; route permissions auto-listed
 - **Administrators**: Manage admin users and assign roles (Admin → Administrators)
-- **Site Settings**: Control site name/logo/favicon, meta title/description/keywords, footer text, legal & social links
-- **Payment Gateways**: Stripe/PayPal configure, enable/disable, test connection; logs
+- **Pages Management**: CRUD for custom pages (Help Center, Shipping Info, Returns, Contact Us) with rich text editor
+- **Reviews Management**: Approve/reject/delete product reviews; filter by status
+- **Newsletter Subscribers**: Manage newsletter subscribers, toggle subscription status
+- **Site Settings**: Comprehensive settings including:
+  - Basic site information (name, tagline, logo, favicon)
+  - SEO settings (meta title, description, keywords)
+  - Legal & footer links (privacy, terms, cookies, customer service links)
+  - Social media links
+  - Feature toggles (wishlist, reviews, newsletter)
+  - Review settings (enable/disable, require purchase, require approval, allow anonymous)
+  - Newsletter settings (enable/disable, double opt-in, welcome email)
+- **Payment Gateways**: Stripe/PayPal/COD configure, enable/disable, test connection; logs
 - **Currencies**: CRUD, set default/toggle active, rates & formatting
 - **Email Settings**: Admin-managed SMTP applied at runtime
 - **Coin Settings**: Configure coin awards (add‑to‑cart award + daily cap, order award rate/minimum, COD bonus, referral signup bonus) and enable/disable features
 - **Shipping Settings**: Enable/disable shipping, free‑shipping threshold, per‑country/city rates (flat/percent), global fallback rate
+- **OTP Settings**: Configure email and SMS OTP settings
+- **Server-Side DataTables**: All admin tables use server-side processing for better performance with search, filters, and pagination
+- **Breadcrumbs**: Automatic breadcrumb navigation throughout admin panel
 
 ### 🔐 **Security & Authorization**
 - **Role-Based Access Control (RBAC)**: Using Spatie Laravel Permission
-- **Route-Based Permissions**: Individual permissions for each admin route
+- **Route-Based Permissions**: Individual permissions for each admin route (automatically discovered)
 - **User Authorization**: Users can only access their own orders and data
 - **CSRF Protection**: Built-in Laravel security features
 - **Input Validation**: Comprehensive form validation and sanitization
+- **XSS Protection**: All user inputs are properly escaped
 
 ### 📊 **Technical Features**
 - **Eloquent ORM**: Clean, expressive database interactions
 - **Database Migrations**: Version-controlled database schema
 - **Model Factories**: Automated test data generation
 - **Pagination**: Efficient data loading with Bootstrap 5 pagination
+- **Server-Side Processing**: DataTables with AJAX for large datasets
 - **API Ready**: RESTful API endpoints for mobile app integration
 - **Session Management**: Secure cart and user session handling
 - **Referral System**: Shareable `/r/{code}` links; awards referrer on successful signup
+- **Rich Text Editor**: Quill editor for product descriptions and page content
+- **Live Search**: AJAX-powered real-time product search with debouncing
 
 ## 🚀 Why Use This eCommerce System?
 
@@ -56,11 +80,13 @@ A comprehensive, modern eCommerce platform built with Laravel 12, featuring a be
 - **Well Documented**: Comprehensive code comments and structure
 - **Modern Stack**: Built with latest Laravel 12 and PHP 8.3+
 - **Security First**: Implements industry-standard security practices
+- **Performance Optimized**: Server-side processing, eager loading, efficient queries
 
 ### **For Business Owners**
 - **Complete Solution**: Everything needed to start selling online
 - **Professional Design**: Modern, responsive interface that builds trust
 - **Easy Management**: Intuitive admin panel for non-technical users
+- **Customer Engagement**: Reviews, ratings, newsletter, and loyalty points
 - **Scalable**: Built to handle growth from startup to enterprise
 - **Cost Effective**: Open source solution with no licensing fees
 
@@ -69,6 +95,8 @@ A comprehensive, modern eCommerce platform built with Laravel 12, featuring a be
 - **Mobile Friendly**: Perfect shopping experience on all devices
 - **Secure Checkout**: Safe and reliable payment processing
 - **Order Tracking**: Complete visibility into order status and history
+- **Product Reviews**: Read and write reviews to make informed decisions
+- **Live Search**: Quick product discovery with instant results
 
 ## 📋 Requirements
 
@@ -114,14 +142,22 @@ DB_PASSWORD=your_password
 php artisan migrate --seed
 ```
 
+This will:
+- Create admin and test user accounts
+- Set up roles and permissions (automatically discovers all admin routes)
+- Seed categories, products, currencies, coupons
+- Configure default site settings (reviews, newsletter, etc.)
+- Create default customer service pages (Help Center, Shipping Info, Returns, Contact Us)
+
 Optional seeders (recommended for admin RBAC and payments):
 ```bash
 php artisan db:seed --class=Database\Seeders\AdminRoutePermissionsSeeder
 php artisan db:seed --class=Database\Seeders\PaymentGatewaySettingsSeeder
+php artisan db:seed --class=Database\Seeders\PageSeeder
 ```
 
-### 5.1 Feature Migrations (Coins, Referral, Shipping)
-If you’re upgrading an existing install, run these specific migrations:
+### 5.1 Feature Migrations (Coins, Referral, Shipping, Reviews, Pages)
+If you're upgrading an existing install, run these specific migrations:
 ```bash
 php artisan migrate --path=database/migrations/2025_10_24_130000_add_coins_to_users_and_create_user_points_table.php
 php artisan migrate --path=database/migrations/2025_10_24_131000_create_coin_settings_table.php
@@ -129,9 +165,14 @@ php artisan migrate --path=database/migrations/2025_10_24_132000_add_referral_fi
 php artisan migrate --path=database/migrations/2025_10_24_133000_add_flags_to_coin_settings_table.php
 php artisan migrate --path=database/migrations/2025_10_24_134000_create_shipping_settings_table.php
 php artisan migrate --path=database/migrations/2025_10_24_134500_add_global_rate_to_shipping_settings_table.php
+php artisan migrate --path=database/migrations/2025_11_07_022231_create_product_reviews_table.php
+php artisan migrate --path=database/migrations/2025_11_07_022251_add_review_settings_to_site_settings_table.php
+php artisan migrate --path=database/migrations/2025_11_07_023046_add_newsletter_settings_to_site_settings_table.php
+php artisan migrate --path=database/migrations/2025_11_07_024826_add_customer_service_links_to_site_settings_table.php
+php artisan migrate --path=database/migrations/2025_11_07_025029_create_pages_table.php
 ```
 
-After migrating, visit Admin → Coin Settings and Admin → Shipping Settings to configure.
+After migrating, visit Admin → Site Settings, Admin → Coin Settings, and Admin → Shipping Settings to configure.
 
 ### 6. Compile Assets (Optional)
 ```bash
@@ -164,17 +205,41 @@ Visit `http://localhost:8000` to see your eCommerce store!
 ├── app/
 │   ├── Http/Controllers/
 │   │   ├── Admin/           # Admin panel controllers
-│   │   └── Api/             # API controllers
+│   │   │   ├── DataTableController.php  # Server-side DataTables handler
+│   │   │   ├── PageController.php       # Pages CRUD
+│   │   │   ├── ReviewController.php     # Reviews management
+│   │   │   └── ...                     # Other admin controllers
+│   │   ├── Api/             # API controllers
+│   │   ├── ProductController.php        # Frontend products (includes search)
+│   │   ├── ReviewController.php          # Frontend reviews
+│   │   ├── PageController.php            # Frontend pages
+│   │   └── NewsletterController.php     # Newsletter subscription
 │   ├── Models/              # Eloquent models
+│   │   ├── ProductReview.php            # Product reviews model
+│   │   ├── Page.php                     # Pages model
+│   │   └── ...
 │   └── Providers/           # Service providers
 ├── database/
 │   ├── migrations/          # Database schema
+│   │   ├── create_product_reviews_table.php
+│   │   ├── create_pages_table.php
+│   │   ├── add_review_settings_to_site_settings_table.php
+│   │   ├── add_newsletter_settings_to_site_settings_table.php
+│   │   └── add_customer_service_links_to_site_settings_table.php
 │   ├── seeders/             # Sample data
+│   │   ├── PageSeeder.php               # Default pages seeder
+│   │   └── ...
 │   └── factories/           # Model factories
 ├── resources/
 │   ├── views/
 │   │   ├── admin/           # Admin panel views
+│   │   │   ├── pages/                  # Pages CRUD views
+│   │   │   ├── reviews/                # Reviews management views
+│   │   │   └── ...
+│   │   ├── pages/           # Frontend page views
 │   │   ├── layouts/         # Layout templates
+│   │   ├── partials/        # Partial views
+│   │   │   └── nav.blade.php           # Navigation with live search
 │   │   └── ...             # Frontend views
 │   └── css/                # Stylesheets
 ├── routes/
@@ -195,10 +260,35 @@ The admin panel uses AdminLTE theme. Customize the appearance by modifying:
 ### Permission System
 - Admin routes are protected by route‑name permissions (e.g., `admin.products.edit`).
 - Use Admin → Role & Permission to assign both named and route‑based permissions.
+- Route permissions are automatically discovered and created by `AdminRoutePermissionsSeeder`.
 - Seed all current admin route permissions and grant to Super Admin:
 ```bash
 php artisan db:seed --class=Database\Seeders\AdminRoutePermissionsSeeder
 ```
+
+### Site Settings
+Configure all site-wide settings from Admin → Site Settings:
+- **Basic Information**: Site name, tagline, logo, favicon
+- **SEO**: Meta title, description, keywords
+- **Legal & Footer**: Footer text, privacy/terms/cookies URLs, customer service links
+- **Social Media**: Facebook, Twitter, Instagram, LinkedIn links
+- **Feature Toggles**: Enable/disable wishlist, reviews, newsletter
+- **Review Settings**: Control review requirements (purchase, approval, anonymous)
+- **Newsletter Settings**: Configure double opt-in and welcome emails
+
+### Pages Management
+Create and manage custom pages from Admin → Pages:
+- Use rich text editor (Quill) for content
+- Set SEO meta tags per page
+- Control visibility with active/inactive status
+- Sort pages with sort order
+- Default pages: Help Center, Shipping Info, Returns, Contact Us
+
+### Reviews System
+- **Frontend**: Customers can leave reviews on product pages (if enabled)
+- **Settings**: Control via Admin → Site Settings → Review Settings
+- **Management**: Approve/reject/delete reviews from Admin → Reviews
+- **Features**: Star ratings (1-5), verified purchase badges, admin moderation
 
 ### Email Configuration
 You can configure SMTP at runtime from Admin → Email Settings (no .env edit required). For local setup via `.env`, use:
@@ -221,6 +311,12 @@ MAIL_FROM_NAME="Your Store"
 - Admin → Shipping Settings: enable shipping, set free shipping minimum, define per‑country/city rates, and a global fallback rate
 - Checkout totals include dynamic shipping and currency formatting
 
+### Payment Gateways
+- **Stripe**: Configure API keys, enable/disable, test connection
+- **PayPal**: Configure client ID/secret, enable/disable, sandbox mode
+- **Cash on Delivery (COD)**: Enable/disable from Admin → Payment Gateways → COD
+- All payment methods are configurable from Admin → Payment Gateways
+
 ## 📚 API Documentation
 
 The system includes RESTful API endpoints for mobile app integration:
@@ -234,12 +330,25 @@ The system includes RESTful API endpoints for mobile app integration:
 - `GET /api/categories` - List categories
 - `GET /api/products` - List products
 - `GET /api/products/{id}` - Get product details
+- `GET /products/search?q={query}` - Live search (returns JSON, requires 3+ characters)
 
 ### Cart & Orders
 - `GET /api/cart` - Get user cart
 - `POST /api/cart/add` - Add item to cart
 - `GET /api/orders` - List user orders
 - `GET /api/orders/{id}` - Get order details
+
+### Reviews
+- `POST /products/{product}/reviews` - Submit a product review (authenticated)
+- `DELETE /reviews/{review}` - Delete own review (authenticated)
+
+### Pages
+- `GET /page/{slug}` - View a custom page
+
+### Newsletter
+- `POST /newsletter/subscribe` - Subscribe to newsletter
+- `POST /newsletter/unsubscribe` - Unsubscribe from newsletter
+- `GET /newsletter/confirm/{token}` - Confirm subscription (double opt-in)
 
 ### OTP
 - Email & SMS OTP request/verify endpoints (UI available under `/otp/email` and `/otp/sms`)
@@ -269,10 +378,44 @@ php artisan db:seed --class=DatabaseSeeder
 6. Configure SSL certificate
 7. Set up database backups
 
-### Docker Deployment
+## 🐳 Docker Deployment
+
+### Quick Start with Docker
+
+1. **Copy environment file:**
+   ```bash
+   cp .env.docker.example .env
+   ```
+
+2. **Update `.env` file with your configuration**
+
+3. **Build and start containers:**
+   ```bash
+   docker-compose up -d --build
+   ```
+
+4. **Install dependencies and setup:**
+   ```bash
+   docker-compose exec app composer install
+   docker-compose exec app php artisan key:generate
+   docker-compose exec app php artisan migrate --seed
+   docker-compose exec app php artisan storage:link
+   ```
+
+5. **Access the application:**
+   - Frontend: http://localhost:8000
+   - Database: localhost:3306
+   - Redis: localhost:6379
+
+### Production Deployment with Docker
+
+For production deployment, use the production override:
+
 ```bash
-docker-compose up -d
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 ```
+
+See [DOCKER.md](DOCKER.md) for detailed Docker setup instructions, SSL configuration, backup strategies, and troubleshooting.
 
 ## 🤝 Contributing
 
@@ -291,7 +434,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Laravel](https://laravel.com) - The PHP framework
 - [AdminLTE](https://adminlte.io) - Admin panel theme
 - [Spatie Laravel Permission](https://spatie.be/docs/laravel-permission) - Role and permission management
-- [Tailwind CSS](https://tailwindcss.com) - CSS framework
+- [Bootstrap 5](https://getbootstrap.com) - CSS framework
+- [Quill](https://quilljs.com) - Rich text editor
+- [DataTables](https://datatables.net) - Advanced table features
 
 ## 📞 Support
 

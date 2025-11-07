@@ -70,6 +70,11 @@ class User extends Authenticatable
         return $this->hasMany(Wishlist::class);
     }
 
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(ProductReview::class);
+    }
+
     public function getDefaultBillingAddress()
     {
         return $this->addresses()->where('type', 'billing')->where('is_default', true)->first();

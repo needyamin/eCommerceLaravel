@@ -57,23 +57,29 @@
             <div class="col-lg-2 col-md-6 mb-4">
                 <h6 class="text-white mb-3">Customer Service</h6>
                 <ul class="list-unstyled">
+                    @php
+                        $helpCenterPage = \App\Models\Page::where('slug', 'help-center')->where('is_active', true)->first();
+                        $shippingInfoPage = \App\Models\Page::where('slug', 'shipping-info')->where('is_active', true)->first();
+                        $returnsPage = \App\Models\Page::where('slug', 'returns')->where('is_active', true)->first();
+                        $contactUsPage = \App\Models\Page::where('slug', 'contact-us')->where('is_active', true)->first();
+                    @endphp
                     <li class="mb-2">
-                        <a href="#" class="text-light text-decoration-none">
+                        <a href="{{ $helpCenterPage ? route('pages.show', $helpCenterPage->slug) : ($siteSettings->help_center_url ?? '#') }}" class="text-light text-decoration-none">
                             <i class="bi bi-question-circle me-1"></i>Help Center
                         </a>
                     </li>
                     <li class="mb-2">
-                        <a href="#" class="text-light text-decoration-none">
+                        <a href="{{ $shippingInfoPage ? route('pages.show', $shippingInfoPage->slug) : ($siteSettings->shipping_info_url ?? '#') }}" class="text-light text-decoration-none">
                             <i class="bi bi-truck me-1"></i>Shipping Info
                         </a>
                     </li>
                     <li class="mb-2">
-                        <a href="#" class="text-light text-decoration-none">
+                        <a href="{{ $returnsPage ? route('pages.show', $returnsPage->slug) : ($siteSettings->returns_url ?? '#') }}" class="text-light text-decoration-none">
                             <i class="bi bi-arrow-clockwise me-1"></i>Returns
                         </a>
                     </li>
                     <li class="mb-2">
-                        <a href="#" class="text-light text-decoration-none">
+                        <a href="{{ $contactUsPage ? route('pages.show', $contactUsPage->slug) : ($siteSettings->contact_us_url ?? '#') }}" class="text-light text-decoration-none">
                             <i class="bi bi-telephone me-1"></i>Contact Us
                         </a>
                     </li>
@@ -116,6 +122,8 @@
             </div>
 
             <!-- Newsletter -->
+            @php $newsletterEnabled = ($siteSettings->newsletter_enabled ?? true); @endphp
+            @if($newsletterEnabled)
                 <div class="col-lg-2 col-md-6 mb-4">
                     <h6 class="text-white mb-3">Newsletter</h6>
                     <p class="text-light mb-3">Subscribe for updates and special offers!</p>
@@ -128,6 +136,7 @@
                         </button>
                     </form>
                 </div>
+            @endif
         </div>
 
         <hr class="my-4 border-secondary">

@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', $siteSettings->meta_title ?? ($siteSettings->site_name ?? 'eCommerce Store'))</title>
+    @if(!empty($siteSettings->meta_description))
+    <meta name="description" content="{{ $siteSettings->meta_description }}">
+    @endif
+    @if(!empty($siteSettings->meta_keywords))
+    <meta name="keywords" content="{{ $siteSettings->meta_keywords }}">
+    @endif
+    @if(!empty($siteSettings->logo_url))
+    <meta property="og:image" content="{{ $siteSettings->logo_url }}">
+    @endif
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">

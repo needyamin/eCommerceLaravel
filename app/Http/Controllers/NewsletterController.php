@@ -4,15 +4,15 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\NewsletterSubscriber;
-use App\Models\NewsletterSetting;
+use App\Models\SiteSetting;
 use Illuminate\Support\Str;
 
 class NewsletterController extends Controller
 {
     public function subscribe(Request $request)
     {
-        $settings = NewsletterSetting::get();
-        if (!$settings->enabled) {
+        $settings = SiteSetting::get();
+        if (!$settings->newsletter_enabled) {
             return back()->with('error', 'Newsletter is currently disabled.');
         }
 
@@ -28,7 +28,7 @@ class NewsletterController extends Controller
             'source' => $validated['source'] ?? ($subscriber->exists ? $subscriber->source : 'footer'),
         ]);
 
-        if ($settings->double_opt_in) {
+        if ($settings->newsletter_double_opt_in) {
             $subscriber->status = 'unsubscribed';
             $subscriber->token = Str::uuid();
             $subscriber->save();
@@ -40,7 +40,7 @@ class NewsletterController extends Controller
         $subscriber->subscribed_at = now();
         $subscriber->save();
 
-        // TODO: optionally send welcome email if $settings->send_welcome_email
+        // TODO: optionally send welcome email if $settings->newsletter_send_welcome_email
 
         return back()->with('success', 'Subscribed to newsletter successfully.');
     }

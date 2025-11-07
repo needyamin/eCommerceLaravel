@@ -6,6 +6,10 @@
 		</a>
 	</div>
 	<div class="sidebar-wrapper">
+		<style>
+			/* Keep items visually the same; only indent sub-items */
+			.app-sidebar .nav-treeview .nav-link { padding-left: 2.25rem; }
+		</style>
 		<nav class="mt-2">
 			<ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="navigation">
 				<li class="nav-item">
@@ -51,15 +55,59 @@
 					</a>
 				</li>
 				<li class="nav-item">
-					<a href="{{ route('admin.email-settings.index') }}" class="nav-link">
-						<i class="nav-icon bi bi-envelope"></i>
-						<p>Email Settings</p>
+					<a href="#" class="nav-link">
+						<i class="nav-icon bi bi-gear"></i>
+						<p>Settings <i class="nav-arrow bi bi-chevron-right"></i></p>
 					</a>
+					<ul class="nav nav-treeview">
+						<li class="nav-item">
+							<a href="{{ route('admin.site-settings.index') }}" class="nav-link">
+								<i class="nav-icon bi bi-gear"></i>
+								<p>Site Settings</p>
+							</a>
+						</li>
+						<li class="nav-item">
+							<a href="{{ route('admin.email-settings.index') }}" class="nav-link">
+								<i class="nav-icon bi bi-envelope"></i>
+								<p>Email Settings</p>
+							</a>
+						</li>
+						<li class="nav-item">
+							<a href="{{ route('admin.payment-gateways.index') }}" class="nav-link">
+								<i class="nav-icon bi bi-credit-card"></i>
+								<p>Payment Gateways</p>
+							</a>
+						</li>
+						<li class="nav-item">
+							<a href="{{ route('admin.shipping-settings.index') }}" class="nav-link">
+								<i class="nav-icon bi bi-truck"></i>
+								<p>Shipping Settings</p>
+							</a>
+						</li>
+						<li class="nav-item">
+							<a href="{{ route('admin.otp-settings.index') }}" class="nav-link">
+								<i class="nav-icon bi bi-shield-lock"></i>
+								<p>OTP Settings</p>
+							</a>
+						</li>
+						<li class="nav-item">
+							<a href="{{ route('admin.coin-settings.index') }}" class="nav-link">
+								<i class="nav-icon bi bi-coin"></i>
+								<p>Coin Settings</p>
+							</a>
+						</li>
+					</ul>
 				</li>
 				<li class="nav-item">
 					<a href="{{ route('admin.coupons.index') }}" class="nav-link">
 						<i class="nav-icon bi bi-ticket"></i>
 						<p>Coupons</p>
+					</a>
+				</li>
+				<li class="nav-item">
+					<a href="{{ route('admin.pages.index') }}" class="nav-link">
+						<i class="nav-icon bi bi-file-text"></i>
+						<p>Pages</p>
 					</a>
 				</li>
 				<li class="nav-item">
@@ -69,11 +117,26 @@
 					</a>
 				</li>
 				<li class="nav-item">
-					<a href="{{ route('admin.payment-gateways.index') }}" class="nav-link">
-						<i class="nav-icon bi bi-credit-card"></i>
-						<p>Payment Gateways</p>
+					<a href="#" class="nav-link">
+						<i class="nav-icon bi bi-star"></i>
+						<p>Reviews <i class="nav-arrow bi bi-chevron-right"></i></p>
 					</a>
+					<ul class="nav nav-treeview">
+						<li class="nav-item">
+							<a href="{{ route('admin.reviews.index') }}" class="nav-link">
+								<i class="nav-icon bi bi-list-ul"></i>
+								<p>Manage Reviews</p>
+							</a>
+						</li>
+						<li class="nav-item">
+							<a href="{{ route('admin.site-settings.index') }}#review-settings" class="nav-link">
+								<i class="nav-icon bi bi-gear"></i>
+								<p>Review Settings</p>
+							</a>
+						</li>
+					</ul>
 				</li>
+				
 				<li class="nav-item">
 					<a href="#" class="nav-link">
 						<i class="nav-icon bi bi-activity"></i>
@@ -112,30 +175,7 @@
 						<p>Administrators</p>
 					</a>
 				</li>
-				<li class="nav-item">
-					<a href="{{ route('admin.site-settings.index') }}" class="nav-link">
-						<i class="nav-icon bi bi-gear"></i>
-						<p>Site Settings</p>
-					</a>
-				</li>
-				<li class="nav-item">
-					<a href="{{ route('admin.otp-settings.index') }}" class="nav-link">
-						<i class="nav-icon bi bi-shield-lock"></i>
-						<p>OTP Settings</p>
-					</a>
-				</li>
-				<li class="nav-item">
-					<a href="{{ route('admin.coin-settings.index') }}" class="nav-link">
-						<i class="nav-icon bi bi-coin"></i>
-						<p>Coin Settings</p>
-					</a>
-				</li>
-				<li class="nav-item">
-					<a href="{{ route('admin.shipping-settings.index') }}" class="nav-link">
-						<i class="nav-icon bi bi-truck"></i>
-						<p>Shipping Settings</p>
-					</a>
-				</li>
+				
 			</ul>
 		</nav>
 	</div>

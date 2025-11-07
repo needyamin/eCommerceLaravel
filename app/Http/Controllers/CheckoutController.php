@@ -210,7 +210,13 @@ class CheckoutController extends Controller
 					}
 				}
 				if ($enableAll && $enableCod && $order->payment_method === 'cod' && $codBonus > 0) {
-					PointService::award($order->user, $codBonus, 'cod_choice', 'Chose COD', $order);
+					// Check if COD is enabled as a payment method
+					$codEnabled = \App\Models\PaymentGatewaySetting::where('gateway', 'cod')
+						->where('key', 'enabled')
+						->value('value');
+					if ((bool) ($codEnabled ?? true)) {
+						PointService::award($order->user, $codBonus, 'cod_choice', 'Chose COD', $order);
+					}
 				}
 			} catch (\Throwable $e) {
 				// swallow

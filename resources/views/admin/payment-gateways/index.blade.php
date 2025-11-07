@@ -21,7 +21,13 @@
                 <div class="card shadow-sm">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">
-                            <i class="fas fa-{{ $gatewayName === 'stripe' ? 'stripe' : 'paypal' }} me-2"></i>
+                            @if($gatewayName === 'stripe')
+                                <i class="fas fa-stripe me-2"></i>
+                            @elseif($gatewayName === 'paypal')
+                                <i class="fas fa-paypal me-2"></i>
+                            @elseif($gatewayName === 'cod')
+                                <i class="bi bi-truck me-2"></i>
+                            @endif
                             {{ $gateway['display_name'] }}
                         </h5>
                         <div class="d-flex gap-2">
@@ -32,9 +38,11 @@
                                     {{ $gateway['enabled'] ? 'Enabled' : 'Disabled' }}
                                 </button>
                             </form>
-                            <button type="button" class="btn btn-sm btn-info test-connection" data-gateway="{{ $gatewayName }}">
-                                <i class="fas fa-plug me-1"></i>Test
-                            </button>
+                            @if($gatewayName !== 'cod')
+                                <button type="button" class="btn btn-sm btn-info test-connection" data-gateway="{{ $gatewayName }}">
+                                    <i class="fas fa-plug me-1"></i>Test
+                                </button>
+                            @endif
                         </div>
                     </div>
                     <div class="card-body">

@@ -34,6 +34,12 @@ class PaymentGatewayController extends Controller
      */
     public function show(string $gateway)
     {
+        if ($gateway === 'cod') {
+            // Handle COD separately
+            $settings = PaymentGatewaySetting::where('gateway', 'cod')->get();
+            return view('admin.payment-gateways.show-cod', compact('settings'));
+        }
+        
         if (!$this->gatewayManager->hasGateway($gateway)) {
             return redirect()->route('admin.payment-gateways.index')
                 ->with('error', 'Invalid payment gateway.');
@@ -51,6 +57,19 @@ class PaymentGatewayController extends Controller
      */
     public function update(Request $request, string $gateway)
     {
+        if ($gateway === 'cod') {
+            // Handle COD update
+            $enabled = $request->boolean('enabled', true);
+            PaymentGatewaySetting::setGatewaySetting(
+                'cod',
+                'enabled',
+                $enabled,
+                'Enable or disable Cash on Delivery payment method'
+            );
+            return redirect()->route('admin.payment-gateways.show', 'cod')
+                ->with('success', 'Cash on Delivery settings updated successfully.');
+        }
+        
         if (!$this->gatewayManager->hasGateway($gateway)) {
             return redirect()->route('admin.payment-gateways.index')
                 ->with('error', 'Invalid payment gateway.');
@@ -98,6 +117,24 @@ class PaymentGatewayController extends Controller
      */
     public function toggleStatus(string $gateway)
     {
+        if ($gateway === 'cod') {
+            $currentStatus = (bool) PaymentGatewaySetting::where('gateway', 'cod')
+                ->where('key', 'enabled')
+                ->value('value') ?? true;
+            $newStatus = !$currentStatus;
+            
+            PaymentGatewaySetting::setGatewaySetting(
+                'cod',
+                'enabled',
+                $newStatus,
+                'Enable or disable Cash on Delivery payment method'
+            );
+            
+            $statusText = $newStatus ? 'enabled' : 'disabled';
+            return redirect()->back()
+                ->with('success', "Cash on Delivery has been {$statusText}.");
+        }
+        
         if (!$this->gatewayManager->hasGateway($gateway)) {
             return redirect()->route('admin.payment-gateways.index')
                 ->with('error', 'Invalid payment gateway.');

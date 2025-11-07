@@ -1,17 +1,17 @@
 @extends('admin.layouts.app')
 
-@section('content_header')
-<div class="content-header">
+@section('breadcrumbs')
+<div class="content-header mb-3">
     <div class="container-fluid">
         <div class="row mb-2">
             <div class="col-sm-6">
                 <h1 class="m-0">Order {{ $order->number }}</h1>
             </div>
             <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Home</a></li>
+                <ol class="breadcrumb float-sm-end mb-0">
+                    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
                     <li class="breadcrumb-item"><a href="{{ route('admin.orders.index') }}">Orders</a></li>
-                    <li class="breadcrumb-item active">{{ $order->number }}</li>
+                    <li class="breadcrumb-item active" aria-current="page">Order {{ $order->number }}</li>
                 </ol>
             </div>
         </div>

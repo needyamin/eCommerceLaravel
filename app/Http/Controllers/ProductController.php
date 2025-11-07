@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\SiteSetting;
+use App\Models\ProductReview;
+use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
@@ -96,12 +99,73 @@ class ProductController extends Controller
 
 	public function show(string $slug)
 	{
-		$product = Product::with('images', 'category')->where('slug', $slug)->firstOrFail();
+		$product = Product::with(['images', 'category', 'approvedReviews.user'])->where('slug', $slug)->firstOrFail();
 		$related = Product::where('category_id', $product->category_id)
 			->where('id', '!=', $product->id)
 			->latest()
 			->take(10)
 			->get();
-		return view('products.show', compact('product', 'related'));
+		$settings = SiteSetting::get();
+		$userCanReview = false;
+		$userHasReviewed = false;
+		
+		if (auth()->check()) {
+			$userCanReview = !$settings->reviews_require_purchase || ProductReview::hasPurchasedProduct(auth()->id(), $product->id);
+			$userHasReviewed = ProductReview::where('product_id', $product->id)
+				->where('user_id', auth()->id())
+				->exists();
+		}
+		
+		return view('products.show', compact('product', 'related', 'settings', 'userCanReview', 'userHasReviewed'));
+	}
+
+	public function search(Request $request)
+	{
+		$query = $request->get('q', '');
+		
+		if (strlen($query) < 3) {
+			return response()->json(['products' => []]);
+		}
+		
+		$products = Product::with(['images', 'category'])
+			->where('is_active', true)
+			->where(function ($q) use ($query) {
+				$q->where('name', 'like', "%{$query}%")
+					->orWhere('slug', 'like', "%{$query}%")
+					->orWhere('short_description', 'like', "%{$query}%")
+					->orWhere('description', 'like', "%{$query}%");
+			})
+			->limit(20)
+			->get()
+			->map(function ($product) {
+				$primaryImage = $product->images->where('is_primary', true)->first() 
+					?? $product->images->first();
+				$imageUrl = $primaryImage 
+					? asset('storage/' . $primaryImage->path) 
+					: asset('admin-assets/assets/img/AdminLTELogo.png');
+				
+				$isOnSale = $product->compare_at_price && $product->price < $product->compare_at_price;
+				$discountPercent = $isOnSale 
+					? round((($product->compare_at_price - $product->price) / $product->compare_at_price) * 100)
+					: 0;
+				
+				return [
+					'id' => $product->id,
+					'name' => $product->name,
+					'slug' => $product->slug,
+					'price' => number_format($product->price, 2),
+					'compare_at_price' => $product->compare_at_price ? number_format($product->compare_at_price, 2) : null,
+					'image' => $imageUrl,
+					'url' => route('products.show', $product->slug),
+					'category' => $product->category ? $product->category->name : null,
+					'stock' => $product->stock,
+					'in_stock' => $product->stock > 0,
+					'short_description' => $product->short_description ? Str::limit(strip_tags($product->short_description), 80) : null,
+					'is_on_sale' => $isOnSale,
+					'discount_percent' => $discountPercent,
+				];
+			});
+		
+		return response()->json(['products' => $products]);
 	}
 }

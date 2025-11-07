@@ -1,0 +1,83 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Docker
+Dockerfile
+docker-compose.yml
+docker-compose.prod.yml
+.dockerignore
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Laravel
+/node_modules
+/public/hot
+/public/storage
+/storage/*.key
+/vendor
+.env
+.env.backup
+.env.production
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+/.fleet
+/.idea
+/.vscode
+
+# Testing
+/tests
+/phpunit.xml
+.phpunit.cache
+
+# Documentation
+README.md
+*.md
+docs/
+
+# Build artifacts
+/public/build
+/public/mix-manifest.json
+
+# Logs
+*.log
+/storage/logs/*.log
+
+# Database
+*.sql
+*.sqlite
+/database/*.sqlite
+
+# Temporary files
+*.tmp
+*.temp
+.cache
+
+# Node
+node_modules
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Composer
+composer.lock
+
+# Misc
+.npm
+.eslintcache
+.stylelintcache
+

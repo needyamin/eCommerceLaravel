@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/styles/overlayscrollbars.min.css" crossorigin="anonymous" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" crossorigin="anonymous" />
     <link rel="stylesheet" href="{{ asset('admin-assets/css/adminlte.css') }}" />
+    <!-- DataTables (Bootstrap 5) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.10/css/dataTables.bootstrap5.min.css" />
     @stack('styles')
   </head>
   <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
@@ -21,6 +23,11 @@
             @if (session('success'))
               <div class="alert alert-success">{{ session('success') }}</div>
             @endif
+            @hasSection('breadcrumbs')
+              @yield('breadcrumbs')
+            @else
+              @include('admin.partials.breadcrumb')
+            @endif
             @yield('content')
           </div>
         </div>
@@ -32,6 +39,10 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
     <script src="{{ asset('admin-assets/js/adminlte.js') }}"></script>
+    <!-- jQuery + DataTables -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/datatables.net@1.13.10/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.10/js/dataTables.bootstrap5.min.js"></script>
     @stack('scripts')
   </body>
 </html>

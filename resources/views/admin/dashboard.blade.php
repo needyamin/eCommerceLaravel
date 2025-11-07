@@ -3,10 +3,6 @@
 @section('title', 'Dashboard')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h1 class="h3 mb-0 fw-semibold"><i class="bi bi-speedometer2 me-2 text-primary"></i>Dashboard</h1>
-</div>
-
 <div class="row g-4">
   <div class="col-md-4">
     <div class="card border-0 shadow-sm">

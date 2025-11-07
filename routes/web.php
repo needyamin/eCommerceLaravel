@@ -80,8 +80,16 @@ Route::post('/wishlist/toggle', [WishlistController::class, 'toggle'])->name('wi
 
 // Products and categories
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+Route::get('/products/search', [ProductController::class, 'search'])->name('products.search');
 Route::get('/products/{slug}', [ProductController::class, 'show'])->name('products.show');
 Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('categories.show');
+
+// Pages (frontend)
+Route::get('/page/{slug}', [App\Http\Controllers\PageController::class, 'show'])->name('pages.show');
+
+// Reviews
+Route::post('/products/{product}/reviews', [App\Http\Controllers\ReviewController::class, 'store'])->name('reviews.store')->middleware('auth');
+Route::delete('/reviews/{review}', [App\Http\Controllers\ReviewController::class, 'destroy'])->name('reviews.destroy')->middleware('auth');
 
 // Cart
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
@@ -93,7 +101,7 @@ Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear')
 // Coupons
 Route::post('/coupons/apply', [CouponController::class, 'apply'])->name('coupons.apply');
 Route::post('/coupons/remove', [CouponController::class, 'remove'])->name('coupons.remove');
-Route::post('/coupons/validate', [CouponController::class, 'validate'])->name('coupons.validate');
+Route::post('/coupons/validate', [CouponController::class, 'validateCode'])->name('coupons.validate');
 
 //
 
@@ -163,9 +171,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             // Newsletter admin
             Route::get('newsletter', [App\Http\Controllers\Admin\NewsletterController::class, 'index'])->name('newsletter.index');
-            Route::put('newsletter/settings', [App\Http\Controllers\Admin\NewsletterController::class, 'updateSettings'])->name('newsletter.settings.update');
             Route::post('newsletter/{subscriber}/toggle', [App\Http\Controllers\Admin\NewsletterController::class, 'toggle'])->name('newsletter.toggle');
             Route::delete('newsletter/{subscriber}', [App\Http\Controllers\Admin\NewsletterController::class, 'destroy'])->name('newsletter.destroy');
+            
+            // Reviews
+            Route::get('reviews', [App\Http\Controllers\Admin\ReviewController::class, 'index'])->name('reviews.index');
+            Route::post('reviews/{review}/approve', [App\Http\Controllers\Admin\ReviewController::class, 'approve'])->name('reviews.approve');
+            Route::post('reviews/{review}/reject', [App\Http\Controllers\Admin\ReviewController::class, 'reject'])->name('reviews.reject');
+            Route::delete('reviews/{review}', [App\Http\Controllers\Admin\ReviewController::class, 'destroy'])->name('reviews.destroy');
             
             // Payment Gateways
             Route::get('payment-gateways', [App\Http\Controllers\Admin\PaymentGatewayController::class, 'index'])->name('payment-gateways.index');
@@ -203,5 +216,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             // Coin Settings
             Route::get('coin-settings', [App\Http\Controllers\Admin\CoinSettingsController::class, 'index'])->name('coin-settings.index');
             Route::put('coin-settings', [App\Http\Controllers\Admin\CoinSettingsController::class, 'update'])->name('coin-settings.update');
+
+            // Pages
+            Route::resource('pages', App\Http\Controllers\Admin\PageController::class);
+
+            // DataTables server-side endpoint
+            Route::get('datatables/{resource}', [App\Http\Controllers\Admin\DataTableController::class, 'handle'])->name('datatables');
     });
 });

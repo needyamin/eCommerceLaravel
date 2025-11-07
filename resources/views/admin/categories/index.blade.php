@@ -4,43 +4,58 @@
 
 @section('content')
 <div class="card">
-	<div class="card-header d-flex justify-content-between align-items-center">
-		<h3 class="card-title m-0">Categories</h3>
-		<a href="{{ route('admin.categories.create') }}" class="btn btn-primary">New Category</a>
-	</div>
-	<div class="card-body p-0">
-		<table class="table table-striped mb-0">
-			<thead>
-				<tr>
-					<th>Name</th>
-					<th class="text-center">Slug</th>
-					<th class="text-center">Active</th>
-					<th class="text-center" style="width:160px">Actions</th>
-				</tr>
-			</thead>
-			<tbody>
-			@foreach($categories as $category)
-				<tr>
-					<td>{{ $category->name }}</td>
-					<td class="text-center">{{ $category->slug }}</td>
-					<td class="text-center">
-						<span class="badge {{ $category->is_active ? 'text-bg-success' : 'text-bg-secondary' }}">{{ $category->is_active ? 'Yes' : 'No' }}</span>
-					</td>
-					<td class="text-center">
-						<a href="{{ route('admin.categories.edit', $category) }}" class="btn btn-sm btn-outline-primary">Edit</a>
-						<form action="{{ route('admin.categories.destroy', $category) }}" method="post" class="d-inline" onsubmit="return confirm('Delete this category?')">
-							@csrf
-							@method('DELETE')
-							<button class="btn btn-sm btn-outline-danger">Delete</button>
-						</form>
-					</td>
-				</tr>
-			@endforeach
-			</tbody>
-		</table>
-	</div>
-	<div class="card-footer">{{ $categories->links() }}</div>
+    <div class="card-header d-flex flex-wrap gap-2 justify-content-between align-items-center">
+        <h3 class="card-title m-0">Categories</h3>
+        <div class="d-flex gap-2 align-items-center ms-auto">
+            <select id="filter_cat_active" class="form-select form-select-sm" style="min-width: 140px;">
+                <option value="">All Status</option>
+                <option value="1">Active</option>
+                <option value="0">Inactive</option>
+            </select>
+            <a href="{{ route('admin.categories.create') }}" class="btn btn-primary btn-sm">New Category</a>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table id="categoriesTable" class="table table-striped mb-0 align-middle" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Slug</th>
+                        <th>Active</th>
+                        <th style="width:160px">Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    const table = $('#categoriesTable').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: '{{ route('admin.datatables', 'categories') }}',
+            data: function(d){
+                d.is_active = document.getElementById('filter_cat_active').value || '';
+            }
+        },
+        columns: [
+            { data: 'name', name: 'name' },
+            { data: 'slug', name: 'slug', className: 'text-center' },
+            { data: 'is_active', name: 'is_active', className: 'text-center', orderable: true, searchable: false },
+            { data: 'actions', name: 'actions', orderable: false, searchable: false, className: 'text-center' },
+        ],
+        order: [[0, 'asc']],
+    });
+    document.getElementById('filter_cat_active').addEventListener('change', ()=>table.ajax.reload());
+});
+</script>
+@endpush
 @endsection
 
 

@@ -50,7 +50,7 @@
                 </div>
                 <div class="col-12">
                     <label class="form-label">Description</label>
-                    <textarea name="description" rows="6" class="form-control"></textarea>
+                    <textarea name="description" id="product_description" rows="6" class="form-control"></textarea>
                 </div>
                 <div class="col-md-3">
                     <div class="form-check mt-4">
@@ -71,6 +71,65 @@
         </div>
     </form>
 </div>
+
+@push('styles')
+<!-- Quill Editor CSS -->
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<style>
+    #product_editor {
+        height: 400px;
+        background: #fff;
+    }
+    .ql-editor {
+        min-height: 400px;
+        font-size: 14px;
+    }
+</style>
+@endpush
+
+@push('scripts')
+<!-- Quill Editor JS -->
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Create editor container
+    const textarea = document.getElementById('product_description');
+    const editorDiv = document.createElement('div');
+    editorDiv.id = 'product_editor';
+    textarea.parentNode.insertBefore(editorDiv, textarea);
+    textarea.style.display = 'none';
+    
+    // Initialize Quill
+    const quill = new Quill('#product_editor', {
+        theme: 'snow',
+        modules: {
+            toolbar: [
+                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ 'color': [] }, { 'background': [] }],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                [{ 'align': [] }],
+                ['link', 'image', 'video'],
+                ['blockquote', 'code-block'],
+                ['clean']
+            ]
+        },
+        placeholder: 'Start writing your product description...'
+    });
+    
+    // Set initial content
+    @if(old('description'))
+        quill.root.innerHTML = @json(old('description'));
+    @endif
+    
+    // Update textarea before form submit
+    const form = textarea.closest('form');
+    form.addEventListener('submit', function() {
+        textarea.value = quill.root.innerHTML;
+    });
+});
+</script>
+@endpush
 @endsection
 
 

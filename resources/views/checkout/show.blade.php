@@ -206,7 +206,7 @@
                             @php
                                 $hasStripe = isset($gateways['stripe']);
                                 $hasPaypal = isset($gateways['paypal']);
-                                $hasCod = true; // Always enable COD for guest or logged-in users
+                                $hasCod = isset($gateways['cod']); // Check if COD is enabled
                             @endphp
 
                             @if(!$hasStripe && !$hasPaypal && !$hasCod)

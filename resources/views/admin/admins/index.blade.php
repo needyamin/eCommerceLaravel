@@ -11,38 +11,33 @@
 <div class="card">
   <div class="card-body p-0">
     <div class="table-responsive">
-      <table class="table table-striped mb-0">
+      <table id="adminsTable" class="table table-striped mb-0" style="width:100%">
         <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Roles</th><th></th></tr></thead>
-        <tbody>
-          @forelse($admins as $admin)
-            <tr>
-              <td>{{ $admin->id }}</td>
-              <td>{{ $admin->name }}</td>
-              <td>{{ $admin->email }}</td>
-              <td>
-                @foreach($admin->roles as $role)
-                  <span class="badge text-bg-secondary">{{ $role->name }}</span>
-                @endforeach
-              </td>
-              <td class="text-end">
-                <a href="{{ route('admin.admins.edit', $admin) }}" class="btn btn-sm btn-outline-primary">Edit</a>
-                @if($admin->email !== 'admin@example.com')
-                  <form action="{{ route('admin.admins.destroy', $admin) }}" method="post" class="d-inline" onsubmit="return confirm('Delete this admin?')">
-                    @csrf @method('DELETE')
-                    <button class="btn btn-sm btn-outline-danger">Delete</button>
-                  </form>
-                @endif
-              </td>
-            </tr>
-          @empty
-            <tr><td colspan="5" class="text-center">No administrators</td></tr>
-          @endforelse
-        </tbody>
+        <tbody></tbody>
       </table>
     </div>
   </div>
-  <div class="card-footer">{{ $admins->links() }}</div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  $('#adminsTable').DataTable({
+    processing: true,
+    serverSide: true,
+    ajax: { url: '{{ route('admin.datatables', 'admins') }}' },
+    order: [[0,'desc']],
+    columns: [
+      { data: 'id', name: 'id' },
+      { data: 'name', name: 'name' },
+      { data: 'email', name: 'email' },
+      { data: 'roles', name: 'roles', orderable: false, searchable: false },
+      { data: 'actions', name: 'actions', orderable: false, searchable: false, className: 'text-end' }
+    ]
+  });
+});
+</script>
+@endpush
 @endsection
 
 

@@ -19,6 +19,7 @@ class PaymentGatewayManager
         $this->gateways = [
             'stripe' => StripeGateway::class,
             'paypal' => PayPalGateway::class,
+            'cod' => null, // COD doesn't need a gateway class, handled separately
         ];
     }
 
@@ -27,6 +28,10 @@ class PaymentGatewayManager
      */
     public function getGateway(string $name): ?PaymentGatewayInterface
     {
+        if ($name === 'cod') {
+            return null; // COD doesn't have a gateway class
+        }
+        
         if (!isset($this->gateways[$name])) {
             return null;
         }
@@ -43,13 +48,26 @@ class PaymentGatewayManager
         $availableGateways = [];
         
         foreach ($this->gateways as $name => $class) {
-            $gateway = new $class();
-            $availableGateways[$name] = [
-                'name' => $name,
-                'display_name' => ucfirst($name),
-                'enabled' => $gateway->isEnabled(),
-                'config' => $gateway->getConfig(),
-            ];
+            if ($name === 'cod') {
+                // Handle COD separately
+                $codEnabled = \App\Models\PaymentGatewaySetting::where('gateway', 'cod')
+                    ->where('key', 'enabled')
+                    ->value('value');
+                $availableGateways[$name] = [
+                    'name' => $name,
+                    'display_name' => 'Cash on Delivery',
+                    'enabled' => (bool) ($codEnabled ?? true), // Default to enabled
+                    'config' => [],
+                ];
+            } else {
+                $gateway = new $class();
+                $availableGateways[$name] = [
+                    'name' => $name,
+                    'display_name' => ucfirst($name),
+                    'enabled' => $gateway->isEnabled(),
+                    'config' => $gateway->getConfig(),
+                ];
+            }
         }
         
         return $availableGateways;
@@ -63,13 +81,27 @@ class PaymentGatewayManager
         $enabledGateways = [];
         
         foreach ($this->gateways as $name => $class) {
-            $gateway = new $class();
-            if ($gateway->isEnabled()) {
-                $enabledGateways[$name] = [
-                    'name' => $name,
-                    'display_name' => ucfirst($name),
-                    'config' => $gateway->getConfig(),
-                ];
+            if ($name === 'cod') {
+                // Check COD enabled status
+                $codEnabled = \App\Models\PaymentGatewaySetting::where('gateway', 'cod')
+                    ->where('key', 'enabled')
+                    ->value('value');
+                if ((bool) ($codEnabled ?? true)) {
+                    $enabledGateways[$name] = [
+                        'name' => $name,
+                        'display_name' => 'Cash on Delivery',
+                        'config' => [],
+                    ];
+                }
+            } else {
+                $gateway = new $class();
+                if ($gateway->isEnabled()) {
+                    $enabledGateways[$name] = [
+                        'name' => $name,
+                        'display_name' => ucfirst($name),
+                        'config' => $gateway->getConfig(),
+                    ];
+                }
             }
         }
         

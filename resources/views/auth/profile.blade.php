@@ -90,6 +90,50 @@
                     </form>
                 </div>
             </div>
+
+            <!-- My Reviews Section -->
+            @php($myReviews = $user->reviews()->with('product')->latest()->get())
+            @if($myReviews->count() > 0)
+                <div class="card shadow-sm mt-4">
+                    <div class="card-header bg-white">
+                        <h2 class="h5 mb-0"><i class="bi bi-star me-2"></i>My Reviews</h2>
+                    </div>
+                    <div class="card-body">
+                        @foreach($myReviews as $review)
+                            <div class="border-bottom pb-3 mb-3">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <strong><a href="{{ route('products.show', $review->product->slug) }}">{{ $review->product->name }}</a></strong>
+                                        @if($review->is_verified_purchase)
+                                            <span class="badge bg-success ms-2"><i class="bi bi-check-circle me-1"></i>Verified Purchase</span>
+                                        @endif
+                                    </div>
+                                    <div class="text-muted small">{{ $review->created_at->format('M d, Y') }}</div>
+                                </div>
+                                <div class="mb-2">
+                                    @for($i = 1; $i <= 5; $i++)
+                                        <i class="bi bi-star{{ $i <= $review->rating ? '-fill text-warning' : '' }}"></i>
+                                    @endfor
+                                    @if($review->is_approved)
+                                        <span class="badge bg-success ms-2">Approved</span>
+                                    @else
+                                        <span class="badge bg-warning ms-2">Pending Approval</span>
+                                    @endif
+                                </div>
+                                @if($review->title)
+                                    <h6 class="mb-2">{{ $review->title }}</h6>
+                                @endif
+                                <p class="mb-2">{{ $review->comment }}</p>
+                                <form action="{{ route('reviews.destroy', $review) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this review?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete Review</button>
+                                </form>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
         </div>
 
         <div class="col-lg-4">
