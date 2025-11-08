@@ -59,4 +59,26 @@ class CategoryController extends Controller
         $category->delete();
         return redirect()->route('admin.categories.index')->with('success', 'Category deleted');
     }
+
+    public function checkSlug(Request $request)
+    {
+        $slug = $request->input('slug');
+        $categoryId = $request->input('category_id');
+        
+        if (empty($slug)) {
+            return response()->json(['available' => false, 'message' => 'Slug is required']);
+        }
+        
+        $query = Category::where('slug', $slug);
+        if ($categoryId) {
+            $query->where('id', '!=', $categoryId);
+        }
+        
+        $exists = $query->exists();
+        
+        return response()->json([
+            'available' => !$exists,
+            'message' => $exists ? 'This slug is already taken' : 'Slug is available'
+        ]);
+    }
 }

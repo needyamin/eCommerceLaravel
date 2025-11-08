@@ -27,6 +27,20 @@
     
     <!-- Custom CSS -->
     <style>
+        /* Remove underline from all links */
+        a {
+            text-decoration: none !important;
+        }
+        a:hover {
+            text-decoration: none !important;
+        }
+        a:focus {
+            text-decoration: none !important;
+        }
+        a:visited {
+            text-decoration: none !important;
+        }
+        
         .navbar-brand {
             font-weight: 700;
             font-size: 1.5rem;

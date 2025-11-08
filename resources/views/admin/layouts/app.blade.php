@@ -12,6 +12,20 @@
     <!-- DataTables (Bootstrap 5) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.10/css/dataTables.bootstrap5.min.css" />
     <style>
+    /* Remove underline from all links */
+    a {
+        text-decoration: none !important;
+    }
+    a:hover {
+        text-decoration: none !important;
+    }
+    a:focus {
+        text-decoration: none !important;
+    }
+    a:visited {
+        text-decoration: none !important;
+    }
+    
     /* Admin DataTable Improvements */
     .card.shadow-sm {
         border: 1px solid #e9ecef;

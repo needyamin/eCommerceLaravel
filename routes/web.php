@@ -186,10 +186,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 ->firstOrFail();
         });
         Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+        Route::post('categories/check-slug', [AdminCategoryController::class, 'checkSlug'])->name('categories.check-slug');
         Route::resource('categories', AdminCategoryController::class);
         // Product helper endpoints must come before resource show route
         Route::get('products/lookup', [AdminProductController::class, 'lookup'])->name('products.lookup');
         Route::get('products/{product}/json', [AdminProductController::class, 'showJson'])->name('products.json');
+        Route::post('products/check-slug', [AdminProductController::class, 'checkSlug'])->name('products.check-slug');
         Route::resource('products', AdminProductController::class);
         Route::get('orders/create', [AdminOrderController::class, 'create'])->name('orders.create');
         Route::post('orders', [AdminOrderController::class, 'store'])->name('orders.store');

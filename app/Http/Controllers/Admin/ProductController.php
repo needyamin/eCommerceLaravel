@@ -106,4 +106,26 @@ class ProductController extends Controller
             'is_active' => (bool) $product->is_active,
         ]);
     }
+
+    public function checkSlug(Request $request)
+    {
+        $slug = $request->input('slug');
+        $productId = $request->input('product_id');
+        
+        if (empty($slug)) {
+            return response()->json(['available' => false, 'message' => 'Slug is required']);
+        }
+        
+        $query = Product::where('slug', $slug);
+        if ($productId) {
+            $query->where('id', '!=', $productId);
+        }
+        
+        $exists = $query->exists();
+        
+        return response()->json([
+            'available' => !$exists,
+            'message' => $exists ? 'This slug is already taken' : 'Slug is available'
+        ]);
+    }
 }

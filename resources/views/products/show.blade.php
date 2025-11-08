@@ -17,6 +17,22 @@
 
 @push('styles')
 <style>
+/* Admin Edit Button */
+.admin-edit-btn {
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.admin-edit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    background-color: var(--bs-primary);
+    color: white !important;
+    border-color: var(--bs-primary) !important;
+}
+.admin-edit-btn i {
+    font-size: 1rem;
+}
+
 .rating-input {
     display: flex;
     flex-direction: row;
@@ -167,7 +183,17 @@
                 </div>
 
                 <!-- Product Title -->
-                <h1 class="h2 fw-bold mb-3">{{ $product->name }}</h1>
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h1 class="h2 fw-bold mb-0">{{ $product->name }}</h1>
+                    @if(auth('admin')->check() && auth('admin')->user()->hasRole('Super Admin'))
+                        <a href="{{ route('admin.products.edit', $product->id) }}" 
+                           class="btn btn-sm btn-outline-primary admin-edit-btn" 
+                           title="Edit Product in Admin Panel"
+                           style="border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; padding: 0;">
+                            <i class="bi bi-pencil-fill"></i>
+                        </a>
+                    @endif
+                </div>
                 
                 <!-- SKU -->
                 @if($product->sku)
