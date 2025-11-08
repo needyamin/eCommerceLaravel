@@ -25,6 +25,7 @@ A comprehensive, modern eCommerce platform built with Laravel 12, featuring a be
 - **Pages System**: Customizable content pages (Help Center, Shipping Info, Returns, Contact Us) with rich text editor
 - **Wishlist**: Add products to wishlist (supports both authenticated users and guests)
 - **Responsive Design**: Mobile-first Bootstrap 5 UI (storefront) with modern components
+- **Custom Error Pages**: Beautiful, animated error pages (404, 500, 403, 401, 503, 429) with gradient backgrounds, floating animations, and helpful action buttons
 - **User Authentication**: Login, register, profile update, password change
 - **User Profile**: View orders, addresses, reviews, and coin balance
 
@@ -80,6 +81,7 @@ A comprehensive, modern eCommerce platform built with Laravel 12, featuring a be
 - **Referral System**: Shareable `/r/{code}` links; awards referrer on successful signup
 - **Rich Text Editor**: Quill editor for product descriptions and page content
 - **Live Search**: AJAX-powered real-time product search with debouncing
+- **Custom Error Pages**: Professional error pages with unique animations, gradient backgrounds, and responsive design for all HTTP error codes
 
 ## 🚀 Why Use This eCommerce System?
 
@@ -256,6 +258,7 @@ Visit `http://localhost:8000` to see your eCommerce store!
 │   │   │   ├── reviews/                # Reviews management views
 │   │   │   └── ...
 │   │   ├── pages/           # Frontend page views
+│   │   ├── errors/          # Custom error pages (404, 500, 403, 401, 503, 429)
 │   │   ├── layouts/         # Layout templates
 │   │   ├── partials/        # Partial views
 │   │   │   └── nav.blade.php           # Navigation with live search
@@ -325,6 +328,24 @@ MAIL_FROM_NAME="Your Store"
 ### Coins Configuration
 - Admin → Coin Settings: toggle coins system on/off and configure awards
 - Profile shows coin balance; admin user page allows Adjust and Reset
+
+### Custom Error Pages
+The system includes beautiful, animated custom error pages for all common HTTP errors:
+- **404 - Page Not Found**: Purple gradient with floating animations
+- **500 - Internal Server Error**: Pink/red gradient with shaking effect
+- **403 - Forbidden**: Warm gradient with bouncing shield icon
+- **401 - Unauthorized**: Blue gradient with pulsing lock icon
+- **503 - Service Unavailable**: Soft pastel gradient with spinning gear
+- **429 - Too Many Requests**: Pink gradient with countdown timer
+
+All error pages feature:
+- Animated gradient backgrounds
+- Floating decorative shapes
+- Unique icon animations per error type
+- Fully responsive design
+- Helpful action buttons (Go Home, Go Back, Login, etc.)
+
+Error pages are automatically used by Laravel when exceptions occur. Located in `resources/views/errors/`.
 
 ### Shipping Configuration
 - Admin → Shipping Settings: enable shipping, set free shipping minimum, define per‑country/city rates, and a global fallback rate

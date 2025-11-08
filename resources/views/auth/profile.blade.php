@@ -262,7 +262,6 @@
 
 @push('scripts')
 <script>
-console.log('Coins balance:', {{ isset($coinsBalance)?$coinsBalance:($user->coins_balance ?? 0) }});
 
 // Read More/Less functionality for review comments
 document.addEventListener('DOMContentLoaded', function(){

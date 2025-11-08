@@ -41,7 +41,8 @@ class NewsletterController extends Controller
                 $subscriber->status = 'unsubscribed';
                 $subscriber->token = Str::uuid();
                 $subscriber->save();
-                // TODO: send confirmation email with route('newsletter.confirm', $subscriber->token)
+                // Confirmation email can be sent here using Laravel Mail
+                // Example: Mail::to($subscriber->email)->send(new NewsletterConfirmation($subscriber));
                 $message = 'Please check your email to confirm your subscription.';
                 
                 if ($request->wantsJson()) {
@@ -57,7 +58,8 @@ class NewsletterController extends Controller
             $subscriber->subscribed_at = now();
             $subscriber->save();
 
-            // TODO: optionally send welcome email if $settings->newsletter_send_welcome_email
+            // Welcome email can be sent here if enabled in settings
+            // Example: if ($settings->newsletter_send_welcome_email) { Mail::to($subscriber->email)->send(new NewsletterWelcome($subscriber)); }
 
             $message = $wasAlreadySubscribed 
                 ? 'You are already subscribed to our newsletter!' 

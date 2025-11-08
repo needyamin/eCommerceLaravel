@@ -2,8 +2,8 @@
     "$schema": "https://getcomposer.org/schema.json",
     "name": "laravel/laravel",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "description": "Complete Laravel eCommerce System - Modern storefront with powerful admin panel, role-based access control, payment gateways, and comprehensive features",
+    "keywords": ["laravel", "ecommerce", "shopping", "cart", "admin", "php", "bootstrap", "payment", "stripe", "paypal"],
     "license": "MIT",
     "require": {
         "php": "^8.2",
