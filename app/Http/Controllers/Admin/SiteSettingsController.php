@@ -59,6 +59,11 @@ class SiteSettingsController extends Controller
             'sitemap_priority_category' => ['nullable','integer','min:1','max:10'],
             'sitemap_priority_page' => ['nullable','integer','min:1','max:10'],
             'sitemap_change_frequency' => ['nullable','string','in:always,hourly,daily,weekly,monthly,yearly,never'],
+            'google_analytics_code' => ['nullable','string'],
+            'facebook_pixel_code' => ['nullable','string'],
+            'microsoft_clarity_code' => ['nullable','string'],
+            'custom_head_code' => ['nullable','string'],
+            'custom_body_code' => ['nullable','string'],
         ]);
         $data['wishlist_enabled'] = (bool) ($request->input('wishlist_enabled') ?? false);
         $data['reviews_enabled'] = (bool) ($request->input('reviews_enabled') ?? false);

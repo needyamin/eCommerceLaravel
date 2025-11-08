@@ -25,6 +25,20 @@
     
     @stack('schema')
     
+    <!-- Tracking Codes - Head Section -->
+    @if(!empty($siteSettings->google_analytics_code))
+        {!! $siteSettings->google_analytics_code !!}
+    @endif
+    @if(!empty($siteSettings->facebook_pixel_code))
+        {!! $siteSettings->facebook_pixel_code !!}
+    @endif
+    @if(!empty($siteSettings->microsoft_clarity_code))
+        {!! $siteSettings->microsoft_clarity_code !!}
+    @endif
+    @if(!empty($siteSettings->custom_head_code))
+        {!! $siteSettings->custom_head_code !!}
+    @endif
+    
     <!-- Custom CSS -->
     <style>
         /* Remove underline from all links */
@@ -502,6 +516,11 @@
     })();
     </script>
     @stack('scripts')
+    
+    <!-- Tracking Codes - Body Section (Before closing tag) -->
+    @if(!empty($siteSettings->custom_body_code))
+        {!! $siteSettings->custom_body_code !!}
+    @endif
 </body>
 </html>
 

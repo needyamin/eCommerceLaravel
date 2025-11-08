@@ -16,7 +16,8 @@ class SiteSetting extends Model
         'schema_enabled','schema_organization_name','schema_organization_logo','schema_organization_phone',
         'schema_organization_email','schema_organization_address','schema_organization_type',
         'sitemap_enabled','sitemap_priority_home','sitemap_priority_product','sitemap_priority_category',
-        'sitemap_priority_page','sitemap_change_frequency'
+        'sitemap_priority_page','sitemap_change_frequency',
+        'google_analytics_code','facebook_pixel_code','microsoft_clarity_code','custom_head_code','custom_body_code'
     ];
 
     protected $casts = [

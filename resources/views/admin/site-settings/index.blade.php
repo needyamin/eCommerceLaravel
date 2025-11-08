@@ -155,6 +155,11 @@
               <i class="bi bi-search"></i>SEO & Sitemap
             </button>
           </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tracking-tab" data-bs-toggle="tab" data-bs-target="#tracking" type="button" role="tab" aria-controls="tracking" aria-selected="false">
+              <i class="bi bi-graph-up"></i>Tracking Codes
+            </button>
+          </li>
         </ul>
 
         <!-- Tabs Content -->
@@ -537,6 +542,69 @@
               </div>
               <small class="text-muted">Submit this URL to Google Search Console and Bing Webmaster Tools</small>
             </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tracking Codes Tab -->
+          <div class="tab-pane fade" id="tracking" role="tabpanel" aria-labelledby="tracking-tab">
+            <!-- Google Analytics -->
+            <div class="settings-section">
+              <h5><i class="bi bi-google"></i>Google Analytics</h5>
+              <div class="row g-3">
+                <div class="col-12">
+                  <label class="form-label">Google Analytics Code (gtag.js or analytics.js)</label>
+                  <textarea name="google_analytics_code" rows="6" class="form-control font-monospace small" placeholder="Paste your Google Analytics tracking code here (gtag.js or analytics.js)">{{ old('google_analytics_code', $settings->google_analytics_code) }}</textarea>
+                  <small class="text-muted">Paste your complete Google Analytics tracking code here. It will be added to the &lt;head&gt; section.</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Facebook Pixel -->
+            <div class="settings-section">
+              <h5><i class="bi bi-facebook"></i>Facebook Pixel</h5>
+              <div class="row g-3">
+                <div class="col-12">
+                  <label class="form-label">Facebook Pixel Code</label>
+                  <textarea name="facebook_pixel_code" rows="6" class="form-control font-monospace small" placeholder="Paste your Facebook Pixel tracking code here">{{ old('facebook_pixel_code', $settings->facebook_pixel_code) }}</textarea>
+                  <small class="text-muted">Paste your complete Facebook Pixel code here. It will be added to the &lt;head&gt; section.</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Microsoft Clarity -->
+            <div class="settings-section">
+              <h5><i class="bi bi-microsoft"></i>Microsoft Clarity</h5>
+              <div class="row g-3">
+                <div class="col-12">
+                  <label class="form-label">Microsoft Clarity Code</label>
+                  <textarea name="microsoft_clarity_code" rows="6" class="form-control font-monospace small" placeholder="Paste your Microsoft Clarity tracking code here">{{ old('microsoft_clarity_code', $settings->microsoft_clarity_code) }}</textarea>
+                  <small class="text-muted">Paste your complete Microsoft Clarity tracking code here. It will be added to the &lt;head&gt; section.</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Custom Head Code -->
+            <div class="settings-section">
+              <h5><i class="bi bi-code-slash"></i>Custom Head Code</h5>
+              <div class="row g-3">
+                <div class="col-12">
+                  <label class="form-label">Custom Code for &lt;head&gt; Section</label>
+                  <textarea name="custom_head_code" rows="6" class="form-control font-monospace small" placeholder="Add any custom tracking codes, meta tags, or scripts for the &lt;head&gt; section">{{ old('custom_head_code', $settings->custom_head_code) }}</textarea>
+                  <small class="text-muted">Add any custom tracking codes, meta tags, or scripts that should be placed in the &lt;head&gt; section.</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Custom Body Code -->
+            <div class="settings-section">
+              <h5><i class="bi bi-code-square"></i>Custom Body Code</h5>
+              <div class="row g-3">
+                <div class="col-12">
+                  <label class="form-label">Custom Code for &lt;body&gt; Section (Before closing tag)</label>
+                  <textarea name="custom_body_code" rows="6" class="form-control font-monospace small" placeholder="Add any custom tracking codes or scripts for the &lt;body&gt; section (before closing tag)">{{ old('custom_body_code', $settings->custom_body_code) }}</textarea>
+                  <small class="text-muted">Add any custom tracking codes or scripts that should be placed before the closing &lt;/body&gt; tag.</small>
+                </div>
               </div>
             </div>
           </div>
