@@ -3,88 +3,308 @@
 @section('title', 'New Product')
 
 @section('content')
-<div class="card">
-    <div class="card-header">
-        <h3 class="card-title m-0">New Product</h3>
-    </div>
-    <form action="{{ route('admin.products.store') }}" method="post">
-        @csrf
-        <div class="card-body">
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label class="form-label">Name</label>
-                    <input name="name" id="product_name" class="form-control" required />
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Slug</label>
-                    <input name="slug" id="product_slug" class="form-control" required />
-                    <div id="slug_error" class="text-danger small mt-1 fw-semibold" style="display: none;"></div>
-                    <div id="slug_success" class="text-success small mt-1 fw-semibold" style="display: none;"></div>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">SKU</label>
-                    <input name="sku" class="form-control" />
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Category</label>
-                    <select name="category_id" class="form-select">
-                        <option value="">None</option>
-                        @foreach($categories as $id => $name)
-                            <option value="{{ $id }}">{{ $name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Price</label>
-                    <input name="price" type="number" step="0.01" min="0" class="form-control" required />
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Compare at Price</label>
-                    <input name="compare_at_price" type="number" step="0.01" min="0" class="form-control" />
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Stock</label>
-                    <input name="stock" type="number" min="0" class="form-control" value="0" required />
-                </div>
-                <div class="col-12">
-                    <label class="form-label">Short Description</label>
-                    <textarea name="short_description" rows="2" class="form-control"></textarea>
-                </div>
-                <div class="col-12">
-                    <label class="form-label">Description</label>
-                    <textarea name="description" id="product_description" rows="6" class="form-control"></textarea>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-check mt-4">
-                        <input class="form-check-input" type="checkbox" name="is_active" id="is_active" checked />
-                        <label class="form-check-label" for="is_active"> Active </label>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-gradient-primary text-white border-0 py-3">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-plus-circle-fill me-2 fs-5"></i>
+                        <h3 class="card-title mb-0 fw-bold">Create New Product</h3>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="form-check mt-4">
-                        <input class="form-check-input" type="checkbox" name="is_featured" id="is_featured" />
-                        <label class="form-check-label" for="is_featured"> Featured </label>
+                <form action="{{ route('admin.products.store') }}" method="post">
+                    @csrf
+                    <div class="card-body p-4">
+                        <!-- Basic Information Section -->
+                        <div class="form-section mb-4">
+                            <div class="section-header mb-3">
+                                <h5 class="mb-0 fw-semibold text-primary">
+                                    <i class="bi bi-info-circle me-2"></i>Basic Information
+                                </h5>
+                                <hr class="mt-2 mb-0">
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">
+                                        <i class="bi bi-tag me-1 text-muted"></i>Product Name <span class="text-danger">*</span>
+                                    </label>
+                                    <input name="name" id="product_name" class="form-control form-control-lg" required placeholder="Enter product name" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">
+                                        <i class="bi bi-link-45deg me-1 text-muted"></i>Slug <span class="text-danger">*</span>
+                                    </label>
+                                    <input name="slug" id="product_slug" class="form-control form-control-lg" required placeholder="product-slug" />
+                                    <div id="slug_error" class="text-danger small mt-1 fw-semibold" style="display: none;"></div>
+                                    <div id="slug_success" class="text-success small mt-1 fw-semibold" style="display: none;"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">
+                                        <i class="bi bi-upc-scan me-1 text-muted"></i>SKU
+                                    </label>
+                                    <input name="sku" class="form-control form-control-lg" placeholder="Product SKU (optional)" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">
+                                        <i class="bi bi-folder me-1 text-muted"></i>Category
+                                    </label>
+                                    <select name="category_id" class="form-select form-select-lg">
+                                        <option value="">Select Category (Optional)</option>
+                                        @foreach($categories as $id => $name)
+                                            <option value="{{ $id }}">{{ $name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pricing & Inventory Section -->
+                        <div class="form-section mb-4">
+                            <div class="section-header mb-3">
+                                <h5 class="mb-0 fw-semibold text-primary">
+                                    <i class="bi bi-currency-dollar me-2"></i>Pricing & Inventory
+                                </h5>
+                                <hr class="mt-2 mb-0">
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">
+                                        <i class="bi bi-cash-stack me-1 text-muted"></i>Price <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group input-group-lg">
+                                        <span class="input-group-text bg-light">৳</span>
+                                        <input name="price" type="number" step="0.01" min="0" class="form-control" required placeholder="0.00" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">
+                                        <i class="bi bi-tag me-1 text-muted"></i>Compare at Price
+                                    </label>
+                                    <div class="input-group input-group-lg">
+                                        <span class="input-group-text bg-light">৳</span>
+                                        <input name="compare_at_price" type="number" step="0.01" min="0" class="form-control" placeholder="0.00" />
+                                    </div>
+                                    <small class="text-muted">Original price for showing discounts</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">
+                                        <i class="bi bi-box-seam me-1 text-muted"></i>Stock Quantity <span class="text-danger">*</span>
+                                    </label>
+                                    <input name="stock" type="number" min="0" class="form-control form-control-lg" value="0" required placeholder="0" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Description Section -->
+                        <div class="form-section mb-4">
+                            <div class="section-header mb-3">
+                                <h5 class="mb-0 fw-semibold text-primary">
+                                    <i class="bi bi-file-text me-2"></i>Description
+                                </h5>
+                                <hr class="mt-2 mb-0">
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">
+                                        <i class="bi bi-card-text me-1 text-muted"></i>Short Description
+                                    </label>
+                                    <textarea name="short_description" rows="3" class="form-control" placeholder="Brief description that appears in product listings..."></textarea>
+                                    <small class="text-muted">This will be shown in product cards and search results</small>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">
+                                        <i class="bi bi-file-earmark-text me-1 text-muted"></i>Full Description
+                                    </label>
+                                    <textarea name="description" id="product_description" rows="6" class="form-control" placeholder="Detailed product description..."></textarea>
+                                    <small class="text-muted">Rich text editor - format your content with headings, lists, links, and more</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Status & Options Section -->
+                        <div class="form-section mb-4">
+                            <div class="section-header mb-3">
+                                <h5 class="mb-0 fw-semibold text-primary">
+                                    <i class="bi bi-toggle-on me-2"></i>Status & Options
+                                </h5>
+                                <hr class="mt-2 mb-0">
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-check form-switch form-switch-lg p-3 border rounded bg-light">
+                                        <input class="form-check-input" type="checkbox" name="is_active" id="is_active" checked />
+                                        <label class="form-check-label fw-semibold ms-2" for="is_active">
+                                            <i class="bi bi-check-circle me-1 text-success"></i>Active Product
+                                        </label>
+                                        <small class="d-block text-muted ms-5 mt-1">Product will be visible to customers</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check form-switch form-switch-lg p-3 border rounded bg-light">
+                                        <input class="form-check-input" type="checkbox" name="is_featured" id="is_featured" />
+                                        <label class="form-check-label fw-semibold ms-2" for="is_featured">
+                                            <i class="bi bi-star me-1 text-warning"></i>Featured Product
+                                        </label>
+                                        <small class="d-block text-muted ms-5 mt-1">Show on homepage featured section</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                    <div class="card-footer bg-light border-top py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{{ route('admin.products.index') }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg px-4" id="submit_btn">
+                                <i class="bi bi-check-circle me-2"></i>Create Product
+                            </button>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
-        <div class="card-footer">
-            <button type="submit" class="btn btn-primary" id="submit_btn">Create</button>
-        </div>
-    </form>
+    </div>
 </div>
 
 @push('styles')
 <!-- Quill Editor CSS -->
 <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 <style>
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .form-section {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        border: 1px solid #e9ecef;
+    }
+    
+    .section-header h5 {
+        color: #667eea;
+        font-size: 1.1rem;
+    }
+    
+    .section-header hr {
+        border: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #667eea 0%, transparent 100%);
+        opacity: 0.3;
+    }
+    
+    .form-label {
+        color: #495057;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+    
+    .form-control, .form-select {
+        border: 1px solid #dee2e6;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    .form-control-lg, .form-select-lg {
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+    }
+    
+    .input-group-text {
+        border-color: #dee2e6;
+        color: #6c757d;
+        font-weight: 600;
+    }
+    
+    .form-check-switch-lg {
+        font-size: 1.1rem;
+    }
+    
+    .form-check-switch-lg .form-check-input {
+        width: 3rem;
+        height: 1.5rem;
+    }
+    
+    .form-check-switch-lg .form-check-label {
+        font-size: 1rem;
+    }
+    
     #product_editor {
         height: 400px;
         background: #fff;
+        border-radius: 0.375rem;
+        border: 1px solid #dee2e6;
     }
+    
     .ql-editor {
         min-height: 400px;
         font-size: 14px;
+    }
+    
+    .ql-toolbar {
+        border-top-left-radius: 0.375rem;
+        border-top-right-radius: 0.375rem;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .ql-container {
+        border-bottom-left-radius: 0.375rem;
+        border-bottom-right-radius: 0.375rem;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-outline-secondary {
+        transition: all 0.3s ease;
+    }
+    
+    .btn-outline-secondary:hover {
+        transform: translateY(-2px);
+    }
+    
+    .card {
+        border-radius: 0.75rem;
+        overflow: hidden;
+    }
+    
+    .card-header {
+        border-radius: 0 !important;
+    }
+    
+    .is-invalid {
+        border-color: #dc3545 !important;
+    }
+    
+    .is-valid {
+        border-color: #28a745 !important;
+    }
+    
+    .form-check {
+        transition: all 0.3s ease;
+    }
+    
+    .form-check:hover {
+        transform: translateX(5px);
+    }
+    
+    .form-check-input:checked {
+        background-color: #667eea;
+        border-color: #667eea;
     }
 </style>
 @endpush
@@ -272,5 +492,3 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 @endpush
 @endsection
-
-
