@@ -167,6 +167,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/login', [AdminLoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AdminLoginController::class, 'login'])->name('login.attempt');
     Route::post('/logout', [AdminLoginController::class, 'logout'])->name('logout');
+    Route::get('/captcha', [App\Http\Controllers\Admin\CaptchaController::class, 'generate'])->name('captcha');
 
     // Lightweight admin AJAX routes (auth only, no permission gate)
     Route::middleware('auth:admin')->group(function(){
@@ -203,6 +204,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('email-settings', [AdminEmailSettingsController::class, 'index'])->name('email-settings.index');
         Route::put('email-settings', [AdminEmailSettingsController::class, 'update'])->name('email-settings.update');
             Route::resource('roles', AdminRoleController::class)->except(['show']);
+            Route::get('roles/{role}/copy', [AdminRoleController::class, 'copy'])->name('roles.copy');
+            Route::post('roles/{role}/copy', [AdminRoleController::class, 'storeCopy'])->name('roles.copy.store');
             Route::resource('permissions', AdminPermissionController::class)->except(['show']);
             Route::resource('coupons', AdminCouponController::class)->except(['show']);
             Route::post('coupons/{coupon}/toggle-status', [AdminCouponController::class, 'toggleStatus'])->name('coupons.toggle-status');

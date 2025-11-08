@@ -99,7 +99,7 @@ class ProductController extends Controller
 
 	public function show(string $slug)
 	{
-		$product = Product::with(['images', 'category', 'approvedReviews.user'])->where('slug', $slug)->firstOrFail();
+		$product = Product::with(['images', 'category.parent', 'approvedReviews.user'])->where('slug', $slug)->firstOrFail();
 		$related = Product::where('category_id', $product->category_id)
 			->where('id', '!=', $product->id)
 			->latest()

@@ -2,32 +2,32 @@
     <div class="position-relative">
         <a href="{{ route('products.show', $product->slug) }}" class="text-decoration-none">
             <div class="card-img-top bg-light d-flex align-items-center justify-content-center product-image-wrapper" style="overflow: hidden;">
-                @if($product->images->count() > 0)
-                    <img src="{{ asset('storage/' . $product->images->first()->image_path) }}" 
-                         alt="{{ $product->name }}" 
+            @if($product->images->count() > 0)
+                <img src="{{ asset('storage/' . $product->images->first()->image_path) }}" 
+                     alt="{{ $product->name }}" 
                          class="img-fluid product-image" 
                          style="transition: transform 0.3s ease;">
-                @else
+            @else
                     <i class="bi bi-image text-muted" style="font-size: clamp(2rem, 5vw, 3rem);"></i>
-                @endif
-            </div>
+            @endif
+        </div>
         </a>
         
         <!-- Badges -->
         <div class="position-absolute top-0 start-0 m-2 d-flex flex-column gap-1" style="z-index: 2; max-width: calc(100% - 60px);">
-            @if($product->is_featured)
+        @if($product->is_featured)
                 <span class="badge bg-warning text-dark" style="max-width: 100%; overflow: hidden; text-overflow: ellipsis;">
-                    <i class="bi bi-star-fill me-1"></i>Featured
-                </span>
-            @endif
-            @if($product->compare_at_price && $product->compare_at_price > $product->price)
-                @php
-                    $discount = round((($product->compare_at_price - $product->price) / $product->compare_at_price) * 100);
-                @endphp
+                <i class="bi bi-star-fill me-1"></i>Featured
+            </span>
+        @endif
+        @if($product->compare_at_price && $product->compare_at_price > $product->price)
+            @php
+                $discount = round((($product->compare_at_price - $product->price) / $product->compare_at_price) * 100);
+            @endphp
                 <span class="badge bg-danger" style="max-width: 100%; overflow: hidden; text-overflow: ellipsis;">
                     <i class="bi bi-tag-fill me-1"></i>-{{ $discount }}%
-                </span>
-            @endif
+            </span>
+        @endif
         </div>
 
         <!-- Wishlist Button -->
@@ -64,7 +64,7 @@
         @if($product->short_description)
             <p class="card-text text-muted small flex-grow-1 mb-2" style="min-height: 40px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
                 {{ Str::limit($product->short_description, 75) }}
-            </p>
+        </p>
         @endif
         
         <!-- Price and Stock -->
@@ -73,7 +73,7 @@
                 <span class="h5 text-primary fw-bold mb-0">@currency($product->price)</span>
                 @if($product->compare_at_price && $product->compare_at_price > $product->price)
                     <small class="text-muted text-decoration-line-through">
-                        @currency($product->compare_at_price)
+                            @currency($product->compare_at_price)
                     </small>
                 @endif
             </div>
@@ -150,15 +150,15 @@
             @else
                 <div class="d-grid gap-2" style="min-height: 90px;">
                     <form action="{{ route('cart.add') }}" method="post" onsubmit="return addToCartAjax(event, this)" class="mb-0">
-                        @csrf
-                        <input type="hidden" name="product_id" value="{{ $product->id }}">
-                        <button class="btn btn-primary w-100 btn-custom" 
+                    @csrf
+                    <input type="hidden" name="product_id" value="{{ $product->id }}">
+                    <button class="btn btn-primary w-100 btn-custom" 
                                 {{ $product->stock <= 0 ? 'disabled' : '' }}
                                 style="min-height: 38px;">
-                            <i class="bi bi-cart-plus me-2"></i>
-                            {{ $product->stock <= 0 ? 'Out of Stock' : 'Add to Cart' }}
-                        </button>
-                    </form>
+                        <i class="bi bi-cart-plus me-2"></i>
+                        {{ $product->stock <= 0 ? 'Out of Stock' : 'Add to Cart' }}
+                    </button>
+                </form>
                 </div>
             @endif
     </div>
@@ -273,69 +273,69 @@ function addToCartAjax(e, form){
         });
     } else {
         // Fallback if button not found
-        const fd = new FormData(form);
-        fetch(form.action, {
-            method: 'POST',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value
-            },
-            body: fd
-        }).then(r=>r.json()).then(data=>{
-            if(!data || !data.success) return;
-            if(data.cart && typeof window.__updateCartCount === 'function'){
-                window.__updateCartCount(data.cart.count);
-            }
-            // Swap UI to show carted state with +/- without reload
-            const card = form.closest('.card');
-            const wrapper = document.createElement('div');
-            wrapper.className = 'd-grid gap-2';
+    const fd = new FormData(form);
+    fetch(form.action, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value
+        },
+        body: fd
+    }).then(r=>r.json()).then(data=>{
+        if(!data || !data.success) return;
+        if(data.cart && typeof window.__updateCartCount === 'function'){
+            window.__updateCartCount(data.cart.count);
+        }
+        // Swap UI to show carted state with +/- without reload
+        const card = form.closest('.card');
+        const wrapper = document.createElement('div');
+        wrapper.className = 'd-grid gap-2';
             wrapper.style.minHeight = '90px';
-            wrapper.innerHTML = `
+        wrapper.innerHTML = `
                 <div class="alert alert-success py-2 mb-0 d-flex justify-content-between align-items-center flex-wrap gap-2" data-stock="{{ (int) $product->stock }}" data-item-id="${data.item.id}">
                     <div class="d-flex align-items-center flex-shrink-0" style="min-width: 0;">
                         <i class="bi bi-check-circle me-1 flex-shrink-0"></i>
                         <span class="text-nowrap">Carted (${data.item.quantity})</span>
-                    </div>
-                    <div class="d-flex align-items-center gap-1 flex-shrink-0">
-                        <button class="btn btn-sm btn-outline-secondary" data-qty-change="-1"><i class="bi bi-dash"></i></button>
-                        <button class="btn btn-sm btn-outline-secondary" data-qty-change="1"><i class="bi bi-plus"></i></button>
-                        <button class="btn btn-sm btn-outline-danger" title="Remove from cart" data-cart-remove="${data.item.id}" data-product-id="{{ $product->id }}" data-stock="{{ (int) $product->stock }}">
-                            <i class="bi bi-x"></i>
-                        </button>
-                    </div>
                 </div>
+                    <div class="d-flex align-items-center gap-1 flex-shrink-0">
+                    <button class="btn btn-sm btn-outline-secondary" data-qty-change="-1"><i class="bi bi-dash"></i></button>
+                    <button class="btn btn-sm btn-outline-secondary" data-qty-change="1"><i class="bi bi-plus"></i></button>
+                    <button class="btn btn-sm btn-outline-danger" title="Remove from cart" data-cart-remove="${data.item.id}" data-product-id="{{ $product->id }}" data-stock="{{ (int) $product->stock }}">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+            </div>
                 <a href="{{ route('cart.index') }}" class="btn btn-outline-primary btn-custom w-100 js-view-cart-btn" style="min-height: 38px;">
-                    <i class="bi bi-cart"></i> View Cart
-                </a>
-            `;
-            form.parentNode.replaceChild(wrapper, form);
-            const changeQty = (delta)=>{
-                const itemId = data.item.id;
-                const newQty = Math.max(1, data.item.quantity + delta);
-                fetch(`{{ url('/cart/items') }}/${itemId}`, {
-                    method: 'POST',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: new URLSearchParams({ _method: 'PUT', quantity: newQty })
-                }).then(r=>r.json()).then(res=>{
-                    if(!res || !res.success) return;
-                    data.item.quantity = res.item.quantity;
+                <i class="bi bi-cart"></i> View Cart
+            </a>
+        `;
+        form.parentNode.replaceChild(wrapper, form);
+        const changeQty = (delta)=>{
+            const itemId = data.item.id;
+            const newQty = Math.max(1, data.item.quantity + delta);
+            fetch(`{{ url('/cart/items') }}/${itemId}`, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: new URLSearchParams({ _method: 'PUT', quantity: newQty })
+            }).then(r=>r.json()).then(res=>{
+                if(!res || !res.success) return;
+                data.item.quantity = res.item.quantity;
                     const cartedText = wrapper.querySelector('.alert .text-nowrap');
                     if (cartedText) {
                         cartedText.textContent = `Carted (${res.item.quantity})`;
                     }
-                    if(typeof window.__updateCartCount === 'function'){
-                        window.__updateCartCount(res.cart.count);
-                    }
-                });
-            };
-            wrapper.querySelector('[data-qty-change="-1"]').addEventListener('click', (ev)=>{ ev.preventDefault(); changeQty(-1); });
-            wrapper.querySelector('[data-qty-change="1"]').addEventListener('click', (ev)=>{ ev.preventDefault(); changeQty(1); });
+                if(typeof window.__updateCartCount === 'function'){
+                    window.__updateCartCount(res.cart.count);
+                }
+            });
+        };
+        wrapper.querySelector('[data-qty-change="-1"]').addEventListener('click', (ev)=>{ ev.preventDefault(); changeQty(-1); });
+        wrapper.querySelector('[data-qty-change="1"]').addEventListener('click', (ev)=>{ ev.preventDefault(); changeQty(1); });
         }).catch((error)=>{
             console.error('Add to cart error:', error);
         });

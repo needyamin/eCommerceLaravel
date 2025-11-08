@@ -95,6 +95,36 @@ class RoleController extends Controller
 		$role->delete();
 		return redirect()->route('admin.roles.index')->with('success', 'Role deleted');
 	}
+
+	public function copy(Role $role)
+	{
+		$routeNames = $this->adminRouteNames();
+		$permissions = Permission::where('guard_name','admin')
+			->whereNotIn('name', $routeNames)
+			->get();
+		$assigned = $role->permissions->pluck('name')->toArray();
+		return view('admin.roles.copy', compact('role', 'permissions', 'assigned', 'routeNames'));
+	}
+
+	public function storeCopy(Request $request, Role $role)
+	{
+		$validated = $request->validate([
+			'name' => 'required|string|max:255|unique:roles,name',
+		]);
+		app(PermissionRegistrar::class)->forgetCachedPermissions();
+		$newRole = Role::create(['name' => $validated['name'], 'guard_name' => 'admin']);
+		$permissionNames = array_values(array_unique($request->input('permissions', [])));
+		foreach ($permissionNames as $permName) {
+			Permission::firstOrCreate(['name' => $permName, 'guard_name' => 'admin']);
+		}
+		$newRole->permissions()->detach();
+		$permissions = Permission::where('guard_name', 'admin')
+			->whereIn('name', $permissionNames)
+			->get();
+		$newRole->syncPermissions($permissions);
+		app(PermissionRegistrar::class)->forgetCachedPermissions();
+		return redirect()->route('admin.roles.index')->with('success', 'Role copied successfully');
+	}
 }
 
 

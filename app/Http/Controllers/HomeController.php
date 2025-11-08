@@ -22,6 +22,7 @@ class HomeController extends Controller
 			->get();
 
 		$categories = Category::where('is_active', true)
+			->with('parent')
 			->latest()
 			->take(12)
 			->get();

@@ -13,7 +13,7 @@ A comprehensive, modern eCommerce platform built with Laravel 12, featuring a be
 - **Live Search**: Real-time product search with dropdown results (triggers after 3 characters, shows up to 20 products with images, prices, categories, and stock status)
 - **Shopping Cart (AJAX)**: Add to cart, inline increase/decrease, and remove without page reload; live header count
 - **Coupons**: Apply/remove coupons (AJAX) with discount reflected in totals
-- **Checkout Process**: Secure checkout with validation and order creation, email notification
+- **Checkout Process**: Secure checkout with validation and order creation, email notification; default country selection (Bangladesh)
 - **Payment Methods**: Stripe, PayPal, and Cash on Delivery (COD) - all configurable from admin panel
 - **Currency**: Default currency enforced globally via `@currency(...)` (frontend switching disabled)
 - **Coins (Loyalty Points)**: Earn coins for add‑to‑cart, order placement, COD choice, and referral sign‑ups. Balance shown on profile; admin can adjust/reset.
@@ -33,8 +33,9 @@ A comprehensive, modern eCommerce platform built with Laravel 12, featuring a be
 - **Roles/Permissions**: Spatie permissions with route‑based checks; route permissions auto-listed
 - **Administrators**: Manage admin users and assign roles (Admin → Administrators)
 - **Pages Management**: CRUD for custom pages (Help Center, Shipping Info, Returns, Contact Us) with rich text editor
-- **Reviews Management**: Approve/reject/delete product reviews; filter by status
+- **Reviews Management**: Approve/reject/delete product reviews; filter by status (server-side DataTables)
 - **Newsletter Subscribers**: Manage newsletter subscribers, toggle subscription status
+- **User Activity Tracking**: Monitor cart activity, wishlist activity (user & guest), and login sessions with server-side DataTables
 - **Site Settings**: Comprehensive settings including:
   - Basic site information (name, tagline, logo, favicon)
   - SEO settings (meta title, description, keywords)
@@ -43,6 +44,7 @@ A comprehensive, modern eCommerce platform built with Laravel 12, featuring a be
   - Feature toggles (wishlist, reviews, newsletter)
   - Review settings (enable/disable, require purchase, require approval, allow anonymous)
   - Newsletter settings (enable/disable, double opt-in, welcome email)
+  - Product display settings (mobile and desktop columns per row)
 - **Payment Gateways**: Stripe/PayPal/COD configure, enable/disable, test connection; logs
 - **Currencies**: CRUD, set default/toggle active, rates & formatting
 - **Email Settings**: Admin-managed SMTP applied at runtime
@@ -50,6 +52,9 @@ A comprehensive, modern eCommerce platform built with Laravel 12, featuring a be
 - **Shipping Settings**: Enable/disable shipping, free‑shipping threshold, per‑country/city rates (flat/percent), global fallback rate
 - **OTP Settings**: Configure email and SMS OTP settings
 - **Server-Side DataTables**: All admin tables use server-side processing for better performance with search, filters, and pagination
+- **Modern Admin UI**: Beautiful, consistent design across all admin pages with gradient headers, improved filters, and enhanced card styling
+- **Professional Login Page**: Modern glassmorphism design with animated gradient background and custom CAPTCHA security
+- **Custom CAPTCHA System**: Built-in image-based CAPTCHA on admin login for enhanced security (no third-party dependencies)
 - **Breadcrumbs**: Automatic breadcrumb navigation throughout admin panel
 
 ### 🔐 **Security & Authorization**
@@ -59,6 +64,7 @@ A comprehensive, modern eCommerce platform built with Laravel 12, featuring a be
 - **CSRF Protection**: Built-in Laravel security features
 - **Input Validation**: Comprehensive form validation and sanitization
 - **XSS Protection**: All user inputs are properly escaped
+- **Admin CAPTCHA**: Custom image-based CAPTCHA system on admin login page to prevent brute-force attacks (one-time use, case-insensitive validation)
 
 ### 📊 **Technical Features**
 - **Eloquent ORM**: Clean, expressive database interactions
@@ -205,11 +211,21 @@ Visit `http://localhost:8000` to see your eCommerce store!
 ├── app/
 │   ├── Http/Controllers/
 │   │   ├── Admin/           # Admin panel controllers
-│   │   │   ├── DataTableController.php  # Server-side DataTables handler
+│   │   │   ├── DataTableController.php  # Server-side DataTables handler (supports all resources)
 │   │   │   ├── PageController.php       # Pages CRUD
-│   │   │   ├── ReviewController.php     # Reviews management
+│   │   │   ├── ReviewController.php      # Reviews management
+│   │   │   ├── UserActivityController.php # Cart/Wishlist/Session activity tracking
+│   │   │   ├── CaptchaController.php     # Custom CAPTCHA generation and validation
 │   │   │   └── ...                     # Other admin controllers
 │   │   ├── Api/             # API controllers
+│   │   │   ├── AuthController.php       # Authentication (register, login, logout, profile)
+│   │   │   ├── ProductController.php    # Products listing and details
+│   │   │   ├── CategoryController.php  # Categories listing
+│   │   │   ├── CartController.php      # Cart operations (guest & auth)
+│   │   │   ├── OrderController.php     # Orders and checkout
+│   │   │   ├── WishlistController.php  # Wishlist operations (guest & auth)
+│   │   │   ├── AddressController.php   # User addresses CRUD
+│   │   │   └── CouponController.php    # Coupon validation and application
 │   │   ├── ProductController.php        # Frontend products (includes search)
 │   │   ├── ReviewController.php          # Frontend reviews
 │   │   ├── PageController.php            # Frontend pages
@@ -319,24 +335,48 @@ MAIL_FROM_NAME="Your Store"
 
 ## 📚 API Documentation
 
-The system includes RESTful API endpoints for mobile app integration:
+The system includes comprehensive RESTful API endpoints for mobile app integration. All endpoints return JSON responses with proper error handling and validation.
 
 ### Authentication
-- `POST /api/register` - User registration
-- `POST /api/login` - User login
-- `POST /api/logout` - User logout
+- `POST /api/register` - User registration (email or phone required)
+- `POST /api/login` - User login (email or phone)
+- `POST /api/logout` - User logout (authenticated)
+- `GET /api/user` - Get current user profile (authenticated)
+- `PUT /api/user` - Update user profile (authenticated)
+- `PUT /api/user/password` - Change password (authenticated)
 
 ### Products & Categories
-- `GET /api/categories` - List categories
-- `GET /api/products` - List products
-- `GET /api/products/{id}` - Get product details
+- `GET /api/categories` - List all categories
+- `GET /api/categories/{slug}` - Get category details
+- `GET /api/products` - List products (supports `q`, `category_id`, `per_page` query parameters)
+- `GET /api/products/{slug}` - Get product details
 - `GET /products/search?q={query}` - Live search (returns JSON, requires 3+ characters)
 
+### Addresses
+- `GET /api/user/addresses` - List user addresses (authenticated)
+- `POST /api/user/addresses` - Create new address (authenticated)
+- `PUT /api/user/addresses/{address}` - Update address (authenticated)
+- `DELETE /api/user/addresses/{address}` - Delete address (authenticated)
+- `POST /api/user/addresses/{address}/set-default` - Set default address (authenticated)
+
+### Coupons
+- `POST /api/coupons/apply` - Apply coupon code
+- `POST /api/coupons/remove` - Remove applied coupon
+- `POST /api/coupons/validate` - Validate coupon code
+
 ### Cart & Orders
-- `GET /api/cart` - Get user cart
-- `POST /api/cart/add` - Add item to cart
-- `GET /api/orders` - List user orders
+- `GET /api/cart` - Get user cart (supports guest sessions via `X-Cart-Session` header)
+- `POST /api/cart/add` - Add item to cart (with stock validation)
+- `PUT /api/cart/items/{item}` - Update cart item quantity (with stock validation)
+- `DELETE /api/cart/items/{item}` - Remove item from cart
+- `POST /api/cart/clear` - Clear entire cart
+- `GET /api/orders` - List user orders (paginated)
 - `GET /api/orders/{id}` - Get order details
+- `POST /api/checkout` - Place order (requires authentication)
+
+### Wishlist
+- `POST /api/wishlist/toggle` - Add/remove product from wishlist (supports guest sessions via `X-Wishlist-Session` header)
+- `GET /api/wishlist` - Get user wishlist items (authenticated only)
 
 ### Reviews
 - `POST /products/{product}/reviews` - Submit a product review (authenticated)
@@ -352,6 +392,24 @@ The system includes RESTful API endpoints for mobile app integration:
 
 ### OTP
 - Email & SMS OTP request/verify endpoints (UI available under `/otp/email` and `/otp/sms`)
+
+### API Authentication
+Most endpoints require authentication using Laravel Sanctum. Include the token in the Authorization header:
+```
+Authorization: Bearer {your_token_here}
+```
+
+### Guest Sessions
+For guest users, include session headers:
+- `X-Cart-Session`: For cart operations (server returns if missing)
+- `X-Wishlist-Session`: For wishlist operations (server returns if missing)
+
+### API Response Format
+All API responses follow a consistent format:
+- **Success responses**: Return data directly or in a `data` field
+- **Error responses**: Include `message` and optional `errors` or `error` fields
+- **Pagination**: Uses `data` array and `meta` object with pagination info
+- **Money fields**: Return both `amount` (float) and `formatted` (string) for currency values
 
 ## 🧪 Testing
 

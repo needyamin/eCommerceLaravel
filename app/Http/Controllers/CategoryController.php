@@ -10,7 +10,7 @@ class CategoryController extends Controller
 {
 	public function show(string $slug)
 	{
-		$category = Category::where('slug', $slug)->firstOrFail();
+		$category = Category::with('parent')->where('slug', $slug)->firstOrFail();
 		$products = Product::where('category_id', $category->id)
 			->where('is_active', true)
 			->latest()

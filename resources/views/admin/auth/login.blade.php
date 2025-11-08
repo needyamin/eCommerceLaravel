@@ -317,6 +317,64 @@
 			opacity: 0.7;
 			cursor: not-allowed;
 		}
+		
+		/* CAPTCHA Styles */
+		.captcha-wrapper {
+			margin-top: 8px;
+		}
+		
+		.captcha-image-wrapper {
+			position: relative;
+			display: inline-block;
+			border: 2px solid #e9ecef;
+			border-radius: 12px;
+			overflow: hidden;
+			background: #f8f9fa;
+			padding: 8px;
+		}
+		
+		.captcha-image {
+			display: block;
+			height: 50px;
+			width: auto;
+		}
+		
+		.captcha-refresh {
+			position: absolute;
+			top: 4px;
+			right: 4px;
+			background: rgba(102, 126, 234, 0.9);
+			border: none;
+			border-radius: 6px;
+			width: 32px;
+			height: 32px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			cursor: pointer;
+			color: white;
+			transition: all 0.3s ease;
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+		}
+		
+		.captcha-refresh:hover {
+			background: rgba(102, 126, 234, 1);
+			transform: rotate(180deg);
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+		}
+		
+		.captcha-refresh:active {
+			transform: rotate(180deg) scale(0.95);
+		}
+		
+		.captcha-refresh i {
+			font-size: 16px;
+		}
+		
+		.form-control[type="text"][name="captcha"] {
+			text-align: center;
+			font-size: 18px;
+		}
 		</style>
 	</head>
 	<body>
@@ -365,6 +423,36 @@
 							/>
 							<i class="bi bi-lock-fill input-icon"></i>
 						</div>
+					</div>
+					
+					<div class="form-group">
+						<label class="form-label">Security Code</label>
+						<div class="captcha-wrapper">
+							<div class="captcha-image-wrapper">
+								<img src="{{ route('admin.captcha') }}?t={{ time() }}{{ $errors->has('captcha') ? '&new=1' : '' }}" alt="CAPTCHA" id="captchaImage" class="captcha-image" />
+								<button type="button" class="captcha-refresh" id="refreshCaptcha" title="Refresh CAPTCHA">
+									<i class="bi bi-arrow-clockwise"></i>
+								</button>
+							</div>
+							<div class="input-wrapper" style="margin-top: 12px;">
+								<input 
+									type="text" 
+									name="captcha" 
+									class="form-control" 
+									placeholder="Enter the code above" 
+									required 
+									autocomplete="off"
+									maxlength="5"
+									style="text-transform: uppercase; letter-spacing: 2px; font-weight: 600;"
+								/>
+								<i class="bi bi-shield-check input-icon"></i>
+							</div>
+						</div>
+						@error('captcha')
+							<div class="text-danger mt-2" style="font-size: 13px;">
+								<i class="bi bi-exclamation-circle me-1"></i>{{ $message }}
+							</div>
+						@enderror
 					</div>
 					
 					<div class="form-options">
@@ -418,6 +506,20 @@
 			}
 		`;
 		document.head.appendChild(style);
+		
+		// CAPTCHA refresh functionality
+		document.getElementById('refreshCaptcha').addEventListener('click', function() {
+			const captchaImage = document.getElementById('captchaImage');
+			captchaImage.src = '{{ route("admin.captcha") }}?t=' + new Date().getTime() + '&new=1';
+		});
+		
+		// Auto-uppercase CAPTCHA input
+		const captchaInput = document.querySelector('input[name="captcha"]');
+		if (captchaInput) {
+			captchaInput.addEventListener('input', function(e) {
+				e.target.value = e.target.value.toUpperCase().replace(/[^0-9A-Z]/g, '');
+			});
+		}
 		</script>
 	</body>
 </html>
