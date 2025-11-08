@@ -85,6 +85,8 @@
     
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
     (function(){
         if(window.__wishlistListenerBound) return; // avoid duplicates
@@ -174,6 +176,89 @@
                     alertBox.parentNode.replaceChild(formNode, alertBox);
                 }
             }).catch(()=>{});
+        });
+    })();
+    
+    // Newsletter subscription with AJAX and SweetAlert
+    (function(){
+        if(window.__newsletterListenerBound) return;
+        window.__newsletterListenerBound = true;
+        
+        document.addEventListener('submit', function(e){
+            const form = e.target.closest('.newsletter-subscribe-form');
+            if(!form) return;
+            
+            e.preventDefault();
+            
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const emailInput = form.querySelector('input[type="email"]');
+            const originalBtnText = submitBtn.innerHTML;
+            
+            // Disable button and show loading
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Subscribing...';
+            
+            const formData = new FormData(form);
+            
+            fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value
+                },
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.message || 'Request failed');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Re-enable button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+                
+                // Clear email input on success
+                if (data.success) {
+                    emailInput.value = '';
+                }
+                
+                // Show SweetAlert
+                if (window.Swal) {
+                    Swal.fire({
+                        icon: data.success ? 'success' : 'error',
+                        title: data.success ? 'Success!' : 'Error',
+                        text: data.message || (data.success ? 'Subscribed successfully!' : 'Something went wrong.'),
+                        confirmButtonColor: '#667eea',
+                        timer: data.success ? 3000 : null,
+                        timerProgressBar: data.success
+                    });
+                } else {
+                    // Fallback to alert if SweetAlert not loaded
+                    alert(data.message || (data.success ? 'Subscribed successfully!' : 'Something went wrong.'));
+                }
+            })
+            .catch(error => {
+                // Re-enable button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+                
+                // Show error with SweetAlert
+                if (window.Swal) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: error.message || 'An error occurred. Please try again.',
+                        confirmButtonColor: '#667eea'
+                    });
+                } else {
+                    alert(error.message || 'An error occurred. Please try again.');
+                }
+            });
         });
     })();
     </script>

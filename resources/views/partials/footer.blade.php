@@ -127,7 +127,7 @@
                 <div class="col-lg-2 col-md-6 mb-4">
                     <h6 class="text-white mb-3">Newsletter</h6>
                     <p class="text-light mb-3">Subscribe for updates and special offers!</p>
-                    <form class="d-flex" action="{{ route('newsletter.subscribe') }}" method="post">
+                    <form class="d-flex newsletter-subscribe-form" action="{{ route('newsletter.subscribe') }}" method="post">
                         @csrf
                         <input type="hidden" name="source" value="footer">
                         <input type="email" name="email" class="form-control form-control-sm me-2" placeholder="Your email" required>

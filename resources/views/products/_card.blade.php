@@ -149,68 +149,175 @@
 <script>
 function addToCartAjax(e, form){
     e.preventDefault();
-    const fd = new FormData(form);
-    fetch(form.action, {
-        method: 'POST',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'Accept': 'application/json',
-            'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value
-        },
-        body: fd
-    }).then(r=>r.json()).then(data=>{
-        if(!data || !data.success) return;
-        if(data.cart && typeof window.__updateCartCount === 'function'){
-            window.__updateCartCount(data.cart.count);
-        }
-        // Swap UI to show carted state with +/- without reload
-        const card = form.closest('.card');
-        const wrapper = document.createElement('div');
-        wrapper.className = 'd-grid gap-2';
-        wrapper.innerHTML = `
-            <div class="alert alert-success py-2 mb-2 d-flex justify-content-between align-items-center">
-                <div>
-                    <i class="bi bi-check-circle me-1"></i>
-                    Carted (${data.item.quantity} ${data.item.quantity>1?'items':'item'})
-                </div>
-                <div class="d-flex align-items-center gap-1">
-                    <button class="btn btn-sm btn-outline-secondary" data-qty-change="-1"><i class="bi bi-dash"></i></button>
-                    <button class="btn btn-sm btn-outline-secondary" data-qty-change="1"><i class="bi bi-plus"></i></button>
-                    <button class="btn btn-sm btn-outline-danger" title="Remove from cart" data-cart-remove="${data.item.id}" data-product-id="{{ $product->id }}" data-stock="{{ (int) $product->stock }}">
-                        <i class="bi bi-x"></i>
-                    </button>
-                </div>
-            </div>
-            <a href="{{ route('cart.index') }}" class="btn btn-outline-primary btn-custom w-100 js-view-cart-btn">
-                <i class="bi bi-cart"></i> View Cart
-            </a>
-        `;
-        form.parentNode.replaceChild(wrapper, form);
-        const changeQty = (delta)=>{
-            const itemId = data.item.id;
-            const newQty = Math.max(1, data.item.quantity + delta);
-            fetch(`{{ url('/cart/items') }}/${itemId}`, {
-                method: 'POST',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: new URLSearchParams({ _method: 'PUT', quantity: newQty })
-            }).then(r=>r.json()).then(res=>{
-                if(!res || !res.success) return;
-                data.item.quantity = res.item.quantity;
-                wrapper.querySelector('.alert').firstElementChild.innerHTML = `
-                    <i class=\"bi bi-check-circle me-1\"></i>
-                    Carted (${res.item.quantity} ${res.item.quantity>1?'items':'item'})`;
-                if(typeof window.__updateCartCount === 'function'){
-                    window.__updateCartCount(res.cart.count);
-                }
-            });
+    
+    // Prevent multiple simultaneous requests
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (submitBtn && submitBtn.disabled) {
+        return false;
+    }
+    
+    // Disable button and show loading state
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Adding...';
+        
+        // Re-enable button on error
+        const reEnableButton = () => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
         };
-        wrapper.querySelector('[data-qty-change="-1"]').addEventListener('click', (ev)=>{ ev.preventDefault(); changeQty(-1); });
-        wrapper.querySelector('[data-qty-change="1"]').addEventListener('click', (ev)=>{ ev.preventDefault(); changeQty(1); });
-    }).catch(()=>{});
+        
+        const fd = new FormData(form);
+        fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value
+            },
+            body: fd
+        }).then(r=>{
+            if (!r.ok) {
+                return r.json().then(err => {
+                    throw new Error(err.message || 'Network response was not ok');
+                }).catch(() => {
+                    throw new Error('Network response was not ok');
+                });
+            }
+            return r.json();
+        }).then(data=>{
+            if(!data || !data.success) {
+                reEnableButton();
+                // Show error message if available
+                if(data && data.message) {
+                    alert(data.message);
+                }
+                return;
+            }
+            if(data.cart && typeof window.__updateCartCount === 'function'){
+                window.__updateCartCount(data.cart.count);
+            }
+            // Swap UI to show carted state with +/- without reload
+            const card = form.closest('.card');
+            const wrapper = document.createElement('div');
+            wrapper.className = 'd-grid gap-2';
+            wrapper.innerHTML = `
+                <div class="alert alert-success py-2 mb-2 d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="bi bi-check-circle me-1"></i>
+                        Carted (${data.item.quantity} ${data.item.quantity>1?'items':'item'})
+                    </div>
+                    <div class="d-flex align-items-center gap-1">
+                        <button class="btn btn-sm btn-outline-secondary" data-qty-change="-1"><i class="bi bi-dash"></i></button>
+                        <button class="btn btn-sm btn-outline-secondary" data-qty-change="1"><i class="bi bi-plus"></i></button>
+                        <button class="btn btn-sm btn-outline-danger" title="Remove from cart" data-cart-remove="${data.item.id}" data-product-id="{{ $product->id }}" data-stock="{{ (int) $product->stock }}">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                </div>
+                <a href="{{ route('cart.index') }}" class="btn btn-outline-primary btn-custom w-100 js-view-cart-btn">
+                    <i class="bi bi-cart"></i> View Cart
+                </a>
+            `;
+            form.parentNode.replaceChild(wrapper, form);
+            const changeQty = (delta)=>{
+                const itemId = data.item.id;
+                const newQty = Math.max(1, data.item.quantity + delta);
+                fetch(`{{ url('/cart/items') }}/${itemId}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: new URLSearchParams({ _method: 'PUT', quantity: newQty })
+                }).then(r=>r.json()).then(res=>{
+                    if(!res || !res.success) return;
+                    data.item.quantity = res.item.quantity;
+                    wrapper.querySelector('.alert').firstElementChild.innerHTML = `
+                        <i class=\"bi bi-check-circle me-1\"></i>
+                        Carted (${res.item.quantity} ${res.item.quantity>1?'items':'item'})`;
+                    if(typeof window.__updateCartCount === 'function'){
+                        window.__updateCartCount(res.cart.count);
+                    }
+                });
+            };
+            wrapper.querySelector('[data-qty-change="-1"]').addEventListener('click', (ev)=>{ ev.preventDefault(); changeQty(-1); });
+            wrapper.querySelector('[data-qty-change="1"]').addEventListener('click', (ev)=>{ ev.preventDefault(); changeQty(1); });
+        }).catch((error)=>{
+            console.error('Add to cart error:', error);
+            reEnableButton();
+            // Show user-friendly error message
+            alert(error.message || 'Failed to add item to cart. Please try again.');
+        });
+    } else {
+        // Fallback if button not found
+        const fd = new FormData(form);
+        fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value
+            },
+            body: fd
+        }).then(r=>r.json()).then(data=>{
+            if(!data || !data.success) return;
+            if(data.cart && typeof window.__updateCartCount === 'function'){
+                window.__updateCartCount(data.cart.count);
+            }
+            // Swap UI to show carted state with +/- without reload
+            const card = form.closest('.card');
+            const wrapper = document.createElement('div');
+            wrapper.className = 'd-grid gap-2';
+            wrapper.innerHTML = `
+                <div class="alert alert-success py-2 mb-2 d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="bi bi-check-circle me-1"></i>
+                        Carted (${data.item.quantity} ${data.item.quantity>1?'items':'item'})
+                    </div>
+                    <div class="d-flex align-items-center gap-1">
+                        <button class="btn btn-sm btn-outline-secondary" data-qty-change="-1"><i class="bi bi-dash"></i></button>
+                        <button class="btn btn-sm btn-outline-secondary" data-qty-change="1"><i class="bi bi-plus"></i></button>
+                        <button class="btn btn-sm btn-outline-danger" title="Remove from cart" data-cart-remove="${data.item.id}" data-product-id="{{ $product->id }}" data-stock="{{ (int) $product->stock }}">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                </div>
+                <a href="{{ route('cart.index') }}" class="btn btn-outline-primary btn-custom w-100 js-view-cart-btn">
+                    <i class="bi bi-cart"></i> View Cart
+                </a>
+            `;
+            form.parentNode.replaceChild(wrapper, form);
+            const changeQty = (delta)=>{
+                const itemId = data.item.id;
+                const newQty = Math.max(1, data.item.quantity + delta);
+                fetch(`{{ url('/cart/items') }}/${itemId}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: new URLSearchParams({ _method: 'PUT', quantity: newQty })
+                }).then(r=>r.json()).then(res=>{
+                    if(!res || !res.success) return;
+                    data.item.quantity = res.item.quantity;
+                    wrapper.querySelector('.alert').firstElementChild.innerHTML = `
+                        <i class=\"bi bi-check-circle me-1\"></i>
+                        Carted (${res.item.quantity} ${res.item.quantity>1?'items':'item'})`;
+                    if(typeof window.__updateCartCount === 'function'){
+                        window.__updateCartCount(res.cart.count);
+                    }
+                });
+            };
+            wrapper.querySelector('[data-qty-change="-1"]').addEventListener('click', (ev)=>{ ev.preventDefault(); changeQty(-1); });
+            wrapper.querySelector('[data-qty-change="1"]').addEventListener('click', (ev)=>{ ev.preventDefault(); changeQty(1); });
+        }).catch((error)=>{
+            console.error('Add to cart error:', error);
+        });
+    }
     return false;
 }
 

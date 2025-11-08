@@ -468,56 +468,151 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 function pdAddToCartAjax(e, form){
     e.preventDefault();
-    const fd = new FormData(form);
-    fetch(form.action, {
-        method: 'POST',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'Accept': 'application/json',
-            'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value
-        },
-        body: fd
-    }).then(r=>r.json()).then(data=>{
-        if(!data || !data.success) return;
-        if(data.cart && typeof window.__updateCartCount === 'function'){
-            window.__updateCartCount(data.cart.count);
-        }
-        const container = form.closest('.card');
-        const wrap = document.createElement('div');
-        wrap.className = 'alert alert-success d-flex justify-content-between align-items-center mb-3';
-        wrap.setAttribute('data-stock', form.dataset.stock || '999999');
-        wrap.setAttribute('data-item-id', data.item.id);
-        wrap.innerHTML = `
-            <div><i class="bi bi-check-circle me-2"></i>Carted (${data.item.quantity} ${data.item.quantity>1?'items':'item'})</div>
-            <div class="d-flex align-items-center gap-2">
-                <form action="${window.location.origin}/cart/items/${data.item.id}" method="post" class="d-inline" onsubmit="return pdUpdateCartItemAjax(event, this)">
-                    <input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').getAttribute('content')}">
-                    <input type="hidden" name="_method" value="PUT">
-                    <input type="hidden" name="quantity" value="${Math.max(1, data.item.quantity - 1)}">
-                    <button class="btn btn-sm btn-outline-secondary" ${data.item.quantity<=1?'disabled':''}><i class="bi bi-dash"></i></button>
-                </form>
-                <form action="${window.location.origin}/cart/items/${data.item.id}" method="post" class="d-inline" onsubmit="return pdUpdateCartItemAjax(event, this)">
-                    <input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').getAttribute('content')}">
-                    <input type="hidden" name="_method" value="PUT">
-                    <input type="hidden" name="quantity" value="${data.item.quantity + 1}">
-                    <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-plus"></i></button>
-                </form>
-                <button class="btn btn-sm btn-outline-danger" title="Remove from cart" onclick="return pdRemoveCartItemAjax(event, ${data.item.id}, ${form.querySelector('input[name=product_id]').value}, ${parseInt(form.dataset.stock || '0', 10)});">
-                    <i class="bi bi-x"></i>
-                </button>
-            </div>`;
-        form.parentNode.replaceChild(wrap, form);
-        // Insert View Cart button right after the alert (ensure only one)
-        try {
-            const cardBody = wrap.closest('.card-body') || wrap.parentNode;
-            cardBody && cardBody.querySelectorAll('.js-view-cart-btn').forEach(n=>n.remove());
-            const viewBtn = document.createElement('a');
-            viewBtn.href = "{{ route('cart.index') }}";
-            viewBtn.className = 'btn btn-outline-primary btn-custom mb-4 w-100 js-view-cart-btn';
-            viewBtn.innerHTML = '<i class="bi bi-cart"></i> View Cart';
-            wrap.insertAdjacentElement('afterend', viewBtn);
-        } catch(_) {}
-    }).catch(()=>{});
+    
+    // Prevent multiple simultaneous requests
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (submitBtn && submitBtn.disabled) {
+        return false;
+    }
+    
+    // Disable button and show loading state
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Adding...';
+        
+        // Re-enable button on error
+        const reEnableButton = () => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        };
+        
+        const fd = new FormData(form);
+        fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value
+            },
+            body: fd
+        }).then(r=>{
+            if (!r.ok) {
+                return r.json().then(err => {
+                    throw new Error(err.message || 'Network response was not ok');
+                }).catch(() => {
+                    throw new Error('Network response was not ok');
+                });
+            }
+            return r.json();
+        }).then(data=>{
+            if(!data || !data.success) {
+                reEnableButton();
+                // Show error message if available
+                if(data && data.message) {
+                    alert(data.message);
+                }
+                return;
+            }
+            if(data.cart && typeof window.__updateCartCount === 'function'){
+                window.__updateCartCount(data.cart.count);
+            }
+            const container = form.closest('.card');
+            const wrap = document.createElement('div');
+            wrap.className = 'alert alert-success d-flex justify-content-between align-items-center mb-3';
+            wrap.setAttribute('data-stock', form.dataset.stock || '999999');
+            wrap.setAttribute('data-item-id', data.item.id);
+            wrap.innerHTML = `
+                <div><i class="bi bi-check-circle me-2"></i>Carted (${data.item.quantity} ${data.item.quantity>1?'items':'item'})</div>
+                <div class="d-flex align-items-center gap-2">
+                    <form action="${window.location.origin}/cart/items/${data.item.id}" method="post" class="d-inline" onsubmit="return pdUpdateCartItemAjax(event, this)">
+                        <input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').getAttribute('content')}">
+                        <input type="hidden" name="_method" value="PUT">
+                        <input type="hidden" name="quantity" value="${Math.max(1, data.item.quantity - 1)}">
+                        <button class="btn btn-sm btn-outline-secondary" ${data.item.quantity<=1?'disabled':''}><i class="bi bi-dash"></i></button>
+                    </form>
+                    <form action="${window.location.origin}/cart/items/${data.item.id}" method="post" class="d-inline" onsubmit="return pdUpdateCartItemAjax(event, this)">
+                        <input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').getAttribute('content')}">
+                        <input type="hidden" name="_method" value="PUT">
+                        <input type="hidden" name="quantity" value="${data.item.quantity + 1}">
+                        <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-plus"></i></button>
+                    </form>
+                    <button class="btn btn-sm btn-outline-danger" title="Remove from cart" onclick="return pdRemoveCartItemAjax(event, ${data.item.id}, ${form.querySelector('input[name=product_id]').value}, ${parseInt(form.dataset.stock || '0', 10)});">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>`;
+            form.parentNode.replaceChild(wrap, form);
+            // Insert View Cart button right after the alert (ensure only one)
+            try {
+                const cardBody = wrap.closest('.card-body') || wrap.parentNode;
+                cardBody && cardBody.querySelectorAll('.js-view-cart-btn').forEach(n=>n.remove());
+                const viewBtn = document.createElement('a');
+                viewBtn.href = "{{ route('cart.index') }}";
+                viewBtn.className = 'btn btn-outline-primary btn-custom mb-4 w-100 js-view-cart-btn';
+                viewBtn.innerHTML = '<i class="bi bi-cart"></i> View Cart';
+                wrap.insertAdjacentElement('afterend', viewBtn);
+            } catch(_) {}
+        }).catch((error)=>{
+            console.error('Add to cart error:', error);
+            reEnableButton();
+            // Show user-friendly error message
+            alert(error.message || 'Failed to add item to cart. Please try again.');
+        });
+    } else {
+        // Fallback if button not found
+        const fd = new FormData(form);
+        fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value
+            },
+            body: fd
+        }).then(r=>r.json()).then(data=>{
+            if(!data || !data.success) return;
+            if(data.cart && typeof window.__updateCartCount === 'function'){
+                window.__updateCartCount(data.cart.count);
+            }
+            const container = form.closest('.card');
+            const wrap = document.createElement('div');
+            wrap.className = 'alert alert-success d-flex justify-content-between align-items-center mb-3';
+            wrap.setAttribute('data-stock', form.dataset.stock || '999999');
+            wrap.setAttribute('data-item-id', data.item.id);
+            wrap.innerHTML = `
+                <div><i class="bi bi-check-circle me-2"></i>Carted (${data.item.quantity} ${data.item.quantity>1?'items':'item'})</div>
+                <div class="d-flex align-items-center gap-2">
+                    <form action="${window.location.origin}/cart/items/${data.item.id}" method="post" class="d-inline" onsubmit="return pdUpdateCartItemAjax(event, this)">
+                        <input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').getAttribute('content')}">
+                        <input type="hidden" name="_method" value="PUT">
+                        <input type="hidden" name="quantity" value="${Math.max(1, data.item.quantity - 1)}">
+                        <button class="btn btn-sm btn-outline-secondary" ${data.item.quantity<=1?'disabled':''}><i class="bi bi-dash"></i></button>
+                    </form>
+                    <form action="${window.location.origin}/cart/items/${data.item.id}" method="post" class="d-inline" onsubmit="return pdUpdateCartItemAjax(event, this)">
+                        <input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').getAttribute('content')}">
+                        <input type="hidden" name="_method" value="PUT">
+                        <input type="hidden" name="quantity" value="${data.item.quantity + 1}">
+                        <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-plus"></i></button>
+                    </form>
+                    <button class="btn btn-sm btn-outline-danger" title="Remove from cart" onclick="return pdRemoveCartItemAjax(event, ${data.item.id}, ${form.querySelector('input[name=product_id]').value}, ${parseInt(form.dataset.stock || '0', 10)});">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>`;
+            form.parentNode.replaceChild(wrap, form);
+            // Insert View Cart button right after the alert (ensure only one)
+            try {
+                const cardBody = wrap.closest('.card-body') || wrap.parentNode;
+                cardBody && cardBody.querySelectorAll('.js-view-cart-btn').forEach(n=>n.remove());
+                const viewBtn = document.createElement('a');
+                viewBtn.href = "{{ route('cart.index') }}";
+                viewBtn.className = 'btn btn-outline-primary btn-custom mb-4 w-100 js-view-cart-btn';
+                viewBtn.innerHTML = '<i class="bi bi-cart"></i> View Cart';
+                wrap.insertAdjacentElement('afterend', viewBtn);
+            } catch(_) {}
+        }).catch((error)=>{
+            console.error('Add to cart error:', error);
+        });
+    }
     return false;
 }
 

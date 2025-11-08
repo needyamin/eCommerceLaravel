@@ -27,6 +27,34 @@ use App\Http\Controllers\OTP\SmsOtpController;
 use App\Http\Controllers\OTP\EmailOtpController;
 use App\Http\Controllers\WishlistController;
 
+
+
+// Storage file serving fallback (for Windows environments where symlinks may not work)
+Route::get('/storage/{path}', function ($path) {
+    $filePath = storage_path('app/public/' . $path);
+    
+    if (!file_exists($filePath) || !is_file($filePath)) {
+        abort(404);
+    }
+    
+    // Security: prevent directory traversal
+    $realPath = realpath($filePath);
+    $storagePath = realpath(storage_path('app/public'));
+    
+    if (!$realPath || strpos($realPath, $storagePath) !== 0) {
+        abort(403);
+    }
+    
+    $mimeType = mime_content_type($filePath) ?: 'application/octet-stream';
+    
+    return response()->file($filePath, [
+        'Content-Type' => $mimeType,
+        'Cache-Control' => 'public, max-age=31536000',
+    ]);
+})->where('path', '.*')->name('storage.serve');
+
+
+
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Currency switch (locked to admin only)

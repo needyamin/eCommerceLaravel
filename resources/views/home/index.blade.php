@@ -189,7 +189,7 @@
                 <p class="mb-0">Subscribe to our newsletter and never miss out on great deals!</p>
             </div>
             <div class="col-lg-6">
-                    <form class="d-flex" action="{{ route('newsletter.subscribe') }}" method="post">
+                    <form class="d-flex newsletter-subscribe-form" action="{{ route('newsletter.subscribe') }}" method="post">
                         @csrf
                         <input type="hidden" name="source" value="home">
                         <input type="email" name="email" class="form-control me-2" placeholder="Enter your email" required>
