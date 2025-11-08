@@ -48,4 +48,12 @@ class CurrencyManager
         $value = $amount * (float) $c->rate;
         return round($value, $precision);
     }
+
+    /**
+     * Get the default currency (alias for current() for backward compatibility)
+     */
+    public static function getDefaultCurrency(): ?Currency
+    {
+        return Currency::default();
+    }
 }

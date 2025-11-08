@@ -2,6 +2,19 @@
 
 @section('title', $product->name)
 
+@push('schema')
+@if(isset($productSchema) && !empty($productSchema))
+<script type="application/ld+json">
+{!! json_encode($productSchema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
+</script>
+@endif
+@if(isset($breadcrumbs) && !empty($breadcrumbs))
+<script type="application/ld+json">
+{!! json_encode($breadcrumbs, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
+</script>
+@endif
+@endpush
+
 @push('styles')
 <style>
 .rating-input {

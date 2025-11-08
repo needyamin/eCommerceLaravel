@@ -264,6 +264,26 @@ class DatabaseSeeder extends Seeder
                 'product_display_columns_desktop' => 3,
             ]);
         }
+        
+        // Set default Schema.org settings
+        if (is_null($siteSettings->schema_enabled)) {
+            $siteSettings->update([
+                'schema_enabled' => true,
+                'schema_organization_type' => 'Store',
+            ]);
+        }
+        
+        // Set default Sitemap settings
+        if (is_null($siteSettings->sitemap_enabled)) {
+            $siteSettings->update([
+                'sitemap_enabled' => true,
+                'sitemap_priority_home' => 10,
+                'sitemap_priority_product' => 8,
+                'sitemap_priority_category' => 7,
+                'sitemap_priority_page' => 6,
+                'sitemap_change_frequency' => 'weekly',
+            ]);
+        }
 
         // Pages
         $this->call(PageSeeder::class);

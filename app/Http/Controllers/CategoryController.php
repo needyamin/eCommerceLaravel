@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Category;
 use App\Models\Product;
+use App\Support\SchemaOrgHelper;
 
 class CategoryController extends Controller
 {
@@ -15,6 +16,15 @@ class CategoryController extends Controller
 			->where('is_active', true)
 			->latest()
 			->paginate(12);
-		return view('categories.show', compact('category', 'products'));
+
+		// Schema.org
+		$schemaHelper = new SchemaOrgHelper();
+		$collectionSchema = $schemaHelper->collectionPage($category);
+		$breadcrumbs = $schemaHelper->breadcrumbs([
+			['name' => 'Home', 'url' => route('home')],
+			['name' => $category->name, 'url' => route('categories.show', $category->slug)],
+		]);
+
+		return view('categories.show', compact('category', 'products', 'collectionSchema', 'breadcrumbs'));
 	}
 }

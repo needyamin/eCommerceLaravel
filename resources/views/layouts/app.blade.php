@@ -22,6 +22,9 @@
     @if(!empty($siteSettings->favicon_url))
     <link rel="icon" href="{{ $siteSettings->favicon_url }}" />
     @endif
+    
+    @stack('schema')
+    
     <!-- Custom CSS -->
     <style>
         .navbar-brand {

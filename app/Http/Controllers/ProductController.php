@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\SiteSetting;
 use App\Models\ProductReview;
+use App\Support\SchemaOrgHelper;
 use Illuminate\Support\Str;
 
 class ProductController extends Controller
@@ -115,8 +116,17 @@ class ProductController extends Controller
 				->where('user_id', auth()->id())
 				->exists();
 		}
+
+		// Schema.org
+		$schemaHelper = new SchemaOrgHelper();
+		$productSchema = $schemaHelper->product($product);
+		$breadcrumbs = $schemaHelper->breadcrumbs([
+			['name' => 'Home', 'url' => route('home')],
+			['name' => $product->category->name ?? 'Products', 'url' => $product->category ? route('categories.show', $product->category->slug) : route('products.index')],
+			['name' => $product->name, 'url' => route('products.show', $product->slug)],
+		]);
 		
-		return view('products.show', compact('product', 'related', 'settings', 'userCanReview', 'userHasReviewed'));
+		return view('products.show', compact('product', 'related', 'settings', 'userCanReview', 'userHasReviewed', 'productSchema', 'breadcrumbs'));
 	}
 
 	public function search(Request $request)

@@ -12,7 +12,11 @@ class SiteSetting extends Model
         'wishlist_enabled','social_facebook','social_twitter','social_instagram','social_linkedin',
         'reviews_enabled','reviews_require_purchase','reviews_require_approval','reviews_allow_anonymous',
         'newsletter_enabled','newsletter_double_opt_in','newsletter_send_welcome_email',
-        'product_display_columns_mobile','product_display_columns_desktop'
+        'product_display_columns_mobile','product_display_columns_desktop',
+        'schema_enabled','schema_organization_name','schema_organization_logo','schema_organization_phone',
+        'schema_organization_email','schema_organization_address','schema_organization_type',
+        'sitemap_enabled','sitemap_priority_home','sitemap_priority_product','sitemap_priority_category',
+        'sitemap_priority_page','sitemap_change_frequency'
     ];
 
     protected $casts = [
@@ -24,6 +28,8 @@ class SiteSetting extends Model
         'newsletter_enabled' => 'boolean',
         'newsletter_double_opt_in' => 'boolean',
         'newsletter_send_welcome_email' => 'boolean',
+        'schema_enabled' => 'boolean',
+        'sitemap_enabled' => 'boolean',
     ];
 
     public static function get(): self

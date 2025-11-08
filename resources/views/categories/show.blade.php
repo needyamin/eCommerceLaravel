@@ -2,6 +2,19 @@
 
 @section('title', $category->name)
 
+@push('schema')
+@if(isset($collectionSchema) && !empty($collectionSchema))
+<script type="application/ld+json">
+{!! json_encode($collectionSchema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
+</script>
+@endif
+@if(isset($breadcrumbs) && !empty($breadcrumbs))
+<script type="application/ld+json">
+{!! json_encode($breadcrumbs, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
+</script>
+@endif
+@endpush
+
 @section('content')
 <div class="container py-5">
     @if($category->parent)

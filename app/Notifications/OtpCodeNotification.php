@@ -30,13 +30,18 @@ class OtpCodeNotification extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
+        $siteSettings = \App\Models\SiteSetting::get();
+        
         return (new MailMessage)
-            ->subject('Your OTP Code')
-            ->greeting('Hello!')
-            ->line('Use the OTP below to complete your verification:')
-            ->line("OTP: {$this->code}")
-            ->line('This code expires at ' . $this->expiresAt->format('H:i'))
-            ->line('If you did not request this, please ignore this email.');
+            ->subject('Your Verification Code')
+            ->view('emails.otp.code', [
+                'code' => $this->code,
+                'expiresAt' => $this->expiresAt,
+                'siteName' => $siteSettings->site_name ?? 'eCommerce Store',
+                'siteUrl' => url('/'),
+                'siteSettings' => $siteSettings,
+                'headerSubtitle' => 'Verification Code',
+            ]);
     }
 
     /**

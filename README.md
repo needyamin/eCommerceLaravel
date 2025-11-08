@@ -26,6 +26,8 @@ A comprehensive, modern eCommerce platform built with Laravel 12, featuring a be
 - **Wishlist**: Add products to wishlist (supports both authenticated users and guests)
 - **Responsive Design**: Mobile-first Bootstrap 5 UI (storefront) with modern components
 - **Custom Error Pages**: Beautiful, animated error pages (404, 500, 403, 401, 503, 429) with gradient backgrounds, floating animations, and helpful action buttons
+- **Schema.org Structured Data**: Automatic JSON-LD structured data for better SEO, rich snippets, and search engine understanding (Organization, Product, Reviews, Breadcrumbs)
+- **Dynamic Sitemap**: Auto-generated XML sitemap at `/sitemap.xml` for search engines with configurable priorities and change frequencies
 - **User Authentication**: Login, register, profile update, password change
 - **User Profile**: View orders, addresses, reviews, and coin balance
 
@@ -49,6 +51,8 @@ A comprehensive, modern eCommerce platform built with Laravel 12, featuring a be
   - Review settings (enable/disable, require purchase, require approval, allow anonymous)
   - Newsletter settings (enable/disable, double opt-in, welcome email)
   - Product display settings (mobile and desktop columns per row)
+  - Schema.org settings (enable/disable, organization details, structured data configuration)
+  - Sitemap settings (enable/disable, priorities, change frequencies)
 - **Payment Gateways**: Stripe/PayPal/COD configure, enable/disable, test connection; logs
 - **Currencies**: CRUD, set default/toggle active, rates & formatting
 - **Email Settings**: Admin-managed SMTP applied at runtime
@@ -82,6 +86,8 @@ A comprehensive, modern eCommerce platform built with Laravel 12, featuring a be
 - **Rich Text Editor**: Quill editor for product descriptions and page content
 - **Live Search**: AJAX-powered real-time product search with debouncing
 - **Custom Error Pages**: Professional error pages with unique animations, gradient backgrounds, and responsive design for all HTTP error codes
+- **Schema.org Structured Data**: JSON-LD structured data for SEO optimization, rich snippets, and enhanced search engine visibility
+- **Dynamic Sitemap**: XML sitemap generation for search engine indexing with admin-configurable priorities and update frequencies
 
 ## 🚀 Why Use This eCommerce System?
 
@@ -234,12 +240,17 @@ Visit `http://localhost:8000` to see your eCommerce store!
 │   │   ├── ProductController.php        # Frontend products (includes search)
 │   │   ├── ReviewController.php          # Frontend reviews
 │   │   ├── PageController.php            # Frontend pages
-│   │   └── NewsletterController.php     # Newsletter subscription
+│   │   ├── NewsletterController.php     # Newsletter subscription
+│   │   └── SitemapController.php        # Dynamic sitemap.xml generation
 │   ├── Models/              # Eloquent models
 │   │   ├── ProductReview.php            # Product reviews model
 │   │   ├── Page.php                     # Pages model
 │   │   └── ...
 │   └── Providers/           # Service providers
+│   └── Support/             # Helper classes
+│       ├── SchemaOrgHelper.php         # Schema.org structured data generator
+│       ├── CurrencyManager.php         # Currency management
+│       └── ...
 ├── database/
 │   ├── migrations/          # Database schema
 │   │   ├── create_product_reviews_table.php
@@ -297,6 +308,8 @@ Configure all site-wide settings from Admin → Site Settings:
 - **Feature Toggles**: Enable/disable wishlist, reviews, newsletter
 - **Review Settings**: Control review requirements (purchase, approval, anonymous)
 - **Newsletter Settings**: Configure double opt-in and welcome emails
+- **Schema.org Settings**: Enable/disable structured data, configure organization details (name, logo, phone, email, address, type)
+- **Sitemap Settings**: Enable/disable sitemap, configure priorities (1-10) for homepage/products/categories/pages, set change frequency
 
 ### Pages Management
 Create and manage custom pages from Admin → Pages:
@@ -346,6 +359,43 @@ All error pages feature:
 - Helpful action buttons (Go Home, Go Back, Login, etc.)
 
 Error pages are automatically used by Laravel when exceptions occur. Located in `resources/views/errors/`.
+
+### Schema.org Structured Data
+The system automatically adds Schema.org JSON-LD structured data to improve SEO and enable rich snippets in search results:
+
+- **Homepage**: Organization schema (with social links) and WebSite schema (with search action)
+- **Product Pages**: Product schema with offers, reviews, ratings, aggregate ratings, and breadcrumbs
+- **Category Pages**: CollectionPage schema and breadcrumbs
+- **All Pages**: Breadcrumb navigation schema
+
+**Features**:
+- JSON-LD format (Google's recommended format)
+- Product reviews and aggregate ratings included
+- Currency-aware pricing
+- Organization information with contact details
+- Social media links in organization schema
+- Search action for website schema
+
+**Configuration**: Admin → Site Settings → Schema.org Settings
+- Enable/disable Schema.org
+- Set organization name, logo, phone, email, address
+- Choose organization type (Store, LocalBusiness, Organization, Corporation)
+
+### Sitemap Configuration
+The system generates a dynamic XML sitemap at `/sitemap.xml` for search engines:
+
+- **Automatic Generation**: Includes all active products, categories, and pages
+- **Configurable Priorities**: Set priority (1-10) for homepage, products, categories, and pages
+- **Change Frequency**: Configure how often content is updated (always, hourly, daily, weekly, monthly, yearly, never)
+- **SEO Optimized**: Proper XML format with lastmod dates
+
+**Configuration**: Admin → Site Settings → Sitemap Settings
+- Enable/disable sitemap generation
+- Set priorities for different content types
+- Configure change frequency
+- Direct link to view sitemap
+
+**Usage**: Submit `/sitemap.xml` to Google Search Console and Bing Webmaster Tools for better indexing.
 
 ### Shipping Configuration
 - Admin → Shipping Settings: enable shipping, set free shipping minimum, define per‑country/city rates, and a global fallback rate
@@ -408,6 +458,9 @@ The system includes comprehensive RESTful API endpoints for mobile app integrati
 
 ### Pages
 - `GET /page/{slug}` - View a custom page
+
+### Sitemap
+- `GET /sitemap.xml` - Dynamic XML sitemap for search engines (includes all active products, categories, and pages)
 
 ### Newsletter
 - `POST /newsletter/subscribe` - Subscribe to newsletter

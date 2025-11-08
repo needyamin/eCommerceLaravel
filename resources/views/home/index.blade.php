@@ -2,6 +2,19 @@
 
 @section('title', 'Home')
 
+@push('schema')
+@if(isset($organizationSchema) && !empty($organizationSchema))
+<script type="application/ld+json">
+{!! json_encode($organizationSchema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
+</script>
+@endif
+@if(isset($websiteSchema) && !empty($websiteSchema))
+<script type="application/ld+json">
+{!! json_encode($websiteSchema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
+</script>
+@endif
+@endpush
+
 @section('content')
 <!-- Hero Section -->
 <section class="hero-section py-5">

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
+use App\Support\SchemaOrgHelper;
 
 class HomeController extends Controller
 {
@@ -27,6 +28,10 @@ class HomeController extends Controller
 			->take(12)
 			->get();
 
-		return view('home.index', compact('featuredProducts', 'latestProducts', 'categories'));
+		$schemaHelper = new SchemaOrgHelper();
+		$organizationSchema = $schemaHelper->organization();
+		$websiteSchema = $schemaHelper->website();
+
+		return view('home.index', compact('featuredProducts', 'latestProducts', 'categories', 'organizationSchema', 'websiteSchema'));
 	}
 }

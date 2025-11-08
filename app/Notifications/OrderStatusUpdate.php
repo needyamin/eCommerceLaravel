@@ -8,15 +8,17 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use App\Models\Order;
 
-class OrderConfirmation extends Notification implements ShouldQueue
+class OrderStatusUpdate extends Notification implements ShouldQueue
 {
     use Queueable;
 
     protected $order;
+    protected $message;
 
-    public function __construct(Order $order)
+    public function __construct(Order $order, ?string $message = null)
     {
         $this->order = $order;
+        $this->message = $message;
     }
 
     public function via($notifiable)
@@ -29,18 +31,16 @@ class OrderConfirmation extends Notification implements ShouldQueue
         $siteSettings = \App\Models\SiteSetting::get();
         $currency = \App\Support\CurrencyManager::getDefaultCurrency();
         
-        // Load order items for email
-        $this->order->load('items');
-        
-        return (new \Illuminate\Notifications\Messages\MailMessage)
-            ->subject('Order Confirmation - ' . $this->order->number)
-            ->view('emails.orders.confirmation', [
+        return (new MailMessage)
+            ->subject('Order Status Update - ' . $this->order->number)
+            ->view('emails.orders.status-update', [
                 'order' => $this->order,
+                'message' => $this->message,
                 'siteName' => $siteSettings->site_name ?? 'eCommerce Store',
                 'siteUrl' => url('/'),
                 'currency' => $currency ? $currency->symbol : '৳',
                 'siteSettings' => $siteSettings,
-                'headerSubtitle' => 'Order Confirmation',
+                'headerSubtitle' => 'Order Status Update',
             ]);
     }
 
@@ -49,7 +49,8 @@ class OrderConfirmation extends Notification implements ShouldQueue
         return [
             'order_id' => $this->order->id,
             'order_number' => $this->order->number,
-            'total' => $this->order->grand_total,
+            'status' => $this->order->status,
         ];
     }
 }
+

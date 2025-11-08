@@ -46,6 +46,19 @@ class SiteSettingsController extends Controller
             'social_linkedin' => ['nullable','string','max:255'],
             'product_display_columns_mobile' => ['nullable','integer','min:1','max:4'],
             'product_display_columns_desktop' => ['nullable','integer','min:1','max:6'],
+            'schema_enabled' => ['nullable','boolean'],
+            'schema_organization_name' => ['nullable','string','max:255'],
+            'schema_organization_logo' => ['nullable','string','max:500'],
+            'schema_organization_phone' => ['nullable','string','max:50'],
+            'schema_organization_email' => ['nullable','email','max:255'],
+            'schema_organization_address' => ['nullable','string','max:500'],
+            'schema_organization_type' => ['nullable','string','max:100'],
+            'sitemap_enabled' => ['nullable','boolean'],
+            'sitemap_priority_home' => ['nullable','integer','min:1','max:10'],
+            'sitemap_priority_product' => ['nullable','integer','min:1','max:10'],
+            'sitemap_priority_category' => ['nullable','integer','min:1','max:10'],
+            'sitemap_priority_page' => ['nullable','integer','min:1','max:10'],
+            'sitemap_change_frequency' => ['nullable','string','in:always,hourly,daily,weekly,monthly,yearly,never'],
         ]);
         $data['wishlist_enabled'] = (bool) ($request->input('wishlist_enabled') ?? false);
         $data['reviews_enabled'] = (bool) ($request->input('reviews_enabled') ?? false);
@@ -57,6 +70,13 @@ class SiteSettingsController extends Controller
         $data['newsletter_send_welcome_email'] = (bool) ($request->input('newsletter_send_welcome_email') ?? false);
         $data['product_display_columns_mobile'] = (int) ($request->input('product_display_columns_mobile') ?? 2);
         $data['product_display_columns_desktop'] = (int) ($request->input('product_display_columns_desktop') ?? 3);
+        $data['schema_enabled'] = (bool) ($request->input('schema_enabled') ?? true);
+        $data['sitemap_enabled'] = (bool) ($request->input('sitemap_enabled') ?? true);
+        $data['sitemap_priority_home'] = (int) ($request->input('sitemap_priority_home') ?? 10);
+        $data['sitemap_priority_product'] = (int) ($request->input('sitemap_priority_product') ?? 8);
+        $data['sitemap_priority_category'] = (int) ($request->input('sitemap_priority_category') ?? 7);
+        $data['sitemap_priority_page'] = (int) ($request->input('sitemap_priority_page') ?? 6);
+        $data['sitemap_change_frequency'] = $request->input('sitemap_change_frequency') ?? 'weekly';
         $settings = SiteSetting::get();
         $settings->update($data);
         return back()->with('success','Site settings updated.');
