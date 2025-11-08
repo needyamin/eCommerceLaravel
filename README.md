@@ -6,6 +6,9 @@ A comprehensive, modern eCommerce platform built with Laravel 12, featuring a be
 ![PHP](https://img.shields.io/badge/PHP-8.3+-blue.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 
+
+<img width="1920" height="2136" alt="Image" src="https://github.com/user-attachments/assets/94ea9511-55c5-4a86-8769-f1405d0fffe2" />
+
 ## ✨ Features
 
 ### 🛍️ **Storefront**
