@@ -3,61 +3,49 @@
 @section('title', 'Cart Activity')
 
 @section('content')
-<div class="container-fluid">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h3 mb-0"><i class="bi bi-cart-plus me-2"></i>Cart Activity</h1>
-  </div>
-
-  <div class="card shadow-sm">
-    <div class="card-body p-0">
-      <div class="table-responsive">
-        <table class="table table-striped align-middle mb-0">
-          <thead>
-            <tr>
-              <th>User</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Product</th>
-              <th>Quantity</th>
-              <th>Added At</th>
-            </tr>
-          </thead>
-          <tbody>
-            @forelse($items as $item)
-              <tr>
-                <td>
-                  @php $user = optional($item->cart->user); @endphp
-                  {{ $user->name ?? '—' }}
-                  @if(empty($user->email) && empty($user->phone))
-                    <span class="badge bg-secondary ms-1">Guest</span>
-                  @endif
-                </td>
-                <td>{{ $user->email ?? '—' }}</td>
-                <td>{{ $user->phone ?? '—' }}</td>
-                <td>
-                  @if($item->product)
-                    <a href="{{ route('products.show', $item->product->slug) }}" target="_blank">{{ $item->product->name }}</a>
-                  @else
-                    <span class="text-muted">(deleted product)</span>
-                  @endif
-                </td>
-                <td>{{ (int) $item->quantity }}</td>
-                <td>{{ $item->created_at->format('Y-m-d H:i') }}</td>
-              </tr>
-            @empty
-              <tr>
-                <td colspan="5" class="text-center text-muted py-4">No cart activity found.</td>
-              </tr>
-            @endforelse
-          </tbody>
-        </table>
-      </div>
+<div class="card shadow-sm">
+    <div class="card-header bg-white border-bottom">
+        <h3 class="card-title mb-0 fw-semibold"><i class="bi bi-cart-plus me-2"></i>Cart Activity</h3>
     </div>
-    @if($items->hasPages())
-      <div class="card-footer">{{ $items->links() }}</div>
-    @endif
-  </div>
+    <div class="card-body p-3">
+        <div class="table-responsive">
+            <table id="cartsTable" class="table table-striped align-middle mb-0" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Added At</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    $('#cartsTable').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: { url: '{{ route('admin.datatables', 'carts') }}' },
+        columns: [
+            { data: 'user', name: 'user', orderable: true, searchable: false },
+            { data: 'email', name: 'email', orderable: true, searchable: false },
+            { data: 'phone', name: 'phone', orderable: true, searchable: false },
+            { data: 'product', name: 'product', orderable: true, searchable: false },
+            { data: 'quantity', name: 'quantity', orderable: true, searchable: false, className: 'text-center' },
+            { data: 'created_at', name: 'created_at', orderable: true, searchable: false },
+        ],
+        order: [[5, 'desc']],
+    });
+});
+</script>
+@endpush
 @endsection
 
 

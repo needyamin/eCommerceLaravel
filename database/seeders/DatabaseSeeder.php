@@ -256,6 +256,14 @@ class DatabaseSeeder extends Seeder
                 'newsletter_send_welcome_email' => true,
             ]);
         }
+        
+        // Set default product display columns settings
+        if (is_null($siteSettings->product_display_columns_mobile) || is_null($siteSettings->product_display_columns_desktop)) {
+            $siteSettings->update([
+                'product_display_columns_mobile' => 2,
+                'product_display_columns_desktop' => 3,
+            ]);
+        }
 
         // Pages
         $this->call(PageSeeder::class);

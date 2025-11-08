@@ -146,9 +146,33 @@
                 <p class="lead text-muted">Handpicked products just for you</p>
             </div>
         </div>
-        <div class="row g-4">
+        @php
+            $settings = \App\Models\SiteSetting::get();
+            $mobileCols = (int) ($settings->product_display_columns_mobile ?? 2);
+            $desktopCols = (int) ($settings->product_display_columns_desktop ?? 3);
+            
+            // Calculate Bootstrap column classes
+            $mobileColClass = match($mobileCols) {
+                1 => 'col-12',
+                2 => 'col-6',
+                3 => 'col-4',
+                default => 'col-6',
+            };
+            
+            $desktopColClass = match($desktopCols) {
+                2 => 'col-lg-6',
+                3 => 'col-lg-4',
+                4 => 'col-lg-3',
+                5 => 'col-lg-2',
+                6 => 'col-lg-2',
+                default => 'col-lg-4',
+            };
+            
+            $colClass = $mobileColClass . ' ' . $desktopColClass;
+        @endphp
+        <div class="row g-4" style="--desktop-cols: {{ $desktopCols }};">
             @foreach($featuredProducts as $product)
-                <div class="col-lg-3 col-md-6">
+                <div class="{{ $colClass }}">
                     @include('products._card', ['product' => $product])
                 </div>
             @endforeach
@@ -170,15 +194,109 @@
                 <p class="lead text-muted">Fresh arrivals in our store</p>
             </div>
         </div>
-        <div class="row g-4">
+        @php
+            $settings = \App\Models\SiteSetting::get();
+            $mobileCols = (int) ($settings->product_display_columns_mobile ?? 2);
+            $desktopCols = (int) ($settings->product_display_columns_desktop ?? 3);
+            
+            // Calculate Bootstrap column classes
+            $mobileColClass = match($mobileCols) {
+                1 => 'col-12',
+                2 => 'col-6',
+                3 => 'col-4',
+                default => 'col-6',
+            };
+            
+            $desktopColClass = match($desktopCols) {
+                2 => 'col-lg-6',
+                3 => 'col-lg-4',
+                4 => 'col-lg-3',
+                5 => 'col-lg-2',
+                6 => 'col-lg-2',
+                default => 'col-lg-4',
+            };
+            
+            $colClass = $mobileColClass . ' ' . $desktopColClass;
+        @endphp
+        <div class="row g-4" style="--desktop-cols: {{ $desktopCols }};">
             @foreach($latestProducts as $product)
-                <div class="col-lg-3 col-md-6">
+                <div class="{{ $colClass }}">
                     @include('products._card', ['product' => $product])
                 </div>
             @endforeach
         </div>
     </div>
 </section>
+
+<style>
+/* Product Cards Responsive - Same as products/index */
+.product-card {
+    position: relative;
+}
+.product-image-wrapper {
+    min-height: 180px;
+    max-height: 280px;
+}
+.product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.product-card .card-title a {
+    font-size: clamp(0.875rem, 1.5vw, 1rem);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-word;
+}
+.product-card .badge {
+    font-size: clamp(0.65rem, 1.2vw, 0.75rem);
+    padding: 0.35rem 0.6rem;
+    white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.product-card .wishlist-toggle {
+    width: clamp(32px, 4vw, 38px) !important;
+    height: clamp(32px, 4vw, 38px) !important;
+    font-size: clamp(0.9rem, 1.5vw, 1rem);
+}
+.product-card .h5 {
+    font-size: clamp(1rem, 2vw, 1.25rem);
+}
+.product-card .card-text {
+    font-size: clamp(0.75rem, 1.2vw, 0.875rem);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.product-card .btn {
+    font-size: clamp(0.8rem, 1.3vw, 0.9rem);
+    white-space: nowrap;
+}
+@media (max-width: 767.98px) {
+    .product-image-wrapper {
+        min-height: 160px;
+        max-height: 220px;
+    }
+    .product-card .card-title a {
+        font-size: 0.9rem;
+    }
+    .product-card .badge {
+        font-size: 0.7rem;
+        padding: 0.3rem 0.5rem;
+    }
+    .product-card .wishlist-toggle {
+        width: 34px !important;
+        height: 34px !important;
+        font-size: 0.9rem;
+    }
+}
+</style>
 
 <!-- Newsletter Section -->
     <section class="py-5 bg-primary text-white">

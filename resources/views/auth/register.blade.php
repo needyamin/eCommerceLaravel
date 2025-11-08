@@ -14,6 +14,32 @@
                         <p class="text-muted">Join us today and start shopping!</p>
                     </div>
 
+                    @if(session('referral_success'))
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="bi bi-check-circle me-2"></i>{{ session('referral_success') }}
+                            @if(isset($referrerName))
+                                <br><small>Referred by: <strong>{{ $referrerName }}</strong></small>
+                            @endif
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
+
+                    @if(session('referral_error'))
+                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle me-2"></i>{{ session('referral_error') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
+
+                    @if(isset($referralCode) && $referralCode)
+                        <div class="alert alert-info mb-3">
+                            <i class="bi bi-gift me-2"></i><strong>Referral Code Active:</strong> {{ $referralCode }}
+                            @if(isset($referrerName))
+                                <br><small>Referred by: <strong>{{ $referrerName }}</strong></small>
+                            @endif
+                        </div>
+                    @endif
+
                     <form method="POST" action="{{ route('register') }}">
                         @csrf
                         

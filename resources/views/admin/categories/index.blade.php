@@ -3,19 +3,25 @@
 @section('title', 'Categories')
 
 @section('content')
-<div class="card">
-    <div class="card-header d-flex flex-wrap gap-2 justify-content-between align-items-center">
-        <h3 class="card-title m-0">Categories</h3>
-        <div class="d-flex gap-2 align-items-center ms-auto">
-            <select id="filter_cat_active" class="form-select form-select-sm" style="min-width: 140px;">
-                <option value="">All Status</option>
-                <option value="1">Active</option>
-                <option value="0">Inactive</option>
-            </select>
-            <a href="{{ route('admin.categories.create') }}" class="btn btn-primary btn-sm">New Category</a>
+<div class="card shadow-sm">
+    <div class="card-header bg-white border-bottom">
+        <div class="d-flex flex-wrap gap-3 justify-content-between align-items-center">
+            <h3 class="card-title mb-0 fw-semibold">Categories</h3>
+            <div class="d-flex gap-2 align-items-center flex-wrap">
+                <div class="filter-group">
+                    <select id="filter_cat_active" class="form-select form-select-sm filter-select">
+                        <option value="">All Status</option>
+                        <option value="1">Active</option>
+                        <option value="0">Inactive</option>
+                    </select>
+                </div>
+                <a href="{{ route('admin.categories.create') }}" class="btn btn-primary btn-sm">
+                    <i class="bi bi-plus-circle me-1"></i>New Category
+                </a>
+            </div>
         </div>
     </div>
-    <div class="card-body p-0">
+    <div class="card-body p-3">
         <div class="table-responsive">
             <table id="categoriesTable" class="table table-striped mb-0 align-middle" style="width:100%">
                 <thead>

@@ -295,26 +295,48 @@
     document.addEventListener('DOMContentLoaded', function(){
         function updateCartCount(count){
             const badge = document.querySelector('.cart-count-badge');
-            if(!badge){ return; }
-            if(count > 0){
-                badge.textContent = count;
-                badge.classList.remove('d-none');
-            } else {
-                badge.textContent = '';
-                badge.classList.add('d-none');
+            if(badge){
+                if(count > 0){
+                    badge.textContent = count;
+                    badge.classList.remove('d-none');
+                } else {
+                    badge.textContent = '';
+                    badge.classList.add('d-none');
+                }
+            }
+            // Update mobile badge
+            const mobileBadge = document.querySelector('.cart-count-badge-mobile');
+            if(mobileBadge){
+                if(count > 0){
+                    mobileBadge.textContent = count > 9 ? '9+' : count;
+                    mobileBadge.style.display = 'flex';
+                } else {
+                    mobileBadge.style.display = 'none';
+                }
             }
         }
         window.__updateCartCount = updateCartCount;
 
         function updateWishlistCount(count){
             const badge = document.querySelector('.wishlist-count-badge');
-            if(!badge){ return; }
-            if(count > 0){
-                badge.textContent = count;
-                badge.classList.remove('d-none');
-            } else {
-                badge.textContent = '';
-                badge.classList.add('d-none');
+            if(badge){
+                if(count > 0){
+                    badge.textContent = count;
+                    badge.classList.remove('d-none');
+                } else {
+                    badge.textContent = '';
+                    badge.classList.add('d-none');
+                }
+            }
+            // Update mobile badge
+            const mobileBadge = document.querySelector('.wishlist-count-badge-mobile');
+            if(mobileBadge){
+                if(count > 0){
+                    mobileBadge.textContent = count > 9 ? '9+' : count;
+                    mobileBadge.style.display = 'flex';
+                } else {
+                    mobileBadge.style.display = 'none';
+                }
             }
         }
         window.__updateWishlistCount = updateWishlistCount;

@@ -74,8 +74,18 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
 Route::post('/register', [AuthController::class, 'register']);
 Route::get('/r/{code}', function ($code) {
-    session(['referral_code' => $code]);
-    return redirect()->route('register');
+    // Normalize referral code to uppercase
+    $normalizedCode = strtoupper(trim($code));
+    
+    // Validate that the referral code exists
+    $referrer = \App\Models\User::where('referral_code', $normalizedCode)->first();
+    
+    if ($referrer) {
+        session(['referral_code' => $normalizedCode, 'referrer_name' => $referrer->name]);
+        return redirect()->route('register')->with('referral_success', 'Referral code applied! You will earn bonus coins when you sign up.');
+    } else {
+        return redirect()->route('register')->with('referral_error', 'Invalid referral code. You can still register without it.');
+    }
 })->name('referral');
 Route::get('/r', function () {
     return redirect()->route('register');

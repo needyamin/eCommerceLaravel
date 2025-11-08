@@ -6,8 +6,8 @@
 <style>
 .rating-input {
     display: flex;
-    flex-direction: row-reverse;
-    justify-content: flex-end;
+    flex-direction: row;
+    justify-content: flex-start;
     gap: 5px;
 }
 .rating-input input[type="radio"] {
@@ -19,13 +19,49 @@
     font-size: 1.5rem;
     transition: color 0.2s;
 }
-.rating-input input[type="radio"]:checked ~ label,
+/* Hover effect: highlight hovered label and all labels before it */
 .rating-input label:hover,
 .rating-input label:hover ~ label {
     color: #ffc107;
 }
-.rating-input input[type="radio"]:checked ~ label {
+/* Active/checked state - handled by JavaScript */
+.rating-input label.active {
     color: #ffc107;
+}
+.review-comment {
+    line-height: 1.6;
+}
+.read-more-btn {
+    font-size: 0.875rem;
+    text-decoration: none;
+    margin-left: 5px;
+    vertical-align: baseline;
+}
+.read-more-btn:hover {
+    text-decoration: underline;
+}
+.review-text-short,
+.review-text-full {
+    word-wrap: break-word;
+}
+.product-details {
+    padding: 1.5rem;
+}
+@media (min-width: 992px) {
+    .product-details {
+        padding: 2rem;
+    }
+}
+.product-details h1 {
+    line-height: 1.2;
+    color: #2c3e50;
+}
+.product-details .badge {
+    padding: 0.5rem 0.75rem;
+    font-weight: 500;
+}
+.product-details .border-bottom {
+    border-color: #e9ecef !important;
 }
 </style>
 @endpush
@@ -90,73 +126,69 @@
 
         <!-- Product Details -->
         <div class="col-lg-6">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
+            <div class="product-details">
+                <!-- Badges -->
+                <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
+                    @if($product->is_featured)
+                        <span class="badge bg-warning text-dark">
+                            <i class="bi bi-star-fill me-1"></i>Featured
+                        </span>
+                    @endif
+                    @if($product->compare_at_price && $product->compare_at_price > $product->price)
+                        @php
+                            $discount = round((($product->compare_at_price - $product->price) / $product->compare_at_price) * 100);
+                        @endphp
+                        <span class="badge bg-danger">
+                            <i class="bi bi-tag-fill me-1"></i>-{{ $discount }}% OFF
+                        </span>
+                    @endif
+                    @if($product->stock > 0)
+                        <span class="badge bg-success">
+                            <i class="bi bi-check-circle me-1"></i>In Stock
+                        </span>
+                    @else
+                        <span class="badge bg-danger">
+                            <i class="bi bi-x-circle me-1"></i>Out of Stock
+                        </span>
+                    @endif
+                </div>
+
+                <!-- Product Title -->
+                <h1 class="h2 fw-bold mb-3">{{ $product->name }}</h1>
+                
+                <!-- SKU -->
+                @if($product->sku)
                     <div class="mb-3">
-                        @if($product->is_featured)
-                            <span class="badge bg-warning text-dark mb-2">
-                                <i class="bi bi-star-fill me-1"></i>Featured Product
+                        <span class="text-muted small">
+                            <i class="bi bi-upc me-1"></i>SKU: <strong class="text-dark">{{ $product->sku }}</strong>
+                        </span>
+                    </div>
+                @endif
+
+                <!-- Price Section -->
+                <div class="mb-4 pb-3 border-bottom">
+                    <div class="d-flex align-items-baseline gap-3 mb-2">
+                        <span class="h3 text-primary fw-bold mb-0">@currency($product->price)</span>
+                        @if($product->compare_at_price && $product->compare_at_price > $product->price)
+                            <span class="text-muted text-decoration-line-through fs-5">
+                                @currency($product->compare_at_price)
                             </span>
                         @endif
-                        @if($product->compare_at_price && $product->compare_at_price > $product->price)
-                            @php
-                                $discount = round((($product->compare_at_price - $product->price) / $product->compare_at_price) * 100);
-                            @endphp
-                            <span class="badge bg-danger mb-2">-{{ $discount }}% OFF</span>
-                        @endif
                     </div>
-
-                    <h1 class="display-6 fw-bold mb-3">{{ $product->name }}</h1>
-                    
-                    @if($product->sku)
-                        <p class="text-muted mb-3">
-                            <strong>SKU:</strong> {{ $product->sku }}
+                    @if($product->stock > 0)
+                        <p class="text-success mb-0 small">
+                            <i class="bi bi-check-circle me-1"></i>{{ $product->stock }} available in stock
                         </p>
                     @endif
+                </div>
 
-                    <div class="mb-4 d-flex align-items-center justify-content-between">
-                            <div class="d-flex align-items-center mb-2">
-                                <span class="h2 text-primary mb-0 me-3">@currency($product->price)</span>
-                                @if($product->compare_at_price && $product->compare_at_price > $product->price)
-                                    <span class="text-muted text-decoration-line-through fs-5">
-                                        @currency($product->compare_at_price)
-                                    </span>
-                                @endif
-                            </div>
-                        @if($product->stock > 0)
-                            <span class="badge bg-success fs-6">
-                                <i class="bi bi-check-circle me-1"></i>In Stock ({{ $product->stock }} available)
-                            </span>
-                        @else
-                            <span class="badge bg-danger fs-6">
-                                <i class="bi bi-x-circle me-1"></i>Out of Stock
-                            </span>
-                        @endif
-                            @php $settings = \App\Models\SiteSetting::get(); @endphp
-                            @if($settings->wishlist_enabled ?? true)
-                                <div class="ms-3">
-                                    @php
-                                        if (auth()->check()) {
-                                            $isWishlisted = \App\Models\Wishlist::where('user_id', auth()->id())->where('product_id', $product->id)->exists();
-                                        } else {
-                                            $sid = session('wishlist_session_id');
-                                            $isWishlisted = $sid ? \App\Models\GuestWishlist::where('session_id', $sid)->where('product_id', $product->id)->exists() : false;
-                                        }
-                                    @endphp
-                                    <button class="btn {{ $isWishlisted ? 'btn-danger' : 'btn-outline-danger' }} wishlist-toggle" data-product-id="{{ $product->id }}">
-                                        <i class="bi {{ $isWishlisted ? 'bi-heart-fill' : 'bi-heart' }} me-1"></i>
-                                        <span>{{ $isWishlisted ? 'Wishlisted' : 'Add to Wishlist' }}</span>
-                                    </button>
-                                </div>
-                            @endif
+                <!-- Quick Overview -->
+                @if($product->short_description)
+                    <div class="mb-4">
+                        <h6 class="fw-semibold mb-2 text-uppercase small">Quick Overview</h6>
+                        <p class="text-muted mb-0">{{ $product->short_description }}</p>
                     </div>
-
-                    @if($product->short_description)
-                        <div class="mb-4">
-                            <h5>Quick Overview</h5>
-                            <p class="text-muted">{{ $product->short_description }}</p>
-                        </div>
-                    @endif
+                @endif
 
                         @php
                             $cartItem = null;
@@ -172,73 +204,103 @@
                             }
                         @endphp
 
-                        @if($cartItem)
-                            <div class="alert alert-success d-flex justify-content-between align-items-center mb-3" data-stock="{{ (int) $product->stock }}" data-item-id="{{ $cartItem->id }}">
-                                <div>
-                                    <i class="bi bi-check-circle me-2"></i>Carted ({{ $cartItem->quantity }} {{ Str::plural('item', $cartItem->quantity) }})
+                <!-- Add to Cart Section -->
+                <div class="mb-4">
+                    @if($cartItem)
+                        <div class="alert alert-success d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3" data-stock="{{ (int) $product->stock }}" data-item-id="{{ $cartItem->id }}">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-check-circle me-2"></i><strong>Carted</strong> ({{ $cartItem->quantity }} {{ Str::plural('item', $cartItem->quantity) }})
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <form action="{{ route('cart.items.update', $cartItem->id) }}" method="post" class="d-inline m-0" onsubmit="return pdUpdateCartItemAjax(event, this)">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="hidden" name="quantity" value="{{ max(1, $cartItem->quantity - 1) }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary" style="width: 38px; height: 38px; padding: 0; display: flex; align-items: center; justify-content: center;" {{ $cartItem->quantity <= 1 ? 'disabled' : '' }}>
+                                        <i class="bi bi-dash"></i>
+                                    </button>
+                                </form>
+                                <form action="{{ route('cart.items.update', $cartItem->id) }}" method="post" class="d-inline m-0" onsubmit="return pdUpdateCartItemAjax(event, this)">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="hidden" name="quantity" value="{{ min($product->stock, $cartItem->quantity + 1) }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary" style="width: 38px; height: 38px; padding: 0; display: flex; align-items: center; justify-content: center;" {{ $product->stock <= $cartItem->quantity ? 'disabled' : '' }}>
+                                        <i class="bi bi-plus"></i>
+                                    </button>
+                                </form>
+                                <button type="button" class="btn btn-sm btn-outline-danger" style="width: 38px; height: 38px; padding: 0; display: flex; align-items: center; justify-content: center;" title="Remove from cart" onclick="return pdRemoveCartItemAjax(event, {{ $cartItem->id }}, {{ (int) $product->id }}, {{ (int) $product->stock }});">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <a href="{{ route('cart.index') }}" class="btn btn-outline-primary w-100 mb-3">
+                            <i class="bi bi-cart me-2"></i> View Cart
+                        </a>
+                    @else
+                        <form action="{{ route('cart.add') }}" method="post" onsubmit="return pdAddToCartAjax(event, this)" data-stock="{{ (int) $product->stock }}">
+                            @csrf
+                            <input type="hidden" name="product_id" value="{{ $product->id }}">
+                            
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-5">
+                                    <label for="quantity" class="form-label fw-semibold small text-uppercase">Quantity</label>
+                                    <input type="number" min="1" max="{{ $product->stock }}" 
+                                           name="quantity" value="1" 
+                                           class="form-control" 
+                                           style="height: 48px;"
+                                           id="quantity" required>
                                 </div>
-                                <div class="d-flex align-items-center gap-2">
-                                    <form action="{{ route('cart.items.update', $cartItem->id) }}" method="post" class="d-inline" onsubmit="return pdUpdateCartItemAjax(event, this)">
-                                        @csrf
-                                        @method('PUT')
-                                        <input type="hidden" name="quantity" value="{{ max(1, $cartItem->quantity - 1) }}">
-                                        <button class="btn btn-sm btn-outline-secondary" {{ $cartItem->quantity <= 1 ? 'disabled' : '' }}>
-                                            <i class="bi bi-dash"></i>
-                                        </button>
-                                    </form>
-                                    <form action="{{ route('cart.items.update', $cartItem->id) }}" method="post" class="d-inline" onsubmit="return pdUpdateCartItemAjax(event, this)">
-                                        @csrf
-                                        @method('PUT')
-                                        <input type="hidden" name="quantity" value="{{ min($product->stock, $cartItem->quantity + 1) }}">
-                                        <button class="btn btn-sm btn-outline-secondary" {{ $product->stock <= $cartItem->quantity ? 'disabled' : '' }}>
-                                            <i class="bi bi-plus"></i>
-                                        </button>
-                                    </form>
-                                    <button class="btn btn-sm btn-outline-danger" title="Remove from cart" onclick="return pdRemoveCartItemAjax(event, {{ $cartItem->id }}, {{ (int) $product->id }}, {{ (int) $product->stock }});">
-                                        <i class="bi bi-x"></i>
+                                <div class="col-md-7">
+                                    <label class="form-label fw-semibold small text-uppercase">&nbsp;</label>
+                                    <button type="submit" class="btn btn-primary w-100"
+                                            style="height: 48px;"
+                                            {{ $product->stock <= 0 ? 'disabled' : '' }}>
+                                        <i class="bi bi-cart-plus me-2"></i>
+                                        {{ $product->stock <= 0 ? 'Out of Stock' : 'Add to Cart' }}
                                     </button>
                                 </div>
                             </div>
-                            <a href="{{ route('cart.index') }}" class="btn btn-outline-primary btn-custom mb-4 w-100">
-                                <i class="bi bi-cart"></i> View Cart
-                            </a>
-                        @else
-                            <form action="{{ route('cart.add') }}" method="post" class="mb-4" onsubmit="return pdAddToCartAjax(event, this)" data-stock="{{ (int) $product->stock }}">
-                                @csrf
-                                <input type="hidden" name="product_id" value="{{ $product->id }}">
-                                
-                                <div class="row align-items-end">
-                                    <div class="col-md-4 mb-3">
-                                        <label for="quantity" class="form-label fw-semibold">Quantity</label>
-                                        <input type="number" min="1" max="{{ $product->stock }}" 
-                                               name="quantity" value="1" 
-                                               class="form-control form-control-lg" 
-                                               id="quantity" required>
-                                    </div>
-                                    <div class="col-md-8 mb-3">
-                                        <button type="submit" class="btn btn-primary btn-lg w-100 btn-custom"
-                                                {{ $product->stock <= 0 ? 'disabled' : '' }}>
-                                            <i class="bi bi-cart-plus me-2"></i>
-                                            {{ $product->stock <= 0 ? 'Out of Stock' : 'Add to Cart' }}
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
-                        @endif
+                        </form>
+                    @endif
 
-                    <!-- Product Features -->
-                    <div class="row text-center mb-4">
-                        <div class="col-4">
-                            <i class="bi bi-truck text-primary fs-3 mb-2 d-block"></i>
-                            <small class="text-muted">Free Shipping</small>
+                    <!-- Wishlist Button -->
+                    @php $settings = \App\Models\SiteSetting::get(); @endphp
+                    @if($settings->wishlist_enabled ?? true)
+                        <div class="mb-4">
+                            @php
+                                if (auth()->check()) {
+                                    $isWishlisted = \App\Models\Wishlist::where('user_id', auth()->id())->where('product_id', $product->id)->exists();
+                                } else {
+                                    $sid = session('wishlist_session_id');
+                                    $isWishlisted = $sid ? \App\Models\GuestWishlist::where('session_id', $sid)->where('product_id', $product->id)->exists() : false;
+                                }
+                            @endphp
+                            <button class="btn {{ $isWishlisted ? 'btn-danger' : 'btn-outline-danger' }} w-100 wishlist-toggle" data-product-id="{{ $product->id }}">
+                                <i class="bi {{ $isWishlisted ? 'bi-heart-fill' : 'bi-heart' }} me-2"></i>
+                                {{ $isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist' }}
+                            </button>
                         </div>
-                        <div class="col-4">
-                            <i class="bi bi-shield-check text-primary fs-3 mb-2 d-block"></i>
-                            <small class="text-muted">Secure Payment</small>
+                    @endif
+                </div>
+
+                <!-- Product Features -->
+                <div class="row g-3 mb-0">
+                    <div class="col-4">
+                        <div class="text-center p-3 bg-light rounded">
+                            <i class="bi bi-truck text-primary fs-4 mb-2 d-block"></i>
+                            <small class="text-muted d-block">Free Shipping</small>
                         </div>
-                        <div class="col-4">
-                            <i class="bi bi-arrow-clockwise text-primary fs-3 mb-2 d-block"></i>
-                            <small class="text-muted">Easy Returns</small>
+                    </div>
+                    <div class="col-4">
+                        <div class="text-center p-3 bg-light rounded">
+                            <i class="bi bi-shield-check text-primary fs-4 mb-2 d-block"></i>
+                            <small class="text-muted d-block">Secure Payment</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="text-center p-3 bg-light rounded">
+                            <i class="bi bi-arrow-clockwise text-primary fs-4 mb-2 d-block"></i>
+                            <small class="text-muted d-block">Easy Returns</small>
                         </div>
                     </div>
                 </div>
@@ -288,30 +350,32 @@
                         @if(auth()->check() && !$userHasReviewed && ($userCanReview || !($settings->reviews_require_purchase ?? false)))
                             <div class="mb-4 p-3 bg-light rounded">
                                 <h6 class="mb-3">Write a Review</h6>
-                                <form action="{{ route('reviews.store', $product) }}" method="POST">
+                                <form id="review-form" action="{{ route('reviews.store', $product) }}" method="POST">
                                     @csrf
                                     <div class="mb-3">
                                         <label class="form-label">Rating</label>
                                         <div class="rating-input">
-                                            @for($i = 5; $i >= 1; $i--)
+                                            @for($i = 1; $i <= 5; $i++)
                                                 <input type="radio" name="rating" value="{{ $i }}" id="rating{{ $i }}" required>
-                                                <label for="rating{{ $i }}" class="star-label"><i class="bi bi-star-fill"></i></label>
+                                                <label for="rating{{ $i }}" class="star-label"><i class="bi bi-star"></i></label>
                                             @endfor
                                         </div>
-                                        @error('rating')<div class="text-danger small">{{ $message }}</div>@enderror
+                                        <div id="rating-error" class="text-danger small" style="display:none;"></div>
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label">Review Title (Optional)</label>
                                         <input type="text" name="title" class="form-control" value="{{ old('title') }}" maxlength="255">
-                                        @error('title')<div class="text-danger small">{{ $message }}</div>@enderror
+                                        <div id="title-error" class="text-danger small" style="display:none;"></div>
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label">Your Review</label>
                                         <textarea name="comment" class="form-control" rows="4" required minlength="10" maxlength="1000">{{ old('comment') }}</textarea>
                                         <small class="text-muted">Minimum 10 characters</small>
-                                        @error('comment')<div class="text-danger small">{{ $message }}</div>@enderror
+                                        <div id="comment-error" class="text-danger small" style="display:none;"></div>
                                     </div>
-                                    <button type="submit" class="btn btn-primary">Submit Review</button>
+                                    <button type="submit" class="btn btn-primary" id="submit-review-btn">
+                                        <span class="btn-text">Submit Review</span>
+                                    </button>
                                 </form>
                             </div>
                         @elseif(auth()->check() && $userHasReviewed)
@@ -325,35 +389,56 @@
                         @endif
 
                         <!-- Reviews List -->
-                        @if($product->approvedReviews->count() > 0)
-                            <div class="reviews-list">
-                                <h6 class="mb-3">Customer Reviews</h6>
-                                @foreach($product->approvedReviews->take(10) as $review)
-                                    <div class="review-item border-bottom pb-3 mb-3">
-                                        <div class="d-flex justify-content-between align-items-start mb-2">
-                                            <div>
-                                                <strong>{{ $review->user->name ?? 'Anonymous' }}</strong>
-                                                @if($review->is_verified_purchase)
-                                                    <span class="badge bg-success ms-2"><i class="bi bi-check-circle me-1"></i>Verified Purchase</span>
+                        <div id="reviews-list-container">
+                            @if($product->approvedReviews->count() > 0)
+                                <div class="reviews-list">
+                                    <h6 class="mb-3">Customer Reviews</h6>
+                                    <div id="reviews-list">
+                                        @foreach($product->approvedReviews->take(10) as $review)
+                                            <div class="review-item border-bottom pb-3 mb-3">
+                                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                                    <div>
+                                                        <strong>{{ $review->user->name ?? 'Anonymous' }}</strong>
+                                                        @if($review->is_verified_purchase)
+                                                            <span class="badge bg-success ms-2"><i class="bi bi-check-circle me-1"></i>Verified Purchase</span>
+                                                        @endif
+                                                    </div>
+                                                    <div class="text-muted small">{{ $review->created_at->format('M d, Y') }}</div>
+                                                </div>
+                                                <div class="mb-2">
+                                                    @for($i = 1; $i <= 5; $i++)
+                                                        <i class="bi bi-star{{ $i <= $review->rating ? '-fill text-warning' : '' }}"></i>
+                                                    @endfor
+                                                </div>
+                                                @if($review->title)
+                                                    <h6 class="mb-2">{{ $review->title }}</h6>
                                                 @endif
+                                                @php
+                                                    $comment = $review->comment;
+                                                    $maxLength = 150;
+                                                    $needsTruncation = strlen($comment) > $maxLength;
+                                                    $shortText = $needsTruncation ? substr($comment, 0, $maxLength) . '...' : '';
+                                                @endphp
+                                                <div class="review-comment" data-full-text="{{ e($comment) }}">
+                                                    @if($needsTruncation)
+                                                        <span class="review-text-short">{{ $shortText }}</span>
+                                                        <span class="review-text-full" style="display:none;">{{ $comment }}</span>
+                                                        <button type="button" class="btn btn-link btn-sm p-0 text-primary read-more-btn">
+                                                            <span class="read-more-text">Read More</span>
+                                                            <span class="read-less-text" style="display:none;">Read Less</span>
+                                                        </button>
+                                                    @else
+                                                        <span class="review-text-full">{{ $comment }}</span>
+                                                    @endif
+                                                </div>
                                             </div>
-                                            <div class="text-muted small">{{ $review->created_at->format('M d, Y') }}</div>
-                                        </div>
-                                        <div class="mb-2">
-                                            @for($i = 1; $i <= 5; $i++)
-                                                <i class="bi bi-star{{ $i <= $review->rating ? '-fill text-warning' : '' }}"></i>
-                                            @endfor
-                                        </div>
-                                        @if($review->title)
-                                            <h6 class="mb-2">{{ $review->title }}</h6>
-                                        @endif
-                                        <p class="mb-0">{{ $review->comment }}</p>
+                                        @endforeach
                                     </div>
-                                @endforeach
-                            </div>
-                        @else
-                            <p class="text-muted mb-0">No reviews yet. Be the first to review this product!</p>
-                        @endif
+                                </div>
+                            @else
+                                <p class="text-muted mb-0" id="no-reviews-msg">No reviews yet. Be the first to review this product!</p>
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>
@@ -519,25 +604,25 @@ function pdAddToCartAjax(e, form){
             }
             const container = form.closest('.card');
             const wrap = document.createElement('div');
-            wrap.className = 'alert alert-success d-flex justify-content-between align-items-center mb-3';
+            wrap.className = 'alert alert-success d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3';
             wrap.setAttribute('data-stock', form.dataset.stock || '999999');
             wrap.setAttribute('data-item-id', data.item.id);
             wrap.innerHTML = `
-                <div><i class="bi bi-check-circle me-2"></i>Carted (${data.item.quantity} ${data.item.quantity>1?'items':'item'})</div>
+                <div class="d-flex align-items-center"><i class="bi bi-check-circle me-2"></i><strong>Carted</strong> (${data.item.quantity} ${data.item.quantity>1?'items':'item'})</div>
                 <div class="d-flex align-items-center gap-2">
-                    <form action="${window.location.origin}/cart/items/${data.item.id}" method="post" class="d-inline" onsubmit="return pdUpdateCartItemAjax(event, this)">
+                    <form action="${window.location.origin}/cart/items/${data.item.id}" method="post" class="d-inline m-0" onsubmit="return pdUpdateCartItemAjax(event, this)">
                         <input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').getAttribute('content')}">
                         <input type="hidden" name="_method" value="PUT">
                         <input type="hidden" name="quantity" value="${Math.max(1, data.item.quantity - 1)}">
-                        <button class="btn btn-sm btn-outline-secondary" ${data.item.quantity<=1?'disabled':''}><i class="bi bi-dash"></i></button>
+                        <button type="submit" class="btn btn-sm btn-outline-secondary" style="width: 38px; height: 38px; padding: 0; display: flex; align-items: center; justify-content: center;" ${data.item.quantity<=1?'disabled':''}><i class="bi bi-dash"></i></button>
                     </form>
-                    <form action="${window.location.origin}/cart/items/${data.item.id}" method="post" class="d-inline" onsubmit="return pdUpdateCartItemAjax(event, this)">
+                    <form action="${window.location.origin}/cart/items/${data.item.id}" method="post" class="d-inline m-0" onsubmit="return pdUpdateCartItemAjax(event, this)">
                         <input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').getAttribute('content')}">
                         <input type="hidden" name="_method" value="PUT">
                         <input type="hidden" name="quantity" value="${data.item.quantity + 1}">
-                        <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-plus"></i></button>
+                        <button type="submit" class="btn btn-sm btn-outline-secondary" style="width: 38px; height: 38px; padding: 0; display: flex; align-items: center; justify-content: center;"><i class="bi bi-plus"></i></button>
                     </form>
-                    <button class="btn btn-sm btn-outline-danger" title="Remove from cart" onclick="return pdRemoveCartItemAjax(event, ${data.item.id}, ${form.querySelector('input[name=product_id]').value}, ${parseInt(form.dataset.stock || '0', 10)});">
+                    <button type="button" class="btn btn-sm btn-outline-danger" style="width: 38px; height: 38px; padding: 0; display: flex; align-items: center; justify-content: center;" title="Remove from cart" onclick="return pdRemoveCartItemAjax(event, ${data.item.id}, ${form.querySelector('input[name=product_id]').value}, ${parseInt(form.dataset.stock || '0', 10)});">
                         <i class="bi bi-x"></i>
                     </button>
                 </div>`;
@@ -576,25 +661,25 @@ function pdAddToCartAjax(e, form){
             }
             const container = form.closest('.card');
             const wrap = document.createElement('div');
-            wrap.className = 'alert alert-success d-flex justify-content-between align-items-center mb-3';
+            wrap.className = 'alert alert-success d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3';
             wrap.setAttribute('data-stock', form.dataset.stock || '999999');
             wrap.setAttribute('data-item-id', data.item.id);
             wrap.innerHTML = `
-                <div><i class="bi bi-check-circle me-2"></i>Carted (${data.item.quantity} ${data.item.quantity>1?'items':'item'})</div>
+                <div class="d-flex align-items-center"><i class="bi bi-check-circle me-2"></i><strong>Carted</strong> (${data.item.quantity} ${data.item.quantity>1?'items':'item'})</div>
                 <div class="d-flex align-items-center gap-2">
-                    <form action="${window.location.origin}/cart/items/${data.item.id}" method="post" class="d-inline" onsubmit="return pdUpdateCartItemAjax(event, this)">
+                    <form action="${window.location.origin}/cart/items/${data.item.id}" method="post" class="d-inline m-0" onsubmit="return pdUpdateCartItemAjax(event, this)">
                         <input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').getAttribute('content')}">
                         <input type="hidden" name="_method" value="PUT">
                         <input type="hidden" name="quantity" value="${Math.max(1, data.item.quantity - 1)}">
-                        <button class="btn btn-sm btn-outline-secondary" ${data.item.quantity<=1?'disabled':''}><i class="bi bi-dash"></i></button>
+                        <button type="submit" class="btn btn-sm btn-outline-secondary" style="width: 38px; height: 38px; padding: 0; display: flex; align-items: center; justify-content: center;" ${data.item.quantity<=1?'disabled':''}><i class="bi bi-dash"></i></button>
                     </form>
-                    <form action="${window.location.origin}/cart/items/${data.item.id}" method="post" class="d-inline" onsubmit="return pdUpdateCartItemAjax(event, this)">
+                    <form action="${window.location.origin}/cart/items/${data.item.id}" method="post" class="d-inline m-0" onsubmit="return pdUpdateCartItemAjax(event, this)">
                         <input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').getAttribute('content')}">
                         <input type="hidden" name="_method" value="PUT">
                         <input type="hidden" name="quantity" value="${data.item.quantity + 1}">
-                        <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-plus"></i></button>
+                        <button type="submit" class="btn btn-sm btn-outline-secondary" style="width: 38px; height: 38px; padding: 0; display: flex; align-items: center; justify-content: center;"><i class="bi bi-plus"></i></button>
                     </form>
-                    <button class="btn btn-sm btn-outline-danger" title="Remove from cart" onclick="return pdRemoveCartItemAjax(event, ${data.item.id}, ${form.querySelector('input[name=product_id]').value}, ${parseInt(form.dataset.stock || '0', 10)});">
+                    <button type="button" class="btn btn-sm btn-outline-danger" style="width: 38px; height: 38px; padding: 0; display: flex; align-items: center; justify-content: center;" title="Remove from cart" onclick="return pdRemoveCartItemAjax(event, ${data.item.id}, ${form.querySelector('input[name=product_id]').value}, ${parseInt(form.dataset.stock || '0', 10)});">
                         <i class="bi bi-x"></i>
                     </button>
                 </div>`;
@@ -697,6 +782,290 @@ function pdRemoveCartItemAjax(e, itemId, productId, stock){
     }).catch(()=>{});
     return false;
 }
+
+// Read More/Less functionality for review comments
+function initReadMore(container) {
+    const reviewComments = container ? container.querySelectorAll('.review-comment') : document.querySelectorAll('.review-comment');
+    
+    reviewComments.forEach(commentDiv => {
+        const shortText = commentDiv.querySelector('.review-text-short');
+        const fullText = commentDiv.querySelector('.review-text-full');
+        const readMoreBtn = commentDiv.querySelector('.read-more-btn');
+        const readMoreText = readMoreBtn ? readMoreBtn.querySelector('.read-more-text') : null;
+        const readLessText = readMoreBtn ? readMoreBtn.querySelector('.read-less-text') : null;
+        
+        // If no button, it means text is short and doesn't need truncation
+        if (!readMoreBtn || !fullText) return;
+        
+        // If no short text element, text is already short, skip
+        if (!shortText) return;
+        
+        // Set up click handler (only if button exists)
+        readMoreBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const isExpanded = fullText.style.display !== 'none';
+            
+            if (isExpanded) {
+                // Collapse
+                shortText.style.display = 'inline';
+                fullText.style.display = 'none';
+                if (readMoreText) readMoreText.style.display = 'inline';
+                if (readLessText) readLessText.style.display = 'none';
+            } else {
+                // Expand
+                shortText.style.display = 'none';
+                fullText.style.display = 'inline';
+                if (readMoreText) readMoreText.style.display = 'none';
+                if (readLessText) readLessText.style.display = 'inline';
+            }
+        });
+    });
+}
+
+// Review form AJAX submission
+document.addEventListener('DOMContentLoaded', function(){
+    // Initialize Read More for existing reviews
+    initReadMore();
+    
+    const reviewForm = document.getElementById('review-form');
+    if (!reviewForm) return;
+    
+    // Handle rating star display
+    const ratingInputs = reviewForm.querySelectorAll('input[name="rating"]');
+    const ratingLabels = reviewForm.querySelectorAll('.rating-input label');
+    
+    function updateStarDisplay(selectedValue) {
+        ratingLabels.forEach((label, index) => {
+            // Normal order: index 0 = star 1, index 1 = star 2, etc.
+            const starNumber = index + 1;
+            if (starNumber <= selectedValue) {
+                label.classList.add('active');
+                label.style.color = '#ffc107';
+                // Change icon to filled star
+                const icon = label.querySelector('i');
+                if (icon) {
+                    icon.classList.remove('bi-star');
+                    icon.classList.add('bi-star-fill');
+                }
+            } else {
+                label.classList.remove('active');
+                label.style.color = '#ddd';
+                // Change icon to empty star
+                const icon = label.querySelector('i');
+                if (icon) {
+                    icon.classList.remove('bi-star-fill');
+                    icon.classList.add('bi-star');
+                }
+            }
+        });
+    }
+    
+    // Update stars when a radio is selected
+    ratingInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            updateStarDisplay(parseInt(this.value));
+        });
+    });
+    
+    // Initialize display if a rating is already selected
+    const checkedInput = reviewForm.querySelector('input[name="rating"]:checked');
+    if (checkedInput) {
+        updateStarDisplay(parseInt(checkedInput.value));
+    }
+    
+    reviewForm.addEventListener('submit', function(e){
+        e.preventDefault();
+        
+        const submitBtn = document.getElementById('submit-review-btn');
+        const btnText = submitBtn.querySelector('.btn-text');
+        const originalText = btnText.textContent;
+        
+        // Clear previous errors
+        ['rating', 'title', 'comment'].forEach(field => {
+            const errorEl = document.getElementById(field + '-error');
+            if (errorEl) {
+                errorEl.style.display = 'none';
+                errorEl.textContent = '';
+            }
+        });
+        
+        // Disable button and show loading
+        submitBtn.disabled = true;
+        btnText.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Submitting...';
+        
+        const formData = new FormData(reviewForm);
+        
+        fetch(reviewForm.action, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': reviewForm.querySelector('input[name="_token"]').value
+            },
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => {
+                    if (err.errors) {
+                        Object.keys(err.errors).forEach(field => {
+                            const errorEl = document.getElementById(field + '-error');
+                            if (errorEl) {
+                                errorEl.textContent = err.errors[field][0];
+                                errorEl.style.display = 'block';
+                            }
+                        });
+                    }
+                    throw new Error(err.message || 'Request failed');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (!data.success) {
+                throw new Error(data.message || 'Failed to submit review');
+            }
+            
+            // Show success message
+            if (window.Swal) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: data.message,
+                    confirmButtonColor: '#667eea',
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+            } else {
+                alert(data.message);
+            }
+            
+            // Update review stats in header
+            if (data.stats) {
+                const badge = document.querySelector('.card-header .badge');
+                if (badge) {
+                    badge.textContent = `${data.stats.total_reviews} Review${data.stats.total_reviews !== 1 ? 's' : ''}`;
+                }
+                
+                const ratingSpan = document.querySelector('.card-header .ms-2');
+                if (ratingSpan) {
+                    let starsHtml = '';
+                    for (let i = 1; i <= 5; i++) {
+                        const filled = i <= Math.round(data.stats.average_rating);
+                        starsHtml += `<i class="bi bi-star${filled ? '-fill text-warning' : ''}"></i>`;
+                    }
+                    ratingSpan.innerHTML = starsHtml + `<span class="ms-1">(${data.stats.average_rating})</span>`;
+                }
+            }
+            
+            // If review is approved, add it to the list
+            if (data.review && data.review.is_approved) {
+                const container = document.getElementById('reviews-list-container');
+                const noReviewsMsg = document.getElementById('no-reviews-msg');
+                let reviewsList = document.getElementById('reviews-list');
+                
+                if (noReviewsMsg) {
+                    noReviewsMsg.remove();
+                }
+                
+                if (!reviewsList && container) {
+                    container.innerHTML = `
+                        <div class="reviews-list">
+                            <h6 class="mb-3">Customer Reviews</h6>
+                            <div id="reviews-list"></div>
+                        </div>
+                    `;
+                    reviewsList = document.getElementById('reviews-list');
+                }
+                
+                if (reviewsList) {
+                    const reviewItem = document.createElement('div');
+                    reviewItem.className = 'review-item border-bottom pb-3 mb-3';
+                    
+                    let starsHtml = '';
+                    for (let i = 1; i <= 5; i++) {
+                        const filled = i <= data.review.rating;
+                        starsHtml += `<i class="bi bi-star${filled ? '-fill text-warning' : ''}"></i>`;
+                    }
+                    
+                    const verifiedBadge = data.review.is_verified_purchase 
+                        ? '<span class="badge bg-success ms-2"><i class="bi bi-check-circle me-1"></i>Verified Purchase</span>'
+                        : '';
+                    
+                    const titleHtml = data.review.title 
+                        ? `<h6 class="mb-2">${data.review.title}</h6>`
+                        : '';
+                    
+                    // Create review comment with Read More functionality
+                    const commentText = data.review.comment || '';
+                    const maxLength = 150;
+                    let commentHtml = '';
+                    
+                    if (commentText.length > maxLength) {
+                        const shortText = commentText.substring(0, maxLength) + '...';
+                        commentHtml = `
+                            <div class="review-comment" data-full-text="${commentText.replace(/"/g, '&quot;')}">
+                                <span class="review-text-short">${shortText}</span>
+                                <span class="review-text-full" style="display:none;">${commentText}</span>
+                                <button type="button" class="btn btn-link btn-sm p-0 text-primary read-more-btn">
+                                    <span class="read-more-text">Read More</span>
+                                    <span class="read-less-text" style="display:none;">Read Less</span>
+                                </button>
+                            </div>
+                        `;
+                    } else {
+                        commentHtml = `<div class="review-comment"><span class="review-text-full">${commentText}</span></div>`;
+                    }
+                    
+                    reviewItem.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <strong>${data.review.user_name}</strong>
+                                ${verifiedBadge}
+                            </div>
+                            <div class="text-muted small">${data.review.created_at}</div>
+                        </div>
+                        <div class="mb-2">${starsHtml}</div>
+                        ${titleHtml}
+                        ${commentHtml}
+                    `;
+                    
+                    reviewsList.insertBefore(reviewItem, reviewsList.firstChild);
+                    
+                    // Initialize Read More for the new review
+                    initReadMore(reviewItem);
+                }
+            }
+            
+            // Hide form
+            const formContainer = reviewForm.closest('.mb-4');
+            if (formContainer) {
+                formContainer.innerHTML = `
+                    <div class="alert alert-info mb-0">
+                        <i class="bi bi-info-circle me-2"></i>You have already reviewed this product.
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            // Re-enable button
+            submitBtn.disabled = false;
+            btnText.textContent = originalText;
+            
+            // Show error
+            if (window.Swal) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message || 'An error occurred. Please try again.',
+                    confirmButtonColor: '#667eea'
+                });
+            } else {
+                alert(error.message || 'An error occurred. Please try again.');
+            }
+        });
+    });
+});
 </script>
 
  

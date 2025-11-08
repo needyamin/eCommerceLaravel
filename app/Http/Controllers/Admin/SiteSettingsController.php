@@ -44,6 +44,8 @@ class SiteSettingsController extends Controller
             'social_twitter' => ['nullable','string','max:255'],
             'social_instagram' => ['nullable','string','max:255'],
             'social_linkedin' => ['nullable','string','max:255'],
+            'product_display_columns_mobile' => ['nullable','integer','min:1','max:4'],
+            'product_display_columns_desktop' => ['nullable','integer','min:1','max:6'],
         ]);
         $data['wishlist_enabled'] = (bool) ($request->input('wishlist_enabled') ?? false);
         $data['reviews_enabled'] = (bool) ($request->input('reviews_enabled') ?? false);
@@ -53,6 +55,8 @@ class SiteSettingsController extends Controller
         $data['newsletter_enabled'] = (bool) ($request->input('newsletter_enabled') ?? false);
         $data['newsletter_double_opt_in'] = (bool) ($request->input('newsletter_double_opt_in') ?? false);
         $data['newsletter_send_welcome_email'] = (bool) ($request->input('newsletter_send_welcome_email') ?? false);
+        $data['product_display_columns_mobile'] = (int) ($request->input('product_display_columns_mobile') ?? 2);
+        $data['product_display_columns_desktop'] = (int) ($request->input('product_display_columns_desktop') ?? 3);
         $settings = SiteSetting::get();
         $settings->update($data);
         return back()->with('success','Site settings updated.');

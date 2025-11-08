@@ -1,15 +1,21 @@
 @extends('admin.layouts.app')
 
 @section('content')
-<div class="card">
-    <div class="card-header d-flex flex-wrap gap-2 justify-content-between align-items-center">
-        <h3 class="card-title m-0">All Users</h3>
-        <div class="d-flex gap-2 align-items-center ms-auto">
-            <input type="date" id="u_from" class="form-control form-control-sm" />
-            <input type="date" id="u_to" class="form-control form-control-sm" />
+<div class="card shadow-sm">
+    <div class="card-header bg-white border-bottom">
+        <div class="d-flex flex-wrap gap-3 justify-content-between align-items-center">
+            <h3 class="card-title mb-0 fw-semibold">All Users</h3>
+            <div class="d-flex gap-2 align-items-center flex-wrap">
+                <div class="filter-group">
+                    <input type="date" id="u_from" class="form-control form-control-sm filter-input" placeholder="From Date" />
+                </div>
+                <div class="filter-group">
+                    <input type="date" id="u_to" class="form-control form-control-sm filter-input" placeholder="To Date" />
+                </div>
+            </div>
         </div>
     </div>
-    <div class="card-body">
+    <div class="card-body p-3">
         <div class="table-responsive">
             <table id="usersTable" class="table table-bordered table-striped align-middle" style="width:100%">
                 <thead>

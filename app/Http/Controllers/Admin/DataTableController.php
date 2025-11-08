@@ -414,6 +414,371 @@ class DataTableController extends Controller
         ]);
     }
 
+    protected function resourceReview(Request $request, int $draw, int $start, int $length, string $search)
+    {
+        $query = \App\Models\ProductReview::query()->with(['product', 'user', 'order']);
+        $recordsTotal = (clone $query)->count();
+
+        if ($request->filled('status')) {
+            if ($request->status === 'approved') {
+                $query->where('is_approved', true);
+            } elseif ($request->status === 'pending') {
+                $query->where('is_approved', false);
+            }
+        }
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('comment', 'like', "%{$search}%")
+                  ->orWhere('title', 'like', "%{$search}%")
+                  ->orWhereHas('product', function ($pq) use ($search) {
+                      $pq->where('name', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('user', function ($uq) use ($search) {
+                      $uq->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $recordsFiltered = (clone $query)->count();
+        $order = $this->extractOrdering($request, ['product', 'user', 'rating', 'review', 'status', 'created_at']);
+        if ($order) {
+            foreach ($order as [$col, $dir]) {
+                if ($col === 'product') {
+                    $query->leftJoin('products', 'products.id', '=', 'product_reviews.product_id');
+                    $query->orderBy('products.name', $dir);
+                } elseif ($col === 'user') {
+                    $query->leftJoin('users', 'users.id', '=', 'product_reviews.user_id');
+                    $query->orderBy('users.name', $dir);
+                } elseif ($col === 'review') {
+                    $query->orderBy('product_reviews.title', $dir);
+                } else {
+                    $query->orderBy('product_reviews.' . $col, $dir);
+                }
+            }
+        } else {
+            $query->latest('product_reviews.id');
+        }
+
+        $items = $query->select('product_reviews.*')->skip($start)->take($length)->get();
+        $data = $items->map(function ($r) {
+            $stars = '';
+            for ($i = 1; $i <= 5; $i++) {
+                $stars .= '<i class="bi bi-star' . ($i <= $r->rating ? '-fill text-warning' : '') . '"></i>';
+            }
+            $stars .= '<span class="ms-1">(' . $r->rating . ')</span>';
+
+            $reviewText = '';
+            if ($r->title) {
+                $reviewText .= '<strong>' . e($r->title) . '</strong><br>';
+            }
+            $reviewText .= '<small class="text-muted">' . e(\Str::limit($r->comment, 100)) . '</small>';
+
+            $statusBadge = $r->is_approved 
+                ? '<span class="badge bg-success">Approved</span>' 
+                : '<span class="badge bg-warning">Pending</span>';
+
+            $userName = $r->user ? e($r->user->name) : 'Anonymous';
+            if ($r->is_verified_purchase) {
+                $userName .= ' <span class="badge bg-success ms-1" title="Verified Purchase"><i class="bi bi-check-circle"></i></span>';
+            }
+
+            $actions = '<div class="btn-group btn-group-sm">';
+            if (!$r->is_approved) {
+                $actions .= '<form action="' . route('admin.reviews.approve', $r) . '" method="POST" class="d-inline">';
+                $actions .= csrf_field();
+                $actions .= '<button type="submit" class="btn btn-success" title="Approve"><i class="bi bi-check"></i></button>';
+                $actions .= '</form>';
+            } else {
+                $actions .= '<form action="' . route('admin.reviews.reject', $r) . '" method="POST" class="d-inline">';
+                $actions .= csrf_field();
+                $actions .= '<button type="submit" class="btn btn-warning" title="Reject"><i class="bi bi-x"></i></button>';
+                $actions .= '</form>';
+            }
+            $actions .= '<form action="' . route('admin.reviews.destroy', $r) . '" method="POST" class="d-inline" onsubmit="return confirm(\'Delete this review?\')">';
+            $actions .= csrf_field();
+            $actions .= method_field('DELETE');
+            $actions .= '<button type="submit" class="btn btn-danger" title="Delete"><i class="bi bi-trash"></i></button>';
+            $actions .= '</form>';
+            $actions .= '</div>';
+
+            return [
+                'product' => $r->product 
+                    ? '<a href="' . route('products.show', $r->product->slug) . '" target="_blank">' . e($r->product->name) . '</a>'
+                    : '-',
+                'user' => $userName,
+                'rating' => $stars,
+                'review' => $reviewText,
+                'status' => $statusBadge,
+                'created_at' => $r->created_at->format('M d, Y'),
+                'actions' => $actions,
+            ];
+        })->all();
+
+        return response()->json([
+            'draw' => $draw,
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered,
+            'data' => $data,
+        ]);
+    }
+
+    protected function resourceCart(Request $request, int $draw, int $start, int $length, string $search)
+    {
+        $ids = \DB::table('cart_items')
+            ->join('carts', 'cart_items.cart_id', '=', 'carts.id')
+            ->whereNotNull('carts.user_id')
+            ->select(\DB::raw('MAX(cart_items.id) as id'))
+            ->groupBy('carts.user_id', 'cart_items.product_id')
+            ->pluck('id');
+
+        $query = \App\Models\CartItem::query()->with(['product', 'cart.user'])->whereIn('id', $ids);
+        $recordsTotal = (clone $query)->count();
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('product', function ($pq) use ($search) {
+                    $pq->where('name', 'like', "%{$search}%");
+                })
+                ->orWhereHas('cart.user', function ($uq) use ($search) {
+                    $uq->where('name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        $recordsFiltered = (clone $query)->count();
+        $order = $this->extractOrdering($request, ['user', 'email', 'phone', 'product', 'quantity', 'created_at']);
+        if ($order) {
+            foreach ($order as [$col, $dir]) {
+                if ($col === 'user' || $col === 'email' || $col === 'phone') {
+                    $query->leftJoin('carts', 'carts.id', '=', 'cart_items.cart_id')
+                          ->leftJoin('users', 'users.id', '=', 'carts.user_id');
+                    $query->orderBy('users.' . $col, $dir);
+                } elseif ($col === 'product') {
+                    $query->leftJoin('products', 'products.id', '=', 'cart_items.product_id');
+                    $query->orderBy('products.name', $dir);
+                } else {
+                    $query->orderBy('cart_items.' . $col, $dir);
+                }
+            }
+        } else {
+            $query->orderByDesc('cart_items.created_at');
+        }
+
+        $items = $query->select('cart_items.*')->skip($start)->take($length)->get();
+        $data = $items->map(function ($item) {
+            $user = optional($item->cart->user);
+            $userName = $user->name ?? '—';
+            if (empty($user->email) && empty($user->phone)) {
+                $userName .= ' <span class="badge bg-secondary ms-1">Guest</span>';
+            }
+
+            return [
+                'user' => $userName,
+                'email' => $user->email ?? '—',
+                'phone' => $user->phone ?? '—',
+                'product' => $item->product 
+                    ? '<a href="' . route('products.show', $item->product->slug) . '" target="_blank">' . e($item->product->name) . '</a>'
+                    : '<span class="text-muted">(deleted product)</span>',
+                'quantity' => (int) $item->quantity,
+                'created_at' => $item->created_at->format('Y-m-d H:i'),
+            ];
+        })->all();
+
+        return response()->json([
+            'draw' => $draw,
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered,
+            'data' => $data,
+        ]);
+    }
+
+    protected function resourceWishlist(Request $request, int $draw, int $start, int $length, string $search)
+    {
+        $query = \App\Models\Wishlist::query()->with(['product', 'user']);
+        $recordsTotal = (clone $query)->count();
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('product', function ($pq) use ($search) {
+                    $pq->where('name', 'like', "%{$search}%");
+                })
+                ->orWhereHas('user', function ($uq) use ($search) {
+                    $uq->where('name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        $recordsFiltered = (clone $query)->count();
+        $order = $this->extractOrdering($request, ['user', 'email', 'phone', 'product', 'created_at']);
+        if ($order) {
+            foreach ($order as [$col, $dir]) {
+                if ($col === 'user' || $col === 'email' || $col === 'phone') {
+                    $query->leftJoin('users', 'users.id', '=', 'wishlists.user_id');
+                    $query->orderBy('users.' . $col, $dir);
+                } elseif ($col === 'product') {
+                    $query->leftJoin('products', 'products.id', '=', 'wishlists.product_id');
+                    $query->orderBy('products.name', $dir);
+                } else {
+                    $query->orderBy('wishlists.' . $col, $dir);
+                }
+            }
+        } else {
+            $query->orderByDesc('wishlists.created_at');
+        }
+
+        $items = $query->select('wishlists.*')->skip($start)->take($length)->get();
+        $data = $items->map(function ($it) {
+            $user = optional($it->user);
+            $userName = $user->name ?? '—';
+            if (empty($user->email) && empty($user->phone)) {
+                $userName .= ' <span class="badge bg-secondary ms-1">Guest</span>';
+            }
+
+            return [
+                'user' => $userName,
+                'email' => $user->email ?? '—',
+                'phone' => $user->phone ?? '—',
+                'product' => $it->product 
+                    ? '<a href="' . route('products.show', $it->product->slug) . '" target="_blank">' . e($it->product->name) . '</a>'
+                    : '<span class="text-muted">(deleted product)</span>',
+                'created_at' => $it->created_at->format('Y-m-d H:i'),
+            ];
+        })->all();
+
+        return response()->json([
+            'draw' => $draw,
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered,
+            'data' => $data,
+        ]);
+    }
+
+    protected function resourceGuestWishlist(Request $request, int $draw, int $start, int $length, string $search)
+    {
+        $guestIds = \DB::table('guest_wishlists')
+            ->select(\DB::raw('MAX(id) as id'))
+            ->groupBy('session_id', 'product_id')
+            ->pluck('id');
+
+        $query = \App\Models\GuestWishlist::query()->with(['product'])->whereIn('id', $guestIds);
+        $recordsTotal = (clone $query)->count();
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('session_id', 'like', "%{$search}%")
+                  ->orWhereHas('product', function ($pq) use ($search) {
+                      $pq->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $recordsFiltered = (clone $query)->count();
+        $order = $this->extractOrdering($request, ['user', 'email', 'phone', 'product', 'session', 'created_at']);
+        if ($order) {
+            foreach ($order as [$col, $dir]) {
+                if ($col === 'product') {
+                    $query->leftJoin('products', 'products.id', '=', 'guest_wishlists.product_id');
+                    $query->orderBy('products.name', $dir);
+                } else {
+                    $query->orderBy('guest_wishlists.' . $col, $dir);
+                }
+            }
+        } else {
+            $query->orderByDesc('guest_wishlists.created_at');
+        }
+
+        $items = $query->select('guest_wishlists.*')->skip($start)->take($length)->get();
+        $data = $items->map(function ($g) {
+            return [
+                'user' => '<span class="badge bg-secondary">Guest</span>',
+                'email' => '<span class="badge bg-secondary">Guest</span>',
+                'phone' => '<span class="badge bg-secondary">Guest</span>',
+                'product' => $g->product 
+                    ? '<a href="' . route('products.show', $g->product->slug) . '" target="_blank">' . e($g->product->name) . '</a>'
+                    : '<span class="text-muted">(deleted product)</span>',
+                'session' => '<code class="small text-muted">' . e($g->session_id) . '</code>',
+                'created_at' => $g->created_at->format('Y-m-d H:i'),
+            ];
+        })->all();
+
+        return response()->json([
+            'draw' => $draw,
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered,
+            'data' => $data,
+        ]);
+    }
+
+    protected function resourceSession(Request $request, int $draw, int $start, int $length, string $search)
+    {
+        $query = \App\Models\SessionEntry::query()->with('user');
+        $recordsTotal = (clone $query)->count();
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', "%{$search}%")
+                  ->orWhere('ip_address', 'like', "%{$search}%")
+                  ->orWhere('user_agent', 'like', "%{$search}%")
+                  ->orWhereHas('user', function ($uq) use ($search) {
+                      $uq->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $recordsFiltered = (clone $query)->count();
+        $order = $this->extractOrdering($request, ['user', 'email', 'phone', 'ip_address', 'user_agent', 'last_activity', 'id']);
+        if ($order) {
+            foreach ($order as [$col, $dir]) {
+                if ($col === 'user' || $col === 'email' || $col === 'phone') {
+                    $query->leftJoin('users', 'users.id', '=', 'sessions.user_id');
+                    $query->orderBy('users.' . $col, $dir);
+                } else {
+                    $query->orderBy('sessions.' . $col, $dir);
+                }
+            }
+        } else {
+            $query->orderByDesc('sessions.last_activity');
+        }
+
+        $items = $query->select('sessions.*')->skip($start)->take($length)->get();
+        $data = $items->map(function ($s) {
+            $u = optional($s->user);
+            $userName = $u->name ?? '—';
+            if (!$s->user_id) {
+                $userName .= ' <span class="badge bg-secondary ms-1">Guest</span>';
+            }
+
+            $actions = '<form action="' . route('admin.activities.sessions.destroy', $s->id) . '" method="post" onsubmit="return confirm(\'Destroy this session?\')" class="d-inline">';
+            $actions .= csrf_field();
+            $actions .= method_field('DELETE');
+            $actions .= '<button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>';
+            $actions .= '</form>';
+
+            return [
+                'user' => $userName,
+                'email' => $u->email ?? '—',
+                'phone' => $u->phone ?? '—',
+                'ip_address' => '<code>' . e($s->ip_address ?? '—') . '</code>',
+                'user_agent' => '<span class="small" title="' . e($s->user_agent) . '">' . e(\Str::limit($s->user_agent, 60)) . '</span>',
+                'last_activity' => \Carbon\Carbon::createFromTimestamp($s->last_activity)->format('Y-m-d H:i'),
+                'id' => '<code class="small">' . e($s->id) . '</code>',
+                'actions' => $actions,
+            ];
+        })->all();
+
+        return response()->json([
+            'draw' => $draw,
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered,
+            'data' => $data,
+        ]);
+    }
+
     /**
      * Extract ordering from DataTables request.
      * @return array<int, array{0:string,1:string}>

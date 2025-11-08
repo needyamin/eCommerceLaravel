@@ -51,7 +51,7 @@
 				<li class="nav-item">
 					<a href="{{ route('admin.permissions.index') }}" class="nav-link">
 						<i class="nav-icon bi bi-key"></i>
-						<p>Group Name</p>
+						<p>Route Permissions</p>
 					</a>
 				</li>
 				<li class="nav-item">

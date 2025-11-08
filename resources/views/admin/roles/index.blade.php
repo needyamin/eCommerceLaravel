@@ -3,13 +3,16 @@
 @section('title', 'Roles')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h4 m-0">Roles</h1>
-    <a href="{{ route('admin.roles.create') }}" class="btn btn-primary">New Role</a>
-  </div>
-
-<div class="card">
-  <div class="card-body p-0">
+<div class="card shadow-sm">
+    <div class="card-header bg-white border-bottom">
+        <div class="d-flex justify-content-between align-items-center">
+            <h3 class="card-title mb-0 fw-semibold">Roles</h3>
+            <a href="{{ route('admin.roles.create') }}" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-circle me-1"></i>New Role
+            </a>
+        </div>
+    </div>
+    <div class="card-body p-3">
     <div class="table-responsive">
       <table id="rolesTable" class="table table-bordered mb-0" style="width:100%">
         <thead>

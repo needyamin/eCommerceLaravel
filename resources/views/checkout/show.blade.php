@@ -110,7 +110,8 @@
                                     <select class="form-select @error('billing_country') is-invalid @enderror" 
                                             id="billing_country" 
                                             name="billing_country">
-                                        <option value="United States" {{ old('billing_country', 'United States') == 'United States' ? 'selected' : '' }}>United States</option>
+                                        <option value="Bangladesh" {{ old('billing_country', 'Bangladesh') == 'Bangladesh' ? 'selected' : '' }}>Bangladesh</option>
+                                        <option value="United States" {{ old('billing_country') == 'United States' ? 'selected' : '' }}>United States</option>
                                         <option value="Canada" {{ old('billing_country') == 'Canada' ? 'selected' : '' }}>Canada</option>
                                         <option value="United Kingdom" {{ old('billing_country') == 'United Kingdom' ? 'selected' : '' }}>United Kingdom</option>
                                         <option value="Australia" {{ old('billing_country') == 'Australia' ? 'selected' : '' }}>Australia</option>

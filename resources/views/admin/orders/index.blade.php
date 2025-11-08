@@ -1,31 +1,41 @@
 @extends('admin.layouts.app')
 
 @section('content')
-<div class="card">
-    <div class="card-header d-flex flex-wrap gap-2 justify-content-between align-items-center">
-        <h3 class="card-title mb-0">All Orders</h3>
-        <div class="d-flex gap-2 align-items-center ms-auto">
-            <select id="f_order_status" class="form-select form-select-sm" style="min-width: 160px;">
-                <option value="">All Status</option>
-                <option value="pending">Pending</option>
-                <option value="processing">Processing</option>
-                <option value="cancelled">Cancelled</option>
-                <option value="delivered">Delivered</option>
-            </select>
-            <select id="f_payment_status" class="form-select form-select-sm" style="min-width: 160px;">
-                <option value="">All Payments</option>
-                <option value="unpaid">Unpaid</option>
-                <option value="paid">Paid</option>
-                <option value="refunded">Refunded</option>
-            </select>
-            <input type="date" id="f_from" class="form-control form-control-sm" />
-            <input type="date" id="f_to" class="form-control form-control-sm" />
-            <a href="{{ route('admin.orders.create') }}" class="btn btn-sm btn-primary">
-                <i class="bi bi-bag-plus me-1"></i> Create Order
-            </a>
+<div class="card shadow-sm">
+    <div class="card-header bg-white border-bottom">
+        <div class="d-flex flex-wrap gap-3 justify-content-between align-items-center">
+            <h3 class="card-title mb-0 fw-semibold">All Orders</h3>
+            <div class="d-flex gap-2 align-items-center flex-wrap">
+                <div class="filter-group">
+                    <select id="f_order_status" class="form-select form-select-sm filter-select">
+                        <option value="">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="processing">Processing</option>
+                        <option value="cancelled">Cancelled</option>
+                        <option value="delivered">Delivered</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <select id="f_payment_status" class="form-select form-select-sm filter-select">
+                        <option value="">All Payments</option>
+                        <option value="unpaid">Unpaid</option>
+                        <option value="paid">Paid</option>
+                        <option value="refunded">Refunded</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <input type="date" id="f_from" class="form-control form-control-sm filter-input" placeholder="From Date" />
+                </div>
+                <div class="filter-group">
+                    <input type="date" id="f_to" class="form-control form-control-sm filter-input" placeholder="To Date" />
+                </div>
+                <a href="{{ route('admin.orders.create') }}" class="btn btn-sm btn-primary">
+                    <i class="bi bi-bag-plus me-1"></i>Create Order
+                </a>
+            </div>
         </div>
     </div>
-    <div class="card-body">
+    <div class="card-body p-3">
         <div class="table-responsive">
             <table id="ordersTable" class="table table-bordered table-striped align-middle" style="width:100%">
                 <thead>

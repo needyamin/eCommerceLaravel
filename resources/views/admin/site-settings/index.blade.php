@@ -239,6 +239,35 @@
           </div>
         </div>
 
+        <!-- Product Display Settings -->
+        <div class="mb-4">
+          <h5 class="mb-3 border-bottom pb-2"><i class="bi bi-grid me-2"></i>Product Display Settings</h5>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Products per Row (Mobile) <span class="text-danger">*</span></label>
+              <select name="product_display_columns_mobile" class="form-select @error('product_display_columns_mobile') is-invalid @enderror" required>
+                <option value="1" {{ old('product_display_columns_mobile', $settings->product_display_columns_mobile ?? 2) == 1 ? 'selected' : '' }}>1 Product</option>
+                <option value="2" {{ old('product_display_columns_mobile', $settings->product_display_columns_mobile ?? 2) == 2 ? 'selected' : '' }}>2 Products</option>
+                <option value="3" {{ old('product_display_columns_mobile', $settings->product_display_columns_mobile ?? 2) == 3 ? 'selected' : '' }}>3 Products</option>
+              </select>
+              <small class="text-muted">Number of products to display per row on mobile devices</small>
+              @error('product_display_columns_mobile')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Products per Row (Desktop) <span class="text-danger">*</span></label>
+              <select name="product_display_columns_desktop" class="form-select @error('product_display_columns_desktop') is-invalid @enderror" required>
+                <option value="2" {{ old('product_display_columns_desktop', $settings->product_display_columns_desktop ?? 3) == 2 ? 'selected' : '' }}>2 Products</option>
+                <option value="3" {{ old('product_display_columns_desktop', $settings->product_display_columns_desktop ?? 3) == 3 ? 'selected' : '' }}>3 Products</option>
+                <option value="4" {{ old('product_display_columns_desktop', $settings->product_display_columns_desktop ?? 3) == 4 ? 'selected' : '' }}>4 Products</option>
+                <option value="5" {{ old('product_display_columns_desktop', $settings->product_display_columns_desktop ?? 3) == 5 ? 'selected' : '' }}>5 Products</option>
+                <option value="6" {{ old('product_display_columns_desktop', $settings->product_display_columns_desktop ?? 3) == 6 ? 'selected' : '' }}>6 Products</option>
+              </select>
+              <small class="text-muted">Number of products to display per row on desktop/laptop screens</small>
+              @error('product_display_columns_desktop')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            </div>
+          </div>
+        </div>
+
         <div class="mt-4 pt-3 border-top">
           <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i>Save All Settings</button>
         </div>

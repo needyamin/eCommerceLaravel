@@ -57,53 +57,59 @@
 
             <div class="card shadow-sm">
                 <div class="card-header bg-white">
-                    <h2 class="h5 mb-0"><i class="bi bi-shield-lock me-2"></i>Change Password</h2>
+                    <h2 class="h5 mb-0">
+                        <button class="btn btn-link text-decoration-none p-0 w-100 text-start d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#changePasswordCollapse" aria-expanded="false" aria-controls="changePasswordCollapse">
+                        <h2 class="h5 mb-0 text-dark"><i class="bi bi-shield-lock me-2"></i>Change Password</h2>
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                    </h2>
                 </div>
-                <div class="card-body">
-                    <form action="{{ route('profile.change-password') }}" method="POST">
-                        @csrf
-                        <div class="row g-3">
-                            <div class="col-12">
-                                <label class="form-label">Current Password</label>
-                                <input name="current_password" type="password" required
-                                       class="form-control @error('current_password') is-invalid @enderror">
-                                @error('current_password')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                <div class="collapse" id="changePasswordCollapse">
+                    <div class="card-body">
+                        <form action="{{ route('profile.change-password') }}" method="POST">
+                            @csrf
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label">Current Password</label>
+                                    <input name="current_password" type="password" required
+                                           class="form-control @error('current_password') is-invalid @enderror">
+                                    @error('current_password')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">New Password</label>
+                                    <input name="password" type="password" required
+                                           class="form-control @error('password') is-invalid @enderror">
+                                    @error('password')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Confirm New Password</label>
+                                    <input name="password_confirmation" type="password" required class="form-control">
+                                </div>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">New Password</label>
-                                <input name="password" type="password" required
-                                       class="form-control @error('password') is-invalid @enderror">
-                                @error('password')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                            <div class="mt-4">
+                                <button type="submit" class="btn btn-danger"><i class="bi bi-key-fill me-1"></i>Change Password</button>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Confirm New Password</label>
-                                <input name="password_confirmation" type="password" required class="form-control">
-                            </div>
-                        </div>
-                        <div class="mt-4">
-                            <button type="submit" class="btn btn-danger"><i class="bi bi-key-fill me-1"></i>Change Password</button>
-                        </div>
-                    </form>
+                        </form>
+                    </div>
                 </div>
             </div>
 
             <!-- My Reviews Section -->
-            @php($myReviews = $user->reviews()->with('product')->latest()->get())
             @if($myReviews->count() > 0)
                 <div class="card shadow-sm mt-4">
                     <div class="card-header bg-white">
-                        <h2 class="h5 mb-0"><i class="bi bi-star me-2"></i>My Reviews</h2>
+                        <h2 class="h5 mb-0"><i class="bi bi-star me-2"></i>My Reviews <span class="badge bg-primary ms-2">{{ $myReviews->total() }}</span></h2>
                     </div>
                     <div class="card-body">
                         @foreach($myReviews as $review)
-                            <div class="border-bottom pb-3 mb-3">
+                            <div class="border-bottom pb-3 mb-3 review-item-profile">
                                 <div class="d-flex justify-content-between align-items-start mb-2">
                                     <div>
-                                        <strong><a href="{{ route('products.show', $review->product->slug) }}">{{ $review->product->name }}</a></strong>
+                                        <strong><a href="{{ route('products.show', $review->product->slug) }}" class="text-decoration-none">{{ $review->product->name }}</a></strong>
                                         @if($review->is_verified_purchase)
                                             <span class="badge bg-success ms-2"><i class="bi bi-check-circle me-1"></i>Verified Purchase</span>
                                         @endif
@@ -123,7 +129,24 @@
                                 @if($review->title)
                                     <h6 class="mb-2">{{ $review->title }}</h6>
                                 @endif
-                                <p class="mb-2">{{ $review->comment }}</p>
+                                @php
+                                    $comment = $review->comment;
+                                    $maxLength = 150;
+                                    $needsTruncation = strlen($comment) > $maxLength;
+                                    $shortText = $needsTruncation ? substr($comment, 0, $maxLength) . '...' : '';
+                                @endphp
+                                <div class="review-comment-profile mb-2" data-full-text="{{ e($comment) }}">
+                                    @if($needsTruncation)
+                                        <span class="review-text-short">{{ $shortText }}</span>
+                                        <span class="review-text-full" style="display:none;">{{ $comment }}</span>
+                                        <button type="button" class="btn btn-link btn-sm p-0 text-primary read-more-btn-profile">
+                                            <span class="read-more-text">Read More</span>
+                                            <span class="read-less-text" style="display:none;">Read Less</span>
+                                        </button>
+                                    @else
+                                        <span class="review-text-full">{{ $comment }}</span>
+                                    @endif
+                                </div>
                                 <form action="{{ route('reviews.destroy', $review) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this review?')">
                                     @csrf
                                     @method('DELETE')
@@ -131,6 +154,13 @@
                                 </form>
                             </div>
                         @endforeach
+                        
+                        <!-- Pagination -->
+                        @if($myReviews->hasPages())
+                            <div class="mt-4">
+                                {{ $myReviews->links() }}
+                            </div>
+                        @endif
                     </div>
                 </div>
             @endif
@@ -193,8 +223,72 @@
 </div>
 @endsection
 
+@push('styles')
+<style>
+.review-comment-profile {
+    line-height: 1.6;
+    word-wrap: break-word;
+}
+.read-more-btn-profile {
+    font-size: 0.875rem;
+    text-decoration: none;
+    margin-left: 5px;
+    vertical-align: baseline;
+}
+.read-more-btn-profile:hover {
+    text-decoration: underline;
+}
+.review-text-short,
+.review-text-full {
+    word-wrap: break-word;
+}
+/* Collapsible password section */
+.card-header button[data-bs-toggle="collapse"] {
+    color: inherit;
+    font-weight: inherit;
+    font-size: inherit;
+}
+.card-header button[data-bs-toggle="collapse"]:hover {
+    color: #667eea;
+}
+.card-header button[data-bs-toggle="collapse"] .bi-chevron-down {
+    transition: transform 0.3s ease;
+}
+.card-header button[data-bs-toggle="collapse"][aria-expanded="true"] .bi-chevron-down {
+    transform: rotate(180deg);
+}
+</style>
+@endpush
+
 @push('scripts')
 <script>
 console.log('Coins balance:', {{ isset($coinsBalance)?$coinsBalance:($user->coins_balance ?? 0) }});
+
+// Read More/Less functionality for review comments
+document.addEventListener('DOMContentLoaded', function(){
+    document.querySelectorAll('.read-more-btn-profile').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const container = this.closest('.review-comment-profile');
+            const shortText = container.querySelector('.review-text-short');
+            const fullText = container.querySelector('.review-text-full');
+            const readMoreText = container.querySelector('.read-more-text');
+            const readLessText = container.querySelector('.read-less-text');
+            
+            if (fullText && fullText.style.display !== 'none') {
+                // Collapse
+                if (shortText) shortText.style.display = 'inline';
+                if (fullText) fullText.style.display = 'none';
+                if (readMoreText) readMoreText.style.display = 'inline';
+                if (readLessText) readLessText.style.display = 'none';
+            } else {
+                // Expand
+                if (shortText) shortText.style.display = 'none';
+                if (fullText) fullText.style.display = 'inline';
+                if (readMoreText) readMoreText.style.display = 'none';
+                if (readLessText) readLessText.style.display = 'inline';
+            }
+        });
+    });
+});
 </script>
 @endpush

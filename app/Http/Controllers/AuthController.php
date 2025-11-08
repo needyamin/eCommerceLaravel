@@ -56,9 +56,11 @@ class AuthController extends Controller
         ])->onlyInput('login');
     }
 
-    public function showRegisterForm()
+    public function showRegisterForm(Request $request)
     {
-        return view('auth.register');
+        $referralCode = $request->session()->get('referral_code');
+        $referrerName = $request->session()->get('referrer_name');
+        return view('auth.register', compact('referralCode', 'referrerName'));
     }
 
     public function register(Request $request)
@@ -90,11 +92,13 @@ class AuthController extends Controller
         // Attach referrer & award signup bonus (respects Coin Settings flags)
         try {
             if ($request->session()->has('referral_code')) {
-                $code = (string) $request->session()->get('referral_code');
+                $code = strtoupper(trim((string) $request->session()->get('referral_code')));
                 $referrer = User::where('referral_code', $code)->first();
                 if ($referrer && $referrer->id !== $user->id) {
                     $user->referred_by_user_id = $referrer->id;
                     $user->save();
+                    
+                    // Award bonus to referrer
                     $bonus = 0; $enabledAll = true; $enabledReferral = true;
                     try {
                         $cs = CoinSetting::get();
@@ -105,9 +109,15 @@ class AuthController extends Controller
                     if ($enabledAll && $enabledReferral && $bonus > 0) {
                         PointService::award($referrer, $bonus, 'referral_signup', 'Referral signup bonus', $user, ['referred_user_id' => $user->id]);
                     }
+                    
+                    // Clear referral session after successful registration
+                    $request->session()->forget(['referral_code', 'referrer_name']);
                 }
             }
-        } catch (\Throwable $e) { /* ignore */ }
+        } catch (\Throwable $e) { 
+            // Log error but don't break registration
+            \Log::error('Referral processing error: ' . $e->getMessage());
+        }
 
         Auth::login($user);
 
@@ -147,7 +157,8 @@ class AuthController extends Controller
         }
         $coinsBalance = (int) $coins;
         $recentPoints = \App\Models\UserPoint::where('user_id', $user->id)->latest()->limit(20)->get();
-        return view('auth.profile', compact('user', 'coinsBalance', 'recentPoints'));
+        $myReviews = $user->reviews()->with('product')->latest()->paginate(5);
+        return view('auth.profile', compact('user', 'coinsBalance', 'recentPoints', 'myReviews'));
     }
 
     public function updateProfile(Request $request)

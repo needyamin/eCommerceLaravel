@@ -11,7 +11,8 @@ class SiteSetting extends Model
         'footer_text','privacy_url','terms_url','cookies_url','help_center_url','shipping_info_url','returns_url','contact_us_url',
         'wishlist_enabled','social_facebook','social_twitter','social_instagram','social_linkedin',
         'reviews_enabled','reviews_require_purchase','reviews_require_approval','reviews_allow_anonymous',
-        'newsletter_enabled','newsletter_double_opt_in','newsletter_send_welcome_email'
+        'newsletter_enabled','newsletter_double_opt_in','newsletter_send_welcome_email',
+        'product_display_columns_mobile','product_display_columns_desktop'
     ];
 
     protected $casts = [
