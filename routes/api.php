@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 use App\Http\Controllers\Api\AuthController as ApiAuthController;
 use App\Http\Controllers\Api\ProductController as ApiProductController;
 use App\Http\Controllers\Api\CategoryController as ApiCategoryController;
@@ -26,7 +27,8 @@ Route::put('/cart/items/{item}', [ApiCartController::class, 'update']);
 Route::delete('/cart/items/{item}', [ApiCartController::class, 'remove']);
 Route::post('/cart/clear', [ApiCartController::class, 'clear']);
 
-// Wishlist (guest toggle + auth list)
+// Wishlist (guest toggle + guest/auth list)
+Route::get('/wishlist', [ApiWishlistController::class, 'index']);
 Route::post('/wishlist/toggle', [ApiWishlistController::class, 'toggle']);
 
 Route::post('/coupons/apply', [ApiCouponController::class, 'apply']);
@@ -52,9 +54,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/orders', [ApiOrderController::class, 'index']);
     Route::get('/orders/{id}', [ApiOrderController::class, 'show']);
     Route::post('/checkout', [ApiOrderController::class, 'place']);
-
-    // Wishlist (auth list)
-    Route::get('/wishlist', [ApiWishlistController::class, 'index']);
 });
+
 
 

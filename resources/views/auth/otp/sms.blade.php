@@ -41,7 +41,7 @@
             </div>
             <div class="mb-3">
               <label for="otp" class="form-label">OTP</label>
-              <input type="text" name="otp" id="otp" class="form-control @error('otp') is-invalid @enderror" placeholder="6-digit code" required>
+              <input type="text" name="otp" id="otp" class="form-control @error('otp') is-invalid @enderror" placeholder="Enter OTP code" pattern="[0-9]{4,8}" maxlength="8" required>
               @error('otp')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
             <div class="mb-3">

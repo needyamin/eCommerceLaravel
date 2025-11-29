@@ -22,7 +22,18 @@ abstract class BasePaymentGateway implements PaymentGatewayInterface
         
         $this->config = [];
         foreach ($settings as $setting) {
-            $this->config[$setting->key] = $setting->value;
+            $value = $setting->value;
+            // Convert boolean strings to actual booleans
+            if (in_array($setting->key, ['enabled', 'sandbox_mode'])) {
+                if (is_bool($value)) {
+                    // Already a boolean, keep it
+                } elseif (is_string($value)) {
+                    $value = in_array(strtolower($value), ['1', 'true', 'yes', 'on']);
+                } else {
+                    $value = (bool) $value;
+                }
+            }
+            $this->config[$setting->key] = $value;
         }
         
         $this->enabled = $this->config['enabled'] ?? false;

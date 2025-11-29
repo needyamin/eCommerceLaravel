@@ -230,8 +230,8 @@ class DataTableController extends Controller
                 'name' => e($u->name),
                 'email' => e($u->email),
                 'phone' => e($u->phone ?? 'N/A'),
-                'addresses_count' => '<span class="badge bg-info">' . (int) $u->addresses_count . '</span>',
-                'orders_count' => '<span class="badge bg-success">' . (int) $u->orders_count . '</span>',
+                'addresses_count' => '<span class="badge text-bg-info">' . (int) $u->addresses_count . '</span>',
+                'orders_count' => '<span class="badge text-bg-success">' . (int) $u->orders_count . '</span>',
                 'created_at' => $u->created_at->format('M d, Y'),
                 'actions' => $this->safeRenderView('admin.users._dt_actions', compact('u')),
             ];
@@ -283,14 +283,14 @@ class DataTableController extends Controller
         if ($order) { foreach ($order as [$c,$d]) { $query->orderBy($c,$d); } } else { $query->latest('id'); }
         $items = $query->skip($start)->take($length)->get();
         $data = $items->map(function($c){
-            $typeBadge = $c->type === 'percentage' ? 'badge-info' : 'badge-success';
+            $typeBadge = $c->type === 'percentage' ? 'text-bg-info' : 'text-bg-success';
             return [
                 'code' => '<code class="bg-light px-2 py-1 rounded">' . e($c->code) . '</code>',
                 'name' => e($c->name),
                 'type' => '<span class="badge ' . $typeBadge . '">' . e(ucfirst($c->type)) . '</span>',
                 'value' => $c->type === 'percentage' ? (int) $c->value . '%' : '$' . number_format((float) $c->value, 2),
                 'usages_count' => (int) $c->usages_count . ($c->usage_limit ? (' / ' . (int) $c->usage_limit) : ''),
-                'is_active' => $c->is_active ? '<span class="badge badge-success">Active</span>' : '<span class="badge badge-secondary">Inactive</span>',
+                'is_active' => $c->is_active ? '<span class="badge text-bg-success">Active</span>' : '<span class="badge text-bg-secondary">Inactive</span>',
                 'expires_at' => $c->expires_at ? $c->expires_at->format('M d, Y') : '<span class="text-muted">Never</span>',
                 'actions' => $this->safeRenderView('admin.coupons._dt_actions', compact('c')),
             ];
@@ -309,12 +309,12 @@ class DataTableController extends Controller
         if ($order) { foreach ($order as [$c,$d]) { $query->orderBy($c,$d); } } else { $query->latest('id'); }
         $items = $query->skip($start)->take($length)->get();
         $data = $items->map(function($s){
-            $statusBadge = $s->status === 'subscribed' ? 'bg-success' : 'bg-secondary';
+            $statusBadge = $s->status === 'subscribed' ? 'text-bg-success' : 'text-bg-secondary';
             return [
                 'email' => e($s->email),
                 'name' => e($s->name ?? '-'),
                 'status' => '<span class="badge ' . $statusBadge . '">' . e(ucfirst($s->status)) . '</span>',
-                'source' => '<span class="badge bg-info">' . e($s->source ?? '-') . '</span>',
+                'source' => '<span class="badge text-bg-info">' . e($s->source ?? '-') . '</span>',
                 'subscribed_at' => $s->subscribed_at ? $s->subscribed_at->format('M d, Y') : '-',
                 'actions' => $this->safeRenderView('admin.newsletter._dt_actions', compact('s')),
             ];
@@ -329,16 +329,16 @@ class DataTableController extends Controller
         if ($request->filled('is_active')) { $query->where('is_active', (int) $request->input('is_active')); }
         if ($search !== '') { $query->where(function($q) use($search){ $q->where('code','like',"%{$search}%")->orWhere('name','like',"%{$search}%"); }); }
         $recordsFiltered = (clone $query)->count();
-        $order = $this->extractOrdering($request, ['code','name','rate','is_active','is_default']);
+        $order = $this->extractOrdering($request, ['code','name','symbol','is_active','is_default']);
         if ($order) { foreach ($order as [$c,$d]) { $query->orderBy($c,$d); } } else { $query->latest('id'); }
         $items = $query->skip($start)->take($length)->get();
         $data = $items->map(function($c){
             return [
                 'code' => '<code>' . e($c->code) . '</code>',
                 'name' => e($c->name),
-                'rate' => e($c->rate),
-                'is_active' => $c->is_active ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-secondary">Inactive</span>',
-                'is_default' => $c->is_default ? '<span class="badge bg-primary">Default</span>' : '',
+                'symbol' => e($c->symbol),
+                'is_active' => $c->is_active ? '<span class="badge text-bg-success">Active</span>' : '<span class="badge text-bg-secondary">Inactive</span>',
+                'is_default' => $c->is_default ? '<span class="badge text-bg-primary">Default</span>' : '',
                 'actions' => $this->safeRenderView('admin.currencies._dt_actions', compact('c')),
             ];
         })->all();
@@ -476,12 +476,12 @@ class DataTableController extends Controller
             $reviewText .= '<small class="text-muted">' . e(\Str::limit($r->comment, 100)) . '</small>';
 
             $statusBadge = $r->is_approved 
-                ? '<span class="badge bg-success">Approved</span>' 
-                : '<span class="badge bg-warning">Pending</span>';
+                ? '<span class="badge text-bg-success">Approved</span>' 
+                : '<span class="badge text-bg-warning text-dark">Pending</span>';
 
             $userName = $r->user ? e($r->user->name) : 'Anonymous';
             if ($r->is_verified_purchase) {
-                $userName .= ' <span class="badge bg-success ms-1" title="Verified Purchase"><i class="bi bi-check-circle"></i></span>';
+                $userName .= ' <span class="badge text-bg-success ms-1" title="Verified Purchase"><i class="bi bi-check-circle"></i></span>';
             }
 
             $actions = '<div class="btn-group btn-group-sm">';
@@ -572,7 +572,7 @@ class DataTableController extends Controller
             $user = optional($item->cart->user);
             $userName = $user->name ?? '—';
             if (empty($user->email) && empty($user->phone)) {
-                $userName .= ' <span class="badge bg-secondary ms-1">Guest</span>';
+                $userName .= ' <span class="badge text-bg-secondary ms-1">Guest</span>';
             }
 
             return [
@@ -635,7 +635,7 @@ class DataTableController extends Controller
             $user = optional($it->user);
             $userName = $user->name ?? '—';
             if (empty($user->email) && empty($user->phone)) {
-                $userName .= ' <span class="badge bg-secondary ms-1">Guest</span>';
+                $userName .= ' <span class="badge text-bg-secondary ms-1">Guest</span>';
             }
 
             return [
@@ -694,9 +694,9 @@ class DataTableController extends Controller
         $items = $query->select('guest_wishlists.*')->skip($start)->take($length)->get();
         $data = $items->map(function ($g) {
             return [
-                'user' => '<span class="badge bg-secondary">Guest</span>',
-                'email' => '<span class="badge bg-secondary">Guest</span>',
-                'phone' => '<span class="badge bg-secondary">Guest</span>',
+                'user' => '<span class="badge text-bg-secondary">Guest</span>',
+                'email' => '<span class="badge text-bg-secondary">Guest</span>',
+                'phone' => '<span class="badge text-bg-secondary">Guest</span>',
                 'product' => $g->product 
                     ? '<a href="' . route('products.show', $g->product->slug) . '" target="_blank">' . e($g->product->name) . '</a>'
                     : '<span class="text-muted">(deleted product)</span>',
@@ -750,7 +750,7 @@ class DataTableController extends Controller
             $u = optional($s->user);
             $userName = $u->name ?? '—';
             if (!$s->user_id) {
-                $userName .= ' <span class="badge bg-secondary ms-1">Guest</span>';
+                $userName .= ' <span class="badge text-bg-secondary ms-1">Guest</span>';
             }
 
             $actions = '<form action="' . route('admin.activities.sessions.destroy', $s->id) . '" method="post" onsubmit="return confirm(\'Destroy this session?\')" class="d-inline">';

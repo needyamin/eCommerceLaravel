@@ -122,10 +122,10 @@ class DatabaseSeeder extends Seeder
 
         // Currencies
         $currencies = [
-            ['code' => 'BDT', 'name' => 'Bangladeshi Taka', 'symbol' => '৳', 'precision' => 2, 'thousand_separator' => ',', 'decimal_separator' => '.', 'symbol_first' => true, 'rate' => 110.00, 'is_active' => true, 'is_default' => true],
-            ['code' => 'USD', 'name' => 'US Dollar', 'symbol' => '$', 'precision' => 2, 'thousand_separator' => ',', 'decimal_separator' => '.', 'symbol_first' => true, 'rate' => 1, 'is_active' => true, 'is_default' => false],
-            ['code' => 'EUR', 'name' => 'Euro', 'symbol' => '€', 'precision' => 2, 'thousand_separator' => '.', 'decimal_separator' => ',', 'symbol_first' => true, 'rate' => 0.92, 'is_active' => true, 'is_default' => false],
-            ['code' => 'GBP', 'name' => 'British Pound', 'symbol' => '£', 'precision' => 2, 'thousand_separator' => ',', 'decimal_separator' => '.', 'symbol_first' => true, 'rate' => 0.78, 'is_active' => true, 'is_default' => false],
+            ['code' => 'BDT', 'name' => 'Bangladeshi Taka', 'symbol' => '৳', 'is_active' => true, 'is_default' => true],
+            ['code' => 'USD', 'name' => 'US Dollar', 'symbol' => '$', 'is_active' => true, 'is_default' => false],
+            ['code' => 'EUR', 'name' => 'Euro', 'symbol' => '€', 'is_active' => true, 'is_default' => false],
+            ['code' => 'GBP', 'name' => 'British Pound', 'symbol' => '£', 'is_active' => true, 'is_default' => false],
         ];
         foreach ($currencies as $data) {
             Currency::updateOrCreate(['code' => $data['code']], $data);
@@ -150,15 +150,47 @@ class DatabaseSeeder extends Seeder
         }
         $super->givePermissionTo(Permission::whereIn('name', $currencyPermissions)->where('guard_name', 'admin')->get());
 
-        // Payment gateway settings
+        // Payment gateway settings with default test/sandbox credentials
+        // International gateways
         PaymentGatewaySetting::setGatewaySetting('stripe', 'enabled', false, 'Enable or disable Stripe payment gateway');
-        PaymentGatewaySetting::setGatewaySetting('stripe', 'publishable_key', '', 'Stripe publishable key (starts with pk_)');
-        PaymentGatewaySetting::setGatewaySetting('stripe', 'secret_key', '', 'Stripe secret key (starts with sk_)', true);
-        PaymentGatewaySetting::setGatewaySetting('stripe', 'webhook_secret', '', 'Stripe webhook endpoint secret', true);
+        PaymentGatewaySetting::setGatewaySetting('stripe', 'publishable_key', 'pk_test_51Q4QjQRPJ7xXyZxZ1234567890abcdefghijklmnopqrstuvwxyz', 'Stripe publishable key (starts with pk_)');
+        PaymentGatewaySetting::setGatewaySetting('stripe', 'secret_key', 'sk_test_51Q4QjQRPJ7xXyZxZ1234567890abcdefghijklmnopqrstuvwxyz', 'Stripe secret key (starts with sk_)', true);
+        PaymentGatewaySetting::setGatewaySetting('stripe', 'webhook_secret', 'whsec_1234567890abcdefghijklmnopqrstuvwxyz', 'Stripe webhook endpoint secret', true);
+        PaymentGatewaySetting::setGatewaySetting('stripe', 'sandbox_mode', true, 'Use Stripe test mode for testing');
+        
         PaymentGatewaySetting::setGatewaySetting('paypal', 'enabled', false, 'Enable or disable PayPal payment gateway');
-        PaymentGatewaySetting::setGatewaySetting('paypal', 'client_id', '', 'PayPal application client ID');
-        PaymentGatewaySetting::setGatewaySetting('paypal', 'client_secret', '', 'PayPal application client secret', true);
+        PaymentGatewaySetting::setGatewaySetting('paypal', 'client_id', 'sb-client_id_1234567890', 'PayPal application client ID');
+        PaymentGatewaySetting::setGatewaySetting('paypal', 'client_secret', 'sb-client_secret_1234567890', 'PayPal application client secret', true);
         PaymentGatewaySetting::setGatewaySetting('paypal', 'sandbox_mode', true, 'Use PayPal sandbox for testing');
+        
+        // Bangladeshi payment gateways
+        PaymentGatewaySetting::setGatewaySetting('bkash', 'enabled', false, 'Enable or disable bKash payment gateway');
+        PaymentGatewaySetting::setGatewaySetting('bkash', 'api_key', '4f6o0cjiki2rfm34kfdadl1eqq', 'bKash App Key (from bKash merchant panel)');
+        PaymentGatewaySetting::setGatewaySetting('bkash', 'api_secret', '2is7hdktrekvrbljjh44d3l9dt', 'bKash App Secret (from bKash merchant panel)', true);
+        PaymentGatewaySetting::setGatewaySetting('bkash', 'username', 'sandboxTokenizedUser02', 'bKash Username (for tokenized checkout)');
+        PaymentGatewaySetting::setGatewaySetting('bkash', 'password', 'sandboxTokenizedUser02@12345', 'bKash Password (for tokenized checkout)', true);
+        PaymentGatewaySetting::setGatewaySetting('bkash', 'sandbox_mode', true, 'Use bKash sandbox for testing');
+        
+        PaymentGatewaySetting::setGatewaySetting('nagad', 'enabled', false, 'Enable or disable Nagad payment gateway');
+        PaymentGatewaySetting::setGatewaySetting('nagad', 'merchant_number', '017XXXXXXXX', 'Nagad merchant account number');
+        PaymentGatewaySetting::setGatewaySetting('nagad', 'api_key', 'nagad_test_api_key_1234567890', 'Nagad API key');
+        PaymentGatewaySetting::setGatewaySetting('nagad', 'api_secret', 'nagad_test_api_secret_1234567890', 'Nagad API secret', true);
+        PaymentGatewaySetting::setGatewaySetting('nagad', 'sandbox_mode', true, 'Use Nagad sandbox for testing');
+        
+        PaymentGatewaySetting::setGatewaySetting('rocket', 'enabled', false, 'Enable or disable Rocket payment gateway');
+        PaymentGatewaySetting::setGatewaySetting('rocket', 'merchant_number', '017XXXXXXXX', 'Rocket merchant account number');
+        PaymentGatewaySetting::setGatewaySetting('rocket', 'api_key', 'rocket_test_api_key_1234567890', 'Rocket API key');
+        PaymentGatewaySetting::setGatewaySetting('rocket', 'api_secret', 'rocket_test_api_secret_1234567890', 'Rocket API secret', true);
+        PaymentGatewaySetting::setGatewaySetting('rocket', 'sandbox_mode', true, 'Use Rocket sandbox for testing');
+        
+        PaymentGatewaySetting::setGatewaySetting('ssl_commerce', 'enabled', false, 'Enable or disable SSL Commerce payment gateway');
+        PaymentGatewaySetting::setGatewaySetting('ssl_commerce', 'store_id', 'testbox', 'SSL Commerce store ID');
+        PaymentGatewaySetting::setGatewaySetting('ssl_commerce', 'store_password', 'qwerty', 'SSL Commerce store password', true);
+        PaymentGatewaySetting::setGatewaySetting('ssl_commerce', 'api_url', 'https://sandbox.sslcommerz.com', 'SSL Commerce API URL');
+        PaymentGatewaySetting::setGatewaySetting('ssl_commerce', 'success_url', url('/payment/ssl-commerce/success'), 'URL to redirect after successful payment');
+        PaymentGatewaySetting::setGatewaySetting('ssl_commerce', 'fail_url', url('/payment/ssl-commerce/fail'), 'URL to redirect after failed payment');
+        PaymentGatewaySetting::setGatewaySetting('ssl_commerce', 'cancel_url', url('/payment/ssl-commerce/cancel'), 'URL to redirect after cancelled payment');
+        PaymentGatewaySetting::setGatewaySetting('ssl_commerce', 'sandbox_mode', true, 'Use SSL Commerce sandbox for testing');
 
         // Coupons
         $coupons = [
@@ -287,5 +319,8 @@ class DatabaseSeeder extends Seeder
 
         // Pages
         $this->call(PageSeeder::class);
+        
+        // Bangladesh Districts
+        $this->call(BangladeshDistrictsSeeder::class);
     }
 }

@@ -89,7 +89,21 @@ class Cart extends Model
         $this->load('items');
         $this->subtotal = $this->items->sum('line_total');
         $this->discount_total = $this->coupon_discount;
-        $this->tax_total = round(($this->subtotal - $this->discount_total) * 0.00, 2); // placeholder tax
+        
+        // Calculate tax based on shipping settings
+        $shippingSettings = \App\Models\ShippingSetting::get();
+        $taxableAmount = $this->subtotal - $this->discount_total;
+        
+        if ($shippingSettings->tax_enabled && $shippingSettings->tax_rate > 0) {
+            if ($shippingSettings->tax_type === 'percent') {
+                $this->tax_total = round($taxableAmount * ($shippingSettings->tax_rate / 100), 2);
+            } else {
+                $this->tax_total = round((float) $shippingSettings->tax_rate, 2);
+            }
+        } else {
+            $this->tax_total = 0;
+        }
+        
         $this->grand_total = $this->subtotal - $this->discount_total + $this->tax_total;
         $this->save();
     }

@@ -31,11 +31,9 @@ class CurrencyManager
     public static function format(float $amount, ?Currency $currency = null): string
     {
         $c = $currency ?: self::current();
-        $value = $amount * (float) $c->rate;
-        $formatted = number_format($value, $c->precision, $c->decimal_separator, $c->thousand_separator);
-        return $c->symbol_first
-            ? ($c->symbol . $formatted)
-            : ($formatted . ' ' . $c->symbol);
+        // Use BDT formatting defaults: 2 decimal places, comma separator, symbol before
+        $formatted = number_format($amount, 2, '.', ',');
+        return $c->symbol . $formatted;
     }
 
     /**
@@ -44,9 +42,8 @@ class CurrencyManager
     public static function convert(float $amount, ?Currency $currency = null, ?int $precisionOverride = null): float
     {
         $c = $currency ?: self::current();
-        $precision = $precisionOverride ?? (int) $c->precision;
-        $value = $amount * (float) $c->rate;
-        return round($value, $precision);
+        $precision = $precisionOverride ?? 2;
+        return round($amount, $precision);
     }
 
     /**

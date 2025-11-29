@@ -7,17 +7,26 @@ use Illuminate\Database\Eloquent\Model;
 class ShippingSetting extends Model
 {
     protected $fillable = [
-        'enabled','free_shipping_enabled','free_shipping_min_total','country_rates',
-        'global_rate_enabled','global_rate_type','global_rate_amount'
+        'enabled',
+        'flat_rate',
+        'free_shipping_enabled',
+        'free_shipping_min_total',
+        'division_rates',
+        'district_rates',
+        'tax_enabled',
+        'tax_type',
+        'tax_rate'
     ];
 
     protected $casts = [
         'enabled' => 'boolean',
+        'flat_rate' => 'decimal:2',
         'free_shipping_enabled' => 'boolean',
         'free_shipping_min_total' => 'decimal:2',
-        'country_rates' => 'array',
-        'global_rate_enabled' => 'boolean',
-        'global_rate_amount' => 'decimal:2',
+        'division_rates' => 'array',
+        'district_rates' => 'array',
+        'tax_enabled' => 'boolean',
+        'tax_rate' => 'decimal:2',
     ];
 
     public static function get(): self

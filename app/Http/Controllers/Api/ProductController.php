@@ -11,7 +11,7 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::with(['images', 'category'])->where('is_active', true);
+        $query = Product::with(['images', 'category.parent'])->where('is_active', true);
         if ($request->filled('q')) {
             $q = $request->string('q');
             $query->where(function ($qbuilder) use ($q) {
@@ -20,7 +20,21 @@ class ProductController extends Controller
             });
         }
         if ($request->filled('category_id')) {
-            $query->where('category_id', $request->integer('category_id'));
+            $categoryId = $request->integer('category_id');
+            // Include products in this category or its subcategories
+            $category = \App\Models\Category::find($categoryId);
+            if ($category) {
+                if ($category->parent_id === null) {
+                    // Parent category: include products in this category and all its subcategories
+                    $subcategoryIds = \App\Models\Category::where('parent_id', $categoryId)->pluck('id');
+                    $query->whereIn('category_id', array_merge([$categoryId], $subcategoryIds->toArray()));
+                } else {
+                    // Subcategory: only products in this subcategory
+                    $query->where('category_id', $categoryId);
+                }
+            } else {
+                $query->where('category_id', $categoryId);
+            }
         }
         $perPage = (int) $request->input('per_page', 20);
         if ($perPage < 1) { $perPage = 20; }
@@ -41,7 +55,7 @@ class ProductController extends Controller
 
     public function show(string $slug)
     {
-        $product = Product::with(['images', 'category'])->where('slug', $slug)->where('is_active', true)->firstOrFail();
+        $product = Product::with(['images', 'category.parent'])->where('slug', $slug)->where('is_active', true)->firstOrFail();
         return response()->json($this->productResource($product, true));
     }
 
@@ -62,6 +76,12 @@ class ProductController extends Controller
                 'id' => $p->category->id,
                 'name' => $p->category->name,
                 'slug' => $p->category->slug,
+                'is_parent' => $p->category->parent_id === null,
+                'parent' => $p->category->parent ? [
+                    'id' => $p->category->parent->id,
+                    'name' => $p->category->parent->name,
+                    'slug' => $p->category->parent->slug,
+                ] : null,
             ] : null,
             'images' => $p->images->map(fn ($img) => [
                 'id' => $img->id,

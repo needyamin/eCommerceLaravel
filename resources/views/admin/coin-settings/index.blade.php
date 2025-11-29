@@ -4,7 +4,6 @@
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-3">
-  <h1 class="h4 mb-0"><i class="bi bi-coin me-2"></i>Coin Settings</h1>
   </div>
 
 <div class="card">

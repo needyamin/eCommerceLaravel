@@ -3,38 +3,43 @@
 @section('title', 'Currencies')
 
 @section('content')
-<div class="container-fluid">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h3 mb-0"><i class="bi bi-currency-exchange me-2"></i>Currencies</h1>
-    <a href="{{ route('admin.currencies.create') }}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add Currency</a>
-  </div>
-
-  <div class="card shadow-sm">
-    <div class="card-body p-0">
-      <div class="p-3 d-flex gap-2 align-items-center">
-        <select id="f_curr_active" class="form-select form-select-sm" style="max-width: 160px;">
-          <option value="">All Status</option>
-          <option value="1">Active</option>
-          <option value="0">Inactive</option>
-        </select>
-      </div>
-      <div class="table-responsive">
-        <table id="currenciesTable" class="table table-hover mb-0" style="width:100%">
-          <thead class="table-light">
-            <tr>
-              <th>Code</th>
-              <th>Name</th>
-              <th>Rate</th>
-              <th>Status</th>
-              <th>Default</th>
-              <th class="text-end">Actions</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
+<div class="card shadow-sm">
+    <div class="card-header bg-white border-bottom">
+        <div class="d-flex flex-wrap gap-3 justify-content-between align-items-center">
+            <h3 class="card-title mb-0 fw-semibold">Currencies</h3>
+            <div class="d-flex gap-2 align-items-center flex-wrap">
+                <a href="{{ route('admin.currencies.create') }}" class="btn btn-primary btn-sm">
+                    <i class="bi bi-plus-circle me-1"></i>New Currency
+                </a>
+            </div>
+        </div>
     </div>
-  </div>
+    <div class="card-body p-3">
+        <div class="d-flex gap-2 align-items-center mb-3">
+            <div class="filter-group">
+                <select id="f_curr_active" class="form-select form-select-sm filter-select">
+                    <option value="">All Status</option>
+                    <option value="1">Active</option>
+                    <option value="0">Inactive</option>
+                </select>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table id="currenciesTable" class="table table-bordered table-striped align-middle" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Symbol</th>
+                        <th>Status</th>
+                        <th>Default</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
 </div>
 @push('scripts')
 <script>
@@ -50,10 +55,10 @@ document.addEventListener('DOMContentLoaded', function(){
     columns: [
       { data: 'code', name: 'code' },
       { data: 'name', name: 'name' },
-      { data: 'rate', name: 'rate' },
+      { data: 'symbol', name: 'symbol' },
       { data: 'is_active', name: 'is_active', searchable: false },
       { data: 'is_default', name: 'is_default', searchable: false },
-      { data: 'actions', name: 'actions', orderable: false, searchable: false, className: 'text-end' }
+      { data: 'actions', name: 'actions', orderable: false, searchable: false, className: 'text-center' }
     ]
   });
   document.getElementById('f_curr_active').addEventListener('change', ()=>table.ajax.reload());

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\PaymentGateway;
 
 use Stripe\Stripe;
 use Stripe\PaymentIntent;
+use Stripe\Checkout\Session;
 use Stripe\Refund;
 use Stripe\Exception\ApiErrorException;
 
@@ -14,7 +15,10 @@ class StripeGateway extends BasePaymentGateway
         parent::__construct();
         
         if ($this->isEnabled()) {
-            Stripe::setApiKey($this->getConfigValue('secret_key'));
+            $secretKey = $this->getConfigValue('secret_key');
+            if ($secretKey) {
+                Stripe::setApiKey($secretKey);
+            }
         }
     }
 
@@ -38,29 +42,46 @@ class StripeGateway extends BasePaymentGateway
                 throw new \Exception('Stripe payment gateway is not enabled');
             }
 
-            $paymentIntent = PaymentIntent::create([
-                'amount' => $this->convertToCents($paymentData['amount']),
-                'currency' => strtolower($paymentData['currency']),
+            $sandboxMode = $this->getConfigValue('sandbox_mode', true);
+            $baseUrl = url('/');
+            
+            // Create Stripe Checkout Session
+            $session = Session::create([
+                'payment_method_types' => ['card'],
+                'line_items' => [[
+                    'price_data' => [
+                        'currency' => strtolower($paymentData['currency'] ?? 'bdt'),
+                        'product_data' => [
+                            'name' => 'Order #' . $paymentData['order_id'],
+                        ],
+                        'unit_amount' => $this->convertToCents($paymentData['amount']),
+                    ],
+                    'quantity' => 1,
+                ]],
+                'mode' => 'payment',
+                'success_url' => $baseUrl . '/payment/stripe/success?session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url' => $baseUrl . '/payment/stripe/cancel',
                 'metadata' => [
                     'order_id' => $paymentData['order_id'],
-                    'customer_email' => $paymentData['customer_email'] ?? '',
                 ],
-                'description' => "Order #{$paymentData['order_id']}",
+                'customer_email' => $paymentData['customer_email'] ?? null,
             ]);
 
             $this->logActivity('payment_created', [
-                'payment_intent_id' => $paymentIntent->id,
+                'session_id' => $session->id,
                 'order_id' => $paymentData['order_id'],
                 'amount' => $paymentData['amount'],
+                'sandbox_mode' => $sandboxMode,
             ]);
-
+            
             return [
                 'success' => true,
-                'payment_id' => $paymentIntent->id,
-                'client_secret' => $paymentIntent->client_secret,
+                'payment_id' => $session->id,
+                'transaction_id' => $session->id,
+                'redirect_url' => $session->url,
                 'amount' => $paymentData['amount'],
                 'currency' => $paymentData['currency'],
-                'status' => $paymentIntent->status,
+                'status' => 'pending',
             ];
 
         } catch (ApiErrorException $e) {
@@ -97,20 +118,23 @@ class StripeGateway extends BasePaymentGateway
                 throw new \Exception('Stripe payment gateway is not enabled');
             }
 
-            $paymentIntent = PaymentIntent::retrieve($paymentId);
+            // Retrieve Checkout Session (since we're using Checkout Sessions)
+            $session = Session::retrieve($paymentId);
 
             $this->logActivity('payment_verified', [
-                'payment_intent_id' => $paymentId,
-                'status' => $paymentIntent->status,
+                'session_id' => $paymentId,
+                'payment_status' => $session->payment_status,
+                'status' => $session->status,
             ]);
 
             return [
                 'success' => true,
-                'payment_id' => $paymentIntent->id,
-                'status' => $paymentIntent->status,
-                'amount' => $this->convertFromCents($paymentIntent->amount),
-                'currency' => strtoupper($paymentIntent->currency),
-                'paid' => $paymentIntent->status === 'succeeded',
+                'payment_id' => $session->id,
+                'status' => $session->status,
+                'payment_status' => $session->payment_status,
+                'amount' => $session->amount_total ? $this->convertFromCents($session->amount_total) : 0,
+                'currency' => strtoupper($session->currency ?? 'usd'),
+                'paid' => $session->payment_status === 'paid',
             ];
 
         } catch (ApiErrorException $e) {

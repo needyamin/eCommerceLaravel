@@ -124,12 +124,7 @@
 @endpush
 
 @section('content')
-<div class="container-fluid">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h3 mb-0"><i class="bi bi-gear me-2"></i>Site Settings</h1>
-  </div>
-
-  <div class="card shadow-sm">
+<div class="card shadow-sm">
     <div class="card-header bg-white border-bottom">
       <h3 class="card-title mb-0 fw-semibold">Configure Site Settings</h3>
     </div>

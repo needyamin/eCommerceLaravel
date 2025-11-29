@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top" style="z-index: 1020;">
     <div class="container">
         <!-- Brand -->
         <a class="navbar-brand text-primary fw-bold d-flex align-items-center" href="{{ route('home') }}">

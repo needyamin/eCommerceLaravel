@@ -20,6 +20,9 @@ class UserAddress extends Model
         'address_line_2',
         'city',
         'state',
+        'division',
+        'district',
+        'upazila',
         'postal_code',
         'country',
         'phone',
@@ -46,11 +49,21 @@ class UserAddress extends Model
         if ($this->address_line_2) {
             $address .= ', ' . $this->address_line_2;
         }
-        $address .= ', ' . $this->city;
-        if ($this->state) {
-            $address .= ', ' . $this->state;
+        if ($this->upazila) {
+            $address .= ', ' . $this->upazila;
         }
-        $address .= ' ' . $this->postal_code . ', ' . $this->country;
+        if ($this->district) {
+            $address .= ', ' . $this->district;
+        }
+        if ($this->division) {
+            $address .= ', ' . $this->division;
+        }
+        if ($this->postal_code) {
+            $address .= ' ' . $this->postal_code;
+        }
+        if ($this->country) {
+            $address .= ', ' . $this->country;
+        }
         return $address;
     }
 }

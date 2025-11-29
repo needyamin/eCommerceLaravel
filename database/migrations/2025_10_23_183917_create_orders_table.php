@@ -21,7 +21,7 @@ return new class extends Migration
             $table->decimal('tax_total', 10, 2)->default(0);
             $table->decimal('shipping_total', 10, 2)->default(0);
             $table->decimal('grand_total', 10, 2)->default(0);
-            $table->string('currency', 3)->default('USD');
+            $table->string('currency', 3)->default('BDT');
             $table->string('payment_method')->nullable();
             $table->string('payment_status')->default('unpaid');
             $table->string('shipping_method')->nullable();

@@ -16,7 +16,13 @@ class AddressController extends Controller
 
     public function create()
     {
-        return view('addresses.create');
+        $divisions = ['Dhaka', 'Chittagong', 'Rajshahi', 'Khulna', 'Barisal', 'Sylhet', 'Rangpur', 'Mymensingh'];
+        $districts = \App\Models\District::where('is_active', true)
+            ->orderBy('division')
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
+        return view('addresses.create', compact('divisions', 'districts'));
     }
 
     public function store(Request $request)
@@ -28,9 +34,12 @@ class AddressController extends Controller
             'company' => 'nullable|string|max:255',
             'address_line_1' => 'required|string|max:255',
             'address_line_2' => 'nullable|string|max:255',
-            'city' => 'required|string|max:255',
+            'city' => 'nullable|string|max:255',
             'state' => 'nullable|string|max:255',
-            'postal_code' => 'required|string|max:20',
+            'division' => 'nullable|string|max:255',
+            'district' => 'nullable|string|max:255',
+            'upazila' => 'nullable|string|max:255',
+            'postal_code' => 'nullable|string|max:20',
             'country' => 'required|string|max:255',
             'phone' => 'nullable|string|max:20',
             'is_default' => 'boolean',
@@ -60,7 +69,13 @@ class AddressController extends Controller
     public function edit(UserAddress $address)
     {
         $this->authorize('update', $address);
-        return view('addresses.edit', compact('address'));
+        $divisions = ['Dhaka', 'Chittagong', 'Rajshahi', 'Khulna', 'Barisal', 'Sylhet', 'Rangpur', 'Mymensingh'];
+        $districts = \App\Models\District::where('is_active', true)
+            ->orderBy('division')
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
+        return view('addresses.edit', compact('address', 'divisions', 'districts'));
     }
 
     public function update(Request $request, UserAddress $address)
@@ -74,9 +89,12 @@ class AddressController extends Controller
             'company' => 'nullable|string|max:255',
             'address_line_1' => 'required|string|max:255',
             'address_line_2' => 'nullable|string|max:255',
-            'city' => 'required|string|max:255',
+            'city' => 'nullable|string|max:255',
             'state' => 'nullable|string|max:255',
-            'postal_code' => 'required|string|max:20',
+            'division' => 'nullable|string|max:255',
+            'district' => 'nullable|string|max:255',
+            'upazila' => 'nullable|string|max:255',
+            'postal_code' => 'nullable|string|max:20',
             'country' => 'required|string|max:255',
             'phone' => 'nullable|string|max:20',
             'is_default' => 'boolean',

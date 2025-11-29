@@ -107,6 +107,14 @@
 							</a>
 						</li>
 						@endcan
+						@can('admin.districts.index')
+						<li class="nav-item">
+							<a href="{{ route('admin.districts.index') }}" class="nav-link">
+								<i class="nav-icon bi bi-map"></i>
+								<p>Districts</p>
+							</a>
+						</li>
+						@endcan
 						@can('admin.otp-settings.index')
 						<li class="nav-item">
 							<a href="{{ route('admin.otp-settings.index') }}" class="nav-link">

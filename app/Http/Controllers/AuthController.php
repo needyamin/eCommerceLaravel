@@ -258,11 +258,6 @@ class AuthController extends Controller
 
     protected function recalculateTotals(Cart $cart): void
     {
-        $cart->load('items');
-        $cart->subtotal = $cart->items->sum('line_total');
-        $cart->discount_total = 0;
-        $cart->tax_total = round($cart->subtotal * 0.00, 2);
-        $cart->grand_total = $cart->subtotal - $cart->discount_total + $cart->tax_total;
-        $cart->save();
+        $cart->recalculateTotals();
     }
 }

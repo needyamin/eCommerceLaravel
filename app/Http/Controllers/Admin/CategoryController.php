@@ -81,4 +81,16 @@ class CategoryController extends Controller
             'message' => $exists ? 'This slug is already taken' : 'Slug is available'
         ]);
     }
+
+    public function getSubcategories(Category $category)
+    {
+        $subcategories = Category::where('parent_id', $category->id)
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get(['id', 'name']);
+        
+        return response()->json([
+            'subcategories' => $subcategories
+        ]);
+    }
 }

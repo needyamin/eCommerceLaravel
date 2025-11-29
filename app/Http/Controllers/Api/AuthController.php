@@ -62,7 +62,12 @@ class AuthController extends Controller
         $user = Auth::user();
         $token = $user->createToken('mobile')->plainTextToken;
 
-        // Merge any guest cart session into user cart is web concern; API cart is user-bound
+        // Merge guest cart session into user cart if session is provided
+        $sessionId = (string) $request->header('X-Cart-Session', '');
+        if ($sessionId !== '') {
+            $this->mergeSessionCartWithUserCart($sessionId, $user->id);
+        }
+
         return response()->json([
             'token' => $token,
             'user' => $this->userResource($user),
@@ -126,6 +131,53 @@ class AuthController extends Controller
             'email' => $user->email,
             'phone' => $user->phone,
         ];
+    }
+
+    private function mergeSessionCartWithUserCart(string $sessionId, int $userId): void
+    {
+        $sessionCart = Cart::where('session_id', $sessionId)->with('items')->first();
+        if (!$sessionCart || $sessionCart->items->isEmpty()) {
+            return;
+        }
+
+        $userCart = Cart::where('user_id', $userId)->with('items')->first();
+
+        if ($userCart) {
+            // Merge session cart items into user cart
+            foreach ($sessionCart->items as $sessionItem) {
+                $existingItem = $userCart->items()
+                    ->where('product_id', $sessionItem->product_id)
+                    ->first();
+
+                if ($existingItem) {
+                    // Update quantity
+                    $existingItem->quantity += $sessionItem->quantity;
+                    $existingItem->line_total = $existingItem->quantity * $existingItem->unit_price;
+                    $existingItem->save();
+                } else {
+                    // Add new item
+                    $sessionItem->cart_id = $userCart->id;
+                    $sessionItem->save();
+                }
+            }
+
+            // Recalculate totals
+            $this->recalculateTotals($userCart);
+            
+            // Delete session cart
+            $sessionCart->items()->delete();
+            $sessionCart->delete();
+        } else {
+            // Convert session cart to user cart
+            $sessionCart->user_id = $userId;
+            $sessionCart->session_id = null;
+            $sessionCart->save();
+        }
+    }
+
+    private function recalculateTotals(Cart $cart): void
+    {
+        $cart->recalculateTotals();
     }
 }
 

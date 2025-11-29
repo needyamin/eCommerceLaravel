@@ -7,10 +7,10 @@
     <div class="row">
         <div class="col-12">
             <div class="card shadow-sm border-0">
-                <div class="card-header bg-gradient-primary text-white border-0 py-3">
+                <div class="card-header bg-white border-bottom">
                     <div class="d-flex align-items-center">
                         <i class="bi bi-plus-circle-fill me-2 fs-5"></i>
-                        <h3 class="card-title mb-0 fw-bold">Create New Product</h3>
+                        <h3 class="card-title mb-0 fw-semibold">Create New Product</h3>
                     </div>
                 </div>
                 <form action="{{ route('admin.products.store') }}" method="post">
@@ -49,12 +49,21 @@
                                     <label class="form-label fw-semibold">
                                         <i class="bi bi-folder me-1 text-muted"></i>Category
                                     </label>
-                                    <select name="category_id" class="form-select form-select-lg">
+                                    <select name="category_id" id="category_id" class="form-select form-select-lg">
                                         <option value="">Select Category (Optional)</option>
-                                        @foreach($categories as $id => $name)
+                                        @foreach($parentCategories as $id => $name)
                                             <option value="{{ $id }}">{{ $name }}</option>
                                         @endforeach
                                     </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">
+                                        <i class="bi bi-folder2-open me-1 text-muted"></i>Subcategory
+                                    </label>
+                                    <select name="subcategory_id" id="subcategory_id" class="form-select form-select-lg" disabled>
+                                        <option value="">Select Subcategory (Optional)</option>
+                                    </select>
+                                    <small class="text-muted">Select a category first to see subcategories</small>
                                 </div>
                             </div>
                         </div>
@@ -172,9 +181,6 @@
 <!-- Quill Editor CSS -->
 <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 <style>
-    .bg-gradient-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
     
     .form-section {
         background: #f8f9fa;
@@ -487,6 +493,65 @@ document.addEventListener('DOMContentLoaded', function() {
             submitBtn.disabled = false;
             submitBtn.classList.remove('disabled');
         }
+    }
+});
+
+// Subcategory functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const categorySelect = document.getElementById('category_id');
+    const subcategorySelect = document.getElementById('subcategory_id');
+    
+    if (!categorySelect || !subcategorySelect) return;
+    
+    categorySelect.addEventListener('change', function() {
+        const categoryId = this.value;
+        
+        // Clear subcategory dropdown
+        subcategorySelect.innerHTML = '<option value="">Select Subcategory (Optional)</option>';
+        subcategorySelect.disabled = true;
+        
+        if (categoryId) {
+            // Fetch subcategories for selected category
+            fetch(`/admin/api/categories/${categoryId}/subcategories`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.subcategories && data.subcategories.length > 0) {
+                        data.subcategories.forEach(sub => {
+                            const option = document.createElement('option');
+                            option.value = sub.id;
+                            option.textContent = sub.name;
+                            subcategorySelect.appendChild(option);
+                        });
+                        subcategorySelect.disabled = false;
+                    } else {
+                        subcategorySelect.innerHTML = '<option value="">No subcategories available</option>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching subcategories:', error);
+                    subcategorySelect.innerHTML = '<option value="">Error loading subcategories</option>';
+                });
+        }
+    });
+    
+    // Handle form submission - use subcategory if selected, otherwise use category
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const subcategoryId = subcategorySelect.value;
+            
+            // If subcategory is selected, use it; otherwise use the parent category
+            if (subcategoryId) {
+                // Create a hidden input to override category_id with subcategory_id
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'category_id';
+                hiddenInput.value = subcategoryId;
+                form.appendChild(hiddenInput);
+                // Disable the original category select
+                categorySelect.disabled = true;
+            }
+        });
     }
 });
 </script>

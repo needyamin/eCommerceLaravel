@@ -17,8 +17,11 @@ class ProductController extends Controller
 
     public function create()
     {
-        $categories = Category::pluck('name', 'id');
-        return view('admin.products.create', compact('categories'));
+        // Get only parent categories (categories without parent_id)
+        $parentCategories = Category::whereNull('parent_id')->pluck('name', 'id');
+        // Get all categories for fallback
+        $allCategories = Category::pluck('name', 'id');
+        return view('admin.products.create', compact('parentCategories', 'allCategories'));
     }
 
     public function store(Request $request)
@@ -44,8 +47,23 @@ class ProductController extends Controller
 
     public function edit(Product $product)
     {
-        $categories = Category::pluck('name', 'id');
-        return view('admin.products.edit', compact('product', 'categories'));
+        // Get only parent categories (categories without parent_id)
+        $parentCategories = Category::whereNull('parent_id')->pluck('name', 'id');
+        // Get all categories for fallback
+        $allCategories = Category::pluck('name', 'id');
+        // Get subcategories if product has a category with parent
+        $subcategories = [];
+        if ($product->category_id) {
+            $selectedCategory = Category::find($product->category_id);
+            if ($selectedCategory && $selectedCategory->parent_id) {
+                // Product is assigned to a subcategory, get its parent's subcategories
+                $subcategories = Category::where('parent_id', $selectedCategory->parent_id)->pluck('name', 'id');
+            } elseif ($selectedCategory && !$selectedCategory->parent_id) {
+                // Product is assigned to a parent category, get its subcategories
+                $subcategories = Category::where('parent_id', $selectedCategory->id)->pluck('name', 'id');
+            }
+        }
+        return view('admin.products.edit', compact('product', 'parentCategories', 'allCategories', 'subcategories'));
     }
 
     public function update(Request $request, Product $product)

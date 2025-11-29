@@ -8,8 +8,20 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h1 class="h3 mb-0 text-gray-800">
-                <i class="fas fa-{{ $gateway === 'stripe' ? 'stripe' : 'paypal' }} me-2"></i>
-                Configure {{ ucfirst($gateway) }} Payment Gateway
+                @if($gateway === 'bkash')
+                    <i class="bi bi-phone me-2"></i>
+                @elseif($gateway === 'nagad')
+                    <i class="bi bi-phone me-2"></i>
+                @elseif($gateway === 'rocket')
+                    <i class="bi bi-phone me-2"></i>
+                @elseif($gateway === 'ssl_commerce')
+                    <i class="bi bi-credit-card me-2"></i>
+                @elseif($gateway === 'stripe')
+                    <i class="fas fa-stripe me-2"></i>
+                @elseif($gateway === 'paypal')
+                    <i class="fas fa-paypal me-2"></i>
+                @endif
+                Configure {{ ucfirst(str_replace('_', ' ', $gateway)) }} Payment Gateway
             </h1>
             <p class="text-muted">Manage {{ ucfirst($gateway) }} payment gateway settings and configurations</p>
         </div>
@@ -34,7 +46,379 @@
                         @csrf
                         @method('PUT')
 
-                        @if($gateway === 'stripe')
+                        @if($gateway === 'bkash')
+                            <!-- bKash Settings -->
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="enabled" value="1" 
+                                               id="enabled" {{ $gatewayInstance->isEnabled() ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="enabled">
+                                            <strong>Enable bKash Payment Gateway</strong>
+                                        </label>
+                                    </div>
+                                    <small class="text-muted">Enable or disable bKash payment processing</small>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="merchant_number" class="form-label">
+                                        <i class="bi bi-phone me-1"></i>Merchant Number
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control @error('merchant_number') is-invalid @enderror" 
+                                           id="merchant_number" 
+                                           name="merchant_number" 
+                                           value="{{ old('merchant_number', $settings->where('key', 'merchant_number')->first()->value ?? '') }}"
+                                           placeholder="017XXXXXXXX">
+                                    @error('merchant_number')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="text-muted">Your bKash merchant account number</small>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="api_key" class="form-label">
+                                        <i class="fas fa-key me-1"></i>API Key
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control @error('api_key') is-invalid @enderror" 
+                                           id="api_key" 
+                                           name="api_key" 
+                                           value="{{ old('api_key', $settings->where('key', 'api_key')->first()->value ?? '') }}"
+                                           placeholder="Your bKash API Key">
+                                    @error('api_key')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="text-muted">Your bKash API key</small>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="api_secret" class="form-label">
+                                        <i class="fas fa-lock me-1"></i>API Secret
+                                    </label>
+                                    <input type="password" 
+                                           class="form-control @error('api_secret') is-invalid @enderror" 
+                                           id="api_secret" 
+                                           name="api_secret" 
+                                           value="{{ old('api_secret', $settings->where('key', 'api_secret')->first()->value ?? '') }}"
+                                           placeholder="Your bKash API Secret">
+                                    @error('api_secret')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="text-muted">Your bKash API secret - This will be encrypted</small>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <input type="hidden" name="sandbox_mode" value="0">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="sandbox_mode" value="1" 
+                                               id="sandbox_mode" {{ ($settings->where('key', 'sandbox_mode')->first()->value ?? true) ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="sandbox_mode">
+                                            <strong>Sandbox Mode</strong>
+                                        </label>
+                                    </div>
+                                    <small class="text-muted">Use bKash sandbox for testing (recommended for development)</small>
+                                </div>
+                            </div>
+
+                        @elseif($gateway === 'nagad')
+                            <!-- Nagad Settings -->
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="enabled" value="1" 
+                                               id="enabled" {{ $gatewayInstance->isEnabled() ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="enabled">
+                                            <strong>Enable Nagad Payment Gateway</strong>
+                                        </label>
+                                    </div>
+                                    <small class="text-muted">Enable or disable Nagad payment processing</small>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="merchant_number" class="form-label">
+                                        <i class="bi bi-phone me-1"></i>Merchant Number
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control @error('merchant_number') is-invalid @enderror" 
+                                           id="merchant_number" 
+                                           name="merchant_number" 
+                                           value="{{ old('merchant_number', $settings->where('key', 'merchant_number')->first()->value ?? '') }}"
+                                           placeholder="017XXXXXXXX">
+                                    @error('merchant_number')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="text-muted">Your Nagad merchant account number</small>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="api_key" class="form-label">
+                                        <i class="fas fa-key me-1"></i>API Key
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control @error('api_key') is-invalid @enderror" 
+                                           id="api_key" 
+                                           name="api_key" 
+                                           value="{{ old('api_key', $settings->where('key', 'api_key')->first()->value ?? '') }}"
+                                           placeholder="Your Nagad API Key">
+                                    @error('api_key')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="text-muted">Your Nagad API key</small>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="api_secret" class="form-label">
+                                        <i class="fas fa-lock me-1"></i>API Secret
+                                    </label>
+                                    <input type="password" 
+                                           class="form-control @error('api_secret') is-invalid @enderror" 
+                                           id="api_secret" 
+                                           name="api_secret" 
+                                           value="{{ old('api_secret', $settings->where('key', 'api_secret')->first()->value ?? '') }}"
+                                           placeholder="Your Nagad API Secret">
+                                    @error('api_secret')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="text-muted">Your Nagad API secret - This will be encrypted</small>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <input type="hidden" name="sandbox_mode" value="0">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="sandbox_mode" value="1" 
+                                               id="sandbox_mode" {{ ($settings->where('key', 'sandbox_mode')->first()->value ?? true) ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="sandbox_mode">
+                                            <strong>Sandbox Mode</strong>
+                                        </label>
+                                    </div>
+                                    <small class="text-muted">Use Nagad sandbox for testing (recommended for development)</small>
+                                </div>
+                            </div>
+
+                        @elseif($gateway === 'rocket')
+                            <!-- Rocket Settings -->
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="enabled" value="1" 
+                                               id="enabled" {{ $gatewayInstance->isEnabled() ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="enabled">
+                                            <strong>Enable Rocket Payment Gateway</strong>
+                                        </label>
+                                    </div>
+                                    <small class="text-muted">Enable or disable Rocket payment processing</small>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="merchant_number" class="form-label">
+                                        <i class="bi bi-phone me-1"></i>Merchant Number
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control @error('merchant_number') is-invalid @enderror" 
+                                           id="merchant_number" 
+                                           name="merchant_number" 
+                                           value="{{ old('merchant_number', $settings->where('key', 'merchant_number')->first()->value ?? '') }}"
+                                           placeholder="017XXXXXXXX">
+                                    @error('merchant_number')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="text-muted">Your Rocket merchant account number</small>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="api_key" class="form-label">
+                                        <i class="fas fa-key me-1"></i>API Key
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control @error('api_key') is-invalid @enderror" 
+                                           id="api_key" 
+                                           name="api_key" 
+                                           value="{{ old('api_key', $settings->where('key', 'api_key')->first()->value ?? '') }}"
+                                           placeholder="Your Rocket API Key">
+                                    @error('api_key')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="text-muted">Your Rocket API key</small>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="api_secret" class="form-label">
+                                        <i class="fas fa-lock me-1"></i>API Secret
+                                    </label>
+                                    <input type="password" 
+                                           class="form-control @error('api_secret') is-invalid @enderror" 
+                                           id="api_secret" 
+                                           name="api_secret" 
+                                           value="{{ old('api_secret', $settings->where('key', 'api_secret')->first()->value ?? '') }}"
+                                           placeholder="Your Rocket API Secret">
+                                    @error('api_secret')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="text-muted">Your Rocket API secret - This will be encrypted</small>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <input type="hidden" name="sandbox_mode" value="0">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="sandbox_mode" value="1" 
+                                               id="sandbox_mode" {{ ($settings->where('key', 'sandbox_mode')->first()->value ?? true) ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="sandbox_mode">
+                                            <strong>Sandbox Mode</strong>
+                                        </label>
+                                    </div>
+                                    <small class="text-muted">Use Rocket sandbox for testing (recommended for development)</small>
+                                </div>
+                            </div>
+
+                        @elseif($gateway === 'ssl_commerce')
+                            <!-- SSL Commerce Settings -->
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="enabled" value="1" 
+                                               id="enabled" {{ $gatewayInstance->isEnabled() ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="enabled">
+                                            <strong>Enable SSL Commerce Payment Gateway</strong>
+                                        </label>
+                                    </div>
+                                    <small class="text-muted">Enable or disable SSL Commerce payment processing</small>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="store_id" class="form-label">
+                                        <i class="fas fa-store me-1"></i>Store ID *
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control @error('store_id') is-invalid @enderror" 
+                                           id="store_id" 
+                                           name="store_id" 
+                                           value="{{ old('store_id', $settings->where('key', 'store_id')->first()->value ?? '') }}"
+                                           placeholder="Your SSL Commerce Store ID">
+                                    @error('store_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="text-muted">Your SSL Commerce store ID</small>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="store_password" class="form-label">
+                                        <i class="fas fa-lock me-1"></i>Store Password *
+                                    </label>
+                                    <input type="password" 
+                                           class="form-control @error('store_password') is-invalid @enderror" 
+                                           id="store_password" 
+                                           name="store_password" 
+                                           value="{{ old('store_password', $settings->where('key', 'store_password')->first()->value ?? '') }}"
+                                           placeholder="Your SSL Commerce Store Password">
+                                    @error('store_password')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="text-muted">Your SSL Commerce store password - This will be encrypted</small>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="api_url" class="form-label">
+                                        <i class="fas fa-link me-1"></i>API URL
+                                    </label>
+                                    <input type="url" 
+                                           class="form-control @error('api_url') is-invalid @enderror" 
+                                           id="api_url" 
+                                           name="api_url" 
+                                           value="{{ old('api_url', $settings->where('key', 'api_url')->first()->value ?? 'https://sandbox.sslcommerz.com') }}"
+                                           placeholder="https://sandbox.sslcommerz.com">
+                                    @error('api_url')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="text-muted">SSL Commerce API URL (default: sandbox.sslcommerz.com for testing)</small>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <input type="hidden" name="sandbox_mode" value="0">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="sandbox_mode" value="1" 
+                                               id="sandbox_mode" {{ ($settings->where('key', 'sandbox_mode')->first()->value ?? true) ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="sandbox_mode">
+                                            <strong>Sandbox Mode</strong>
+                                        </label>
+                                    </div>
+                                    <small class="text-muted">Use SSL Commerce sandbox for testing (recommended for development)</small>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="success_url" class="form-label">
+                                        <i class="fas fa-check-circle me-1"></i>Success URL
+                                    </label>
+                                    <input type="url" 
+                                           class="form-control @error('success_url') is-invalid @enderror" 
+                                           id="success_url" 
+                                           name="success_url" 
+                                           value="{{ old('success_url', $settings->where('key', 'success_url')->first()->value ?? '') }}"
+                                           placeholder="https://yoursite.com/payment/success">
+                                    @error('success_url')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="text-muted">URL to redirect after successful payment</small>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label for="fail_url" class="form-label">
+                                        <i class="fas fa-times-circle me-1"></i>Fail URL
+                                    </label>
+                                    <input type="url" 
+                                           class="form-control @error('fail_url') is-invalid @enderror" 
+                                           id="fail_url" 
+                                           name="fail_url" 
+                                           value="{{ old('fail_url', $settings->where('key', 'fail_url')->first()->value ?? '') }}"
+                                           placeholder="https://yoursite.com/payment/fail">
+                                    @error('fail_url')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="text-muted">URL to redirect after failed payment</small>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label for="cancel_url" class="form-label">
+                                        <i class="fas fa-ban me-1"></i>Cancel URL
+                                    </label>
+                                    <input type="url" 
+                                           class="form-control @error('cancel_url') is-invalid @enderror" 
+                                           id="cancel_url" 
+                                           name="cancel_url" 
+                                           value="{{ old('cancel_url', $settings->where('key', 'cancel_url')->first()->value ?? '') }}"
+                                           placeholder="https://yoursite.com/payment/cancel">
+                                    @error('cancel_url')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="text-muted">URL to redirect after cancelled payment</small>
+                                </div>
+                            </div>
+
+                        @elseif($gateway === 'stripe')
                             <!-- Stripe Settings -->
                             <div class="row">
                                 <div class="col-md-6 mb-3">
@@ -101,6 +485,20 @@
                                 </div>
                             </div>
 
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <input type="hidden" name="sandbox_mode" value="0">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="sandbox_mode" value="1" 
+                                               id="sandbox_mode" {{ ($settings->where('key', 'sandbox_mode')->first()->value ?? true) ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="sandbox_mode">
+                                            <strong>Test Mode</strong>
+                                        </label>
+                                    </div>
+                                    <small class="text-muted">Use Stripe test mode for testing (recommended for development)</small>
+                                </div>
+                            </div>
+
                         @elseif($gateway === 'paypal')
                             <!-- PayPal Settings -->
                             <div class="row">
@@ -152,6 +550,7 @@
 
                             <div class="row">
                                 <div class="col-md-6 mb-3">
+                                    <input type="hidden" name="sandbox_mode" value="0">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" name="sandbox_mode" value="1" 
                                                id="sandbox_mode" {{ $settings->where('key', 'sandbox_mode')->first()->value ?? true ? 'checked' : '' }}>
@@ -196,10 +595,24 @@
                             </span>
                         </div>
                         <div class="col-6">
-                            <strong>Settings:</strong><br>
-                            <span class="badge bg-info">{{ $settings->count() }} Configured</span>
+                            <strong>Mode:</strong><br>
+                            @php
+                                $sandboxMode = $settings->where('key', 'sandbox_mode')->first()->value ?? true;
+                            @endphp
+                            <span class="badge {{ $sandboxMode ? 'bg-warning text-dark' : 'bg-primary' }}">
+                                {{ $sandboxMode ? 'Sandbox/Test' : 'Live' }}
+                            </span>
                         </div>
                     </div>
+                    
+                    @if($sandboxMode)
+                        <div class="alert alert-info mt-3 mb-0 py-2">
+                            <small>
+                                <i class="bi bi-info-circle me-1"></i>
+                                <strong>Sandbox Mode Active:</strong> Using test credentials. All transactions are for testing only.
+                            </small>
+                        </div>
+                    @endif
                     
                     <hr>
                     
@@ -342,3 +755,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endsection
+

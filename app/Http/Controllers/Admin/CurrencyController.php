@@ -100,17 +100,17 @@ class CurrencyController extends Controller
 
     private function validateData(Request $request, ?int $id = null): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'code' => ['required', 'string', 'size:3', 'unique:currencies,code,' . ($id ?? 'NULL')],
             'name' => ['required', 'string', 'max:100'],
-            'symbol' => ['required', 'string', 'max:5'],
-            'precision' => ['required', 'integer', 'min:0', 'max:8'],
-            'thousand_separator' => ['required', 'string', 'max:2'],
-            'decimal_separator' => ['required', 'string', 'max:2'],
-            'symbol_first' => ['required', 'boolean'],
-            'rate' => ['required', 'numeric', 'min:0'],
+            'symbol' => ['required', 'string', 'max:10'],
             'is_active' => ['nullable', 'boolean'],
             'is_default' => ['nullable', 'boolean'],
         ]);
+        
+        // Convert code to uppercase
+        $data['code'] = strtoupper($data['code']);
+        
+        return $data;
     }
 }

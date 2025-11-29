@@ -53,10 +53,14 @@ class PayPalGateway extends BasePaymentGateway
                 'amount' => $paymentData['amount'],
             ]);
 
+            $approvalUrl = $this->getApprovalUrl($order);
+            
             return [
                 'success' => true,
                 'payment_id' => $order['id'],
-                'approval_url' => $this->getApprovalUrl($order),
+                'transaction_id' => $order['id'],
+                'approval_url' => $approvalUrl,
+                'redirect_url' => $approvalUrl, // For consistency
                 'amount' => $paymentData['amount'],
                 'currency' => $paymentData['currency'],
                 'status' => $order['status'],
@@ -194,8 +198,8 @@ class PayPalGateway extends BasePaymentGateway
                 ],
             ],
             'application_context' => [
-                'return_url' => route('payment.return', ['gateway' => 'paypal']),
-                'cancel_url' => route('payment.cancel', ['gateway' => 'paypal']),
+                'return_url' => url('/payment/paypal/success') . '?order_id=' . $paymentData['order_id'],
+                'cancel_url' => url('/payment/paypal/cancel'),
             ],
         ];
 
@@ -224,10 +228,14 @@ class PayPalGateway extends BasePaymentGateway
      */
     private function createRefund(string $orderId, float $amount, string $accessToken): array
     {
+        // Get order to get currency
+        $order = $this->getOrder($orderId, $accessToken);
+        $currency = $this->getOrderCurrency($order);
+        
         $refundData = [
             'amount' => [
                 'value' => number_format($amount, 2, '.', ''),
-                'currency_code' => 'USD', // You might want to make this dynamic
+                'currency_code' => $currency ?? 'BDT',
             ],
         ];
 

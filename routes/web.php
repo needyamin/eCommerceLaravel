@@ -147,6 +147,34 @@ Route::post('/coupons/validate', [CouponController::class, 'validateCode'])->nam
 // Checkout and Orders
 Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout.show');
 Route::post('/checkout', [CheckoutController::class, 'place'])->name('checkout.place');
+Route::post('/checkout/calculate-shipping-tax', [CheckoutController::class, 'calculateShippingTax'])->name('checkout.calculate-shipping-tax');
+
+// Payment Callbacks
+Route::prefix('payment')->group(function () {
+    // SSL Commerce
+    Route::post('/ssl-commerce/success', [App\Http\Controllers\PaymentCallbackController::class, 'sslCommerceSuccess'])->name('payment.ssl-commerce.success');
+    Route::post('/ssl-commerce/fail', [App\Http\Controllers\PaymentCallbackController::class, 'sslCommerceFail'])->name('payment.ssl-commerce.fail');
+    Route::post('/ssl-commerce/cancel', [App\Http\Controllers\PaymentCallbackController::class, 'sslCommerceCancel'])->name('payment.ssl-commerce.cancel');
+    Route::get('/ssl-commerce/success', [App\Http\Controllers\PaymentCallbackController::class, 'sslCommerceSuccess'])->name('payment.ssl-commerce.success.get');
+    Route::get('/ssl-commerce/fail', [App\Http\Controllers\PaymentCallbackController::class, 'sslCommerceFail'])->name('payment.ssl-commerce.fail.get');
+    Route::get('/ssl-commerce/cancel', [App\Http\Controllers\PaymentCallbackController::class, 'sslCommerceCancel'])->name('payment.ssl-commerce.cancel.get');
+    
+    // Stripe
+    Route::get('/stripe/success', [App\Http\Controllers\PaymentCallbackController::class, 'stripeSuccess'])->name('payment.stripe.success');
+    Route::get('/stripe/cancel', [App\Http\Controllers\PaymentCallbackController::class, 'stripeCancel'])->name('payment.stripe.cancel');
+    
+    // PayPal
+    Route::get('/paypal/success', [App\Http\Controllers\PaymentCallbackController::class, 'paypalSuccess'])->name('payment.paypal.success');
+    Route::get('/paypal/cancel', [App\Http\Controllers\PaymentCallbackController::class, 'paypalCancel'])->name('payment.paypal.cancel');
+    
+    // bKash, Nagad, Rocket - Callbacks from official payment gateways
+    Route::get('/bkash/callback', [App\Http\Controllers\PaymentCallbackController::class, 'bkashCallback'])->name('payment.bkash.callback');
+    Route::post('/bkash/callback', [App\Http\Controllers\PaymentCallbackController::class, 'bkashCallback'])->name('payment.bkash.callback.post');
+    Route::get('/nagad/callback', [App\Http\Controllers\PaymentCallbackController::class, 'nagadCallback'])->name('payment.nagad.callback');
+    Route::post('/nagad/callback', [App\Http\Controllers\PaymentCallbackController::class, 'nagadCallback'])->name('payment.nagad.callback.post');
+    Route::get('/rocket/callback', [App\Http\Controllers\PaymentCallbackController::class, 'rocketCallback'])->name('payment.rocket.callback');
+    Route::post('/rocket/callback', [App\Http\Controllers\PaymentCallbackController::class, 'rocketCallback'])->name('payment.rocket.callback.post');
+});
 
 Route::prefix('user')->middleware('auth')->group(function(){
     Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
@@ -204,8 +232,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('users/{user}/coins/reset', [AdminUserController::class, 'resetCoins'])->name('users.coins.reset');
         Route::get('shipping-settings', [\App\Http\Controllers\Admin\ShippingSettingsController::class, 'index'])->name('shipping-settings.index');
         Route::put('shipping-settings', [\App\Http\Controllers\Admin\ShippingSettingsController::class, 'update'])->name('shipping-settings.update');
-        Route::get('email-settings', [AdminEmailSettingsController::class, 'index'])->name('email-settings.index');
-        Route::put('email-settings', [AdminEmailSettingsController::class, 'update'])->name('email-settings.update');
+            Route::get('email-settings', [AdminEmailSettingsController::class, 'index'])->name('email-settings.index');
+            Route::put('email-settings', [AdminEmailSettingsController::class, 'update'])->name('email-settings.update');
+            Route::post('email-settings/test', [AdminEmailSettingsController::class, 'testEmail'])->name('email-settings.test');
             Route::resource('roles', AdminRoleController::class)->except(['show']);
             Route::get('roles/{role}/copy', [AdminRoleController::class, 'copy'])->name('roles.copy');
             Route::post('roles/{role}/copy', [AdminRoleController::class, 'storeCopy'])->name('roles.copy.store');
@@ -235,6 +264,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('otp-settings', [App\Http\Controllers\Admin\OtpSettingsController::class, 'index'])->name('otp-settings.index');
             Route::put('otp-settings', [App\Http\Controllers\Admin\OtpSettingsController::class, 'update'])->name('otp-settings.update');
 
+            // API Routes for Admin
+            Route::get('api/categories/{category}/subcategories', [AdminCategoryController::class, 'getSubcategories'])->name('api.categories.subcategories');
+
             // User Activity
             Route::get('activities/carts', [App\Http\Controllers\Admin\UserActivityController::class, 'carts'])->name('activities.carts');
             Route::get('activities/wishlists', [App\Http\Controllers\Admin\UserActivityController::class, 'wishlists'])->name('activities.wishlists');
@@ -263,6 +295,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             // Pages
             Route::resource('pages', App\Http\Controllers\Admin\PageController::class);
+
+            // Districts
+            Route::resource('districts', App\Http\Controllers\Admin\DistrictController::class);
+            Route::post('districts/{district}/toggle-status', [App\Http\Controllers\Admin\DistrictController::class, 'toggleStatus'])->name('districts.toggle-status');
 
             // DataTables server-side endpoint
             Route::get('datatables/{resource}', [App\Http\Controllers\Admin\DataTableController::class, 'handle'])->name('datatables');

@@ -207,7 +207,7 @@
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span>Shipping</span>
-                            <span class="text-success">FREE</span>
+                            <span class="text-muted small">Calculated at checkout</span>
                         </div>
                         <hr>
                         <div class="d-flex justify-content-between mb-4">

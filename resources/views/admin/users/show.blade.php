@@ -69,7 +69,7 @@
                         <tbody>
                         @forelse($user->addresses as $addr)
                             <tr>
-                                <td>{{ ucfirst($addr->type) }} @if($addr->is_default)<span class="badge badge-primary">Default</span>@endif</td>
+                                <td>{{ ucfirst($addr->type) }} @if($addr->is_default)<span class="badge text-bg-primary">Default</span>@endif</td>
                                 <td>{{ $addr->full_name }}</td>
                                 <td>{{ $addr->full_address }}</td>
                                 <td>{{ $addr->phone ?? '—' }}</td>
@@ -94,7 +94,7 @@
                         @forelse($user->orders as $order)
                             <tr>
                                 <td>{{ $order->number }}</td>
-                                <td><span class="badge badge-{{ $order->status === 'delivered' ? 'success' : ($order->status === 'pending' ? 'warning' : 'secondary') }}">{{ ucfirst($order->status) }}</span></td>
+                                <td><span class="badge text-bg-{{ $order->status === 'delivered' ? 'success' : ($order->status === 'pending' ? 'warning text-dark' : 'secondary') }}">{{ ucfirst($order->status) }}</span></td>
                                 <td>@currency($order->grand_total)</td>
                                 <td>{{ $order->created_at->format('M d, Y') }}</td>
                                 <td><a href="{{ route('admin.orders.show', $order) }}" class="btn btn-xs btn-primary">View</a></td>

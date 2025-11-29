@@ -120,7 +120,12 @@
                     @if($order->billing_address)
                         <div class="mt-3 small text-muted">
                             <p class="mb-0">{{ $order->billing_address }}</p>
-                            <p class="mb-0">{{ $order->billing_city }}, {{ $order->billing_postcode }}</p>
+                            <p class="mb-0">
+                                @if($order->billing_upazila){{ $order->billing_upazila }}, @endif
+                                @if($order->billing_district){{ $order->billing_district }}, @endif
+                                @if($order->billing_division){{ $order->billing_division }}@endif
+                                @if($order->billing_postcode) {{ $order->billing_postcode }}@endif
+                            </p>
                             <p class="mb-0">{{ $order->billing_country }}</p>
                         </div>
                     @endif

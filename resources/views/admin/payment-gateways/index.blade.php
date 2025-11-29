@@ -3,25 +3,28 @@
 @section('title', 'Payment Gateways')
 
 @section('content')
-<div class="container-fluid">
-    <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="h3 mb-0 text-gray-800">
-                <i class="fas fa-credit-card me-2"></i>Payment Gateways
-            </h1>
-            <p class="text-muted">Manage payment gateway settings and configurations</p>
-        </div>
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-white border-bottom">
+        <h3 class="card-title mb-0 fw-semibold">Payment Gateways</h3>
     </div>
+    <div class="card-body p-3">
 
-    <!-- Payment Gateways Grid -->
-    <div class="row">
+        <!-- Payment Gateways Grid -->
+        <div class="row">
         @foreach($gateways as $gatewayName => $gateway)
             <div class="col-lg-6 mb-4">
                 <div class="card shadow-sm">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">
-                            @if($gatewayName === 'stripe')
+                            @if($gatewayName === 'bkash')
+                                <i class="bi bi-phone me-2"></i>
+                            @elseif($gatewayName === 'nagad')
+                                <i class="bi bi-phone me-2"></i>
+                            @elseif($gatewayName === 'rocket')
+                                <i class="bi bi-phone me-2"></i>
+                            @elseif($gatewayName === 'ssl_commerce')
+                                <i class="bi bi-credit-card me-2"></i>
+                            @elseif($gatewayName === 'stripe')
                                 <i class="fas fa-stripe me-2"></i>
                             @elseif($gatewayName === 'paypal')
                                 <i class="fas fa-paypal me-2"></i>
@@ -54,12 +57,24 @@
                                 </span>
                             </div>
                             <div class="col-md-6">
-                                <h6 class="text-muted mb-2">Configuration</h6>
-                                <span class="badge bg-info">
-                                    {{ count($gateway['config']) }} Settings
+                                <h6 class="text-muted mb-2">Mode</h6>
+                                @php
+                                    $sandboxMode = $gateway['config']['sandbox_mode'] ?? true;
+                                @endphp
+                                <span class="badge {{ $sandboxMode ? 'bg-warning text-dark' : 'bg-primary' }}">
+                                    {{ $sandboxMode ? 'Sandbox/Test' : 'Live' }}
                                 </span>
                             </div>
                         </div>
+                        
+                        @if($sandboxMode)
+                            <div class="alert alert-info mt-3 mb-0 py-2">
+                                <small>
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    <strong>Sandbox Mode:</strong> Using test credentials for testing
+                                </small>
+                            </div>
+                        @endif
                         
                         <div class="mt-3">
                             <a href="{{ route('admin.payment-gateways.show', $gatewayName) }}" 
@@ -73,8 +88,8 @@
         @endforeach
     </div>
 
-    <!-- Recent Activity -->
-    <div class="row mt-4">
+        <!-- Recent Activity -->
+        <div class="row mt-4">
         <div class="col-12">
             <div class="card shadow-sm">
                 <div class="card-header">
@@ -83,10 +98,10 @@
                     </h5>
                 </div>
                 <div class="card-body">
-                    @if($recentLogs->count() > 0)
+                    @if($recentLogs && $recentLogs->count() > 0)
                         <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
+                            <table class="table table-hover table-striped">
+                                <thead class="table-light">
                                     <tr>
                                         <th>Gateway</th>
                                         <th>Action</th>
@@ -99,37 +114,40 @@
                                     @foreach($recentLogs as $log)
                                         <tr>
                                             <td>
-                                                <span class="badge bg-primary">{{ ucfirst($log->gateway) }}</span>
+                                                <span class="badge bg-primary text-white">{{ ucfirst($log->gateway ?? 'N/A') }}</span>
                                             </td>
                                             <td>
-                                                <code>{{ $log->action }}</code>
+                                                <code class="text-dark">{{ $log->action ?? 'N/A' }}</code>
                                             </td>
                                             <td>
-                                                @if($log->data)
+                                                @if(!empty($log->data))
                                                     <button type="button" class="btn btn-sm btn-outline-info" 
                                                             data-bs-toggle="modal" 
                                                             data-bs-target="#logModal{{ $log->id }}">
-                                                        <i class="fas fa-eye"></i>
+                                                        <i class="fas fa-eye"></i> View
                                                     </button>
                                                 @else
                                                     <span class="text-muted">No data</span>
                                                 @endif
                                             </td>
-                                            <td>{{ $log->ip_address ?? 'N/A' }}</td>
-                                            <td>{{ $log->created_at->format('M d, Y H:i') }}</td>
+                                            <td class="text-muted">{{ $log->ip_address ?? 'N/A' }}</td>
+                                            <td class="text-muted">{{ $log->created_at ? $log->created_at->format('M d, Y H:i') : 'N/A' }}</td>
                                         </tr>
                                         
                                         <!-- Log Data Modal -->
-                                        @if($log->data)
+                                        @if(!empty($log->data))
                                             <div class="modal fade" id="logModal{{ $log->id }}" tabindex="-1">
                                                 <div class="modal-dialog modal-lg">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
-                                                            <h5 class="modal-title">Log Data - {{ ucfirst($log->gateway) }}</h5>
+                                                            <h5 class="modal-title">Log Data - {{ ucfirst($log->gateway ?? 'Unknown') }}</h5>
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                         </div>
                                                         <div class="modal-body">
-                                                            <pre class="bg-light p-3 rounded"><code>{{ json_encode($log->data, JSON_PRETTY_PRINT) }}</code></pre>
+                                                            <pre class="bg-light p-3 rounded" style="max-height: 400px; overflow-y: auto;"><code>{{ json_encode($log->data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</code></pre>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -142,7 +160,8 @@
                     @else
                         <div class="text-center py-4">
                             <i class="fas fa-history fa-3x text-muted mb-3"></i>
-                            <p class="text-muted">No payment activity logs found.</p>
+                            <p class="text-muted mb-0">No payment activity logs found.</p>
+                            <small class="text-muted">Payment activity will appear here when transactions are processed.</small>
                         </div>
                     @endif
                 </div>

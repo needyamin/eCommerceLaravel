@@ -141,6 +141,68 @@
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
     }
+    /* Badge Color Fixes - Ensure all badges have readable text */
+    .badge {
+        font-weight: 600 !important;
+        padding: 0.35em 0.65em !important;
+    }
+    /* Fix text-bg-* classes to ensure proper contrast */
+    .badge.text-bg-primary,
+    .badge.text-bg-success,
+    .badge.text-bg-info,
+    .badge.text-bg-danger {
+        color: #ffffff !important;
+    }
+    .badge.text-bg-warning {
+        background-color: #ffc107 !important;
+        color: #000000 !important;
+    }
+    .badge.text-bg-secondary {
+        background-color: #6c757d !important;
+        color: #ffffff !important;
+    }
+    .badge.text-bg-light {
+        background-color: #f8f9fa !important;
+        color: #000000 !important;
+    }
+    .badge.text-bg-dark {
+        background-color: #212529 !important;
+        color: #ffffff !important;
+    }
+    /* Fix old badge-* classes if they exist */
+    .badge.badge-primary,
+    .badge.badge-success,
+    .badge.badge-info,
+    .badge.badge-danger,
+    .badge.badge-secondary,
+    .badge.badge-dark {
+        color: #ffffff !important;
+    }
+    .badge.badge-warning {
+        background-color: #ffc107 !important;
+        color: #000000 !important;
+    }
+    .badge.badge-light {
+        background-color: #f8f9fa !important;
+        color: #000000 !important;
+    }
+    /* Fix bg-* classes without text color */
+    .badge.bg-primary,
+    .badge.bg-success,
+    .badge.bg-info,
+    .badge.bg-danger,
+    .badge.bg-secondary,
+    .badge.bg-dark {
+        color: #ffffff !important;
+    }
+    .badge.bg-warning {
+        background-color: #ffc107 !important;
+        color: #000000 !important;
+    }
+    .badge.bg-light {
+        background-color: #f8f9fa !important;
+        color: #000000 !important;
+    }
     </style>
     @stack('styles')
   </head>

@@ -14,10 +14,24 @@
       <form action="{{ route('admin.currencies.store') }}" method="POST">
         @csrf
         @include('admin.currencies.partials.form', ['currency' => null])
-        <div class="mt-3">
-          <button class="btn btn-primary" type="submit"><i class="bi bi-save me-1"></i>Save</button>
+        <div class="mt-4 d-flex justify-content-end gap-2">
+          <a href="{{ route('admin.currencies.index') }}" class="btn btn-secondary">Cancel</a>
+          <button class="btn btn-primary" type="submit"><i class="bi bi-save me-1"></i>Save Currency</button>
         </div>
       </form>
+      
+      @push('scripts')
+      <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const codeInput = document.getElementById('code');
+        if (codeInput) {
+          codeInput.addEventListener('input', function() {
+            this.value = this.value.toUpperCase();
+          });
+        }
+      });
+      </script>
+      @endpush
     </div>
   </div>
 </div>

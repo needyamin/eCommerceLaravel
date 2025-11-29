@@ -10,14 +10,10 @@ class Currency extends Model
     use HasFactory;
 
     protected $fillable = [
-        'code', 'name', 'symbol', 'precision', 'thousand_separator', 'decimal_separator',
-        'symbol_first', 'rate', 'is_active', 'is_default'
+        'code', 'name', 'symbol', 'is_active', 'is_default'
     ];
 
     protected $casts = [
-        'precision' => 'integer',
-        'symbol_first' => 'boolean',
-        'rate' => 'decimal:8',
         'is_active' => 'boolean',
         'is_default' => 'boolean',
     ];

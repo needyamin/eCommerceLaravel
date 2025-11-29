@@ -92,6 +92,93 @@
 .product-details .border-bottom {
     border-color: #e9ecef !important;
 }
+
+/* Product Description HTML Styling */
+.prose {
+    line-height: 1.7;
+    color: #333;
+}
+.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+    margin-top: 1.5em;
+    margin-bottom: 0.75em;
+    font-weight: 600;
+    line-height: 1.3;
+}
+.prose h1 { font-size: 2em; }
+.prose h2 { font-size: 1.75em; }
+.prose h3 { font-size: 1.5em; }
+.prose h4 { font-size: 1.25em; }
+.prose h5 { font-size: 1.1em; }
+.prose h6 { font-size: 1em; }
+.prose p {
+    margin-bottom: 1em;
+}
+.prose ul, .prose ol {
+    margin-bottom: 1em;
+    padding-left: 2em;
+}
+.prose li {
+    margin-bottom: 0.5em;
+}
+.prose a {
+    color: #0d6efd;
+    text-decoration: underline;
+}
+.prose a:hover {
+    color: #0a58ca;
+}
+.prose strong {
+    font-weight: 600;
+}
+.prose em {
+    font-style: italic;
+}
+.prose blockquote {
+    border-left: 4px solid #e9ecef;
+    padding-left: 1em;
+    margin: 1.5em 0;
+    color: #6c757d;
+    font-style: italic;
+}
+.prose img {
+    max-width: 100%;
+    height: auto;
+    margin: 1em 0;
+    border-radius: 0.375rem;
+}
+.prose code {
+    background-color: #f8f9fa;
+    padding: 0.2em 0.4em;
+    border-radius: 0.25rem;
+    font-size: 0.9em;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+.prose pre {
+    background-color: #f8f9fa;
+    padding: 1em;
+    border-radius: 0.375rem;
+    overflow-x: auto;
+    margin: 1em 0;
+}
+.prose pre code {
+    background-color: transparent;
+    padding: 0;
+}
+.prose table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1em 0;
+}
+.prose table th,
+.prose table td {
+    border: 1px solid #dee2e6;
+    padding: 0.5em;
+    text-align: left;
+}
+.prose table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
 </style>
 @endpush
 
@@ -358,7 +445,7 @@
                         </h5>
                     </div>
                     <div class="card-body">
-                        <div class="prose">{!! nl2br(e($product->description)) !!}</div>
+                        <div class="prose">{!! $product->description !!}</div>
                     </div>
                 </div>
             </div>

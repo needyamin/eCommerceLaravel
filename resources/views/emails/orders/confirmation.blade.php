@@ -75,7 +75,12 @@
     <div class="info-box">
         <p><strong>{{ $order->billing_name }}</strong></p>
         <p>{{ $order->billing_address }}</p>
-        <p>{{ $order->billing_city }}{{ $order->billing_state ? ', ' . $order->billing_state : '' }}{{ $order->billing_postcode ? ' ' . $order->billing_postcode : '' }}</p>
+        <p>
+            @if($order->billing_upazila){{ $order->billing_upazila }}, @endif
+            @if($order->billing_district){{ $order->billing_district }}, @endif
+            @if($order->billing_division){{ $order->billing_division }}@endif
+            @if($order->billing_postcode) {{ $order->billing_postcode }}@endif
+        </p>
         <p>{{ $order->billing_country }}</p>
         <p style="margin-top: 10px;"><strong>Phone:</strong> {{ $order->billing_phone }}</p>
         <p><strong>Email:</strong> {{ $order->billing_email }}</p>

@@ -17,9 +17,15 @@ class PaymentGatewayManager
     private function registerGateways()
     {
         $this->gateways = [
+            // Bangladeshi payment gateways
+            'bkash' => BkashGateway::class,
+            'nagad' => NagadGateway::class,
+            'rocket' => RocketGateway::class,
+            'ssl_commerce' => SslCommerceGateway::class,
+            'cod' => null, // COD doesn't need a gateway class, handled separately
+            // International gateways (optional)
             'stripe' => StripeGateway::class,
             'paypal' => PayPalGateway::class,
-            'cod' => null, // COD doesn't need a gateway class, handled separately
         ];
     }
 
@@ -60,12 +66,21 @@ class PaymentGatewayManager
                     'config' => [],
                 ];
             } else {
+                $displayNames = [
+                    'bkash' => 'bKash',
+                    'nagad' => 'Nagad',
+                    'rocket' => 'Rocket',
+                    'ssl_commerce' => 'SSL Commerce',
+                    'stripe' => 'Stripe',
+                    'paypal' => 'PayPal',
+                ];
                 $gateway = new $class();
+                $config = $gateway->getConfig();
                 $availableGateways[$name] = [
                     'name' => $name,
-                    'display_name' => ucfirst($name),
+                    'display_name' => $displayNames[$name] ?? ucfirst(str_replace('_', ' ', $name)),
                     'enabled' => $gateway->isEnabled(),
-                    'config' => $gateway->getConfig(),
+                    'config' => $config,
                 ];
             }
         }
@@ -94,11 +109,19 @@ class PaymentGatewayManager
                     ];
                 }
             } else {
+                $displayNames = [
+                    'bkash' => 'bKash',
+                    'nagad' => 'Nagad',
+                    'rocket' => 'Rocket',
+                    'ssl_commerce' => 'SSL Commerce',
+                    'stripe' => 'Stripe',
+                    'paypal' => 'PayPal',
+                ];
                 $gateway = new $class();
                 if ($gateway->isEnabled()) {
                     $enabledGateways[$name] = [
                         'name' => $name,
-                        'display_name' => ucfirst($name),
+                        'display_name' => $displayNames[$name] ?? ucfirst(str_replace('_', ' ', $name)),
                         'config' => $gateway->getConfig(),
                     ];
                 }

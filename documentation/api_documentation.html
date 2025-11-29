@@ -104,7 +104,13 @@
     "sku": "SKU-A",
     "short_description": "...",
     "stock": 12,
-    "category": {"id": 2, "name": "Cat", "slug": "cat"},
+    "category": {
+      "id": 2,
+      "name": "Cat",
+      "slug": "cat",
+      "is_parent": false,
+      "parent": {"id": 1, "name": "Parent Category", "slug": "parent-category"}
+    },
     "images": [{"id": 1, "path": "/storage/...", "is_primary": true}],
     "price": {"amount": 99.9, "formatted": "$99.90"},
     "compare_at_price": null,
@@ -120,13 +126,40 @@
   <h3><span class="tag get">GET</span> /categories</h3>
   <p>List active categories.</p>
   <table>
-    <tr><th>Query</th><td><code>page</code> (int), <code>per_page</code> (int, default 20, max 100)</td></tr>
+    <tr><th>Query</th><td><code>page</code> (int), <code>per_page</code> (int, default 20, max 100), <code>parent_only</code> (bool), <code>subcategories_only</code> (bool)</td></tr>
   </table>
   <pre>{
-  "data": [{"id": 1, "name": "Shoes", "slug": "shoes", "description": "..."}],
-  "meta": {"current_page": 1, "last_page": 1, "per_page": 20, "total": 1}
+  "data": [{
+    "id": 1,
+    "name": "Shoes",
+    "slug": "shoes",
+    "description": "...",
+    "is_parent": true,
+    "parent": null
+  }, {
+    "id": 2,
+    "name": "Running Shoes",
+    "slug": "running-shoes",
+    "description": "...",
+    "is_parent": false,
+    "parent": {"id": 1, "name": "Shoes", "slug": "shoes"}
+  }],
+  "meta": {"current_page": 1, "last_page": 1, "per_page": 20, "total": 2}
 }</pre>
   <h3><span class="tag get">GET</span> /categories/{slug}</h3>
+  <p>Get category details with subcategories (if parent).</p>
+  <pre>{
+  "id": 1,
+  "name": "Shoes",
+  "slug": "shoes",
+  "description": "...",
+  "is_parent": true,
+  "parent": null,
+  "subcategories": [
+    {"id": 2, "name": "Running Shoes", "slug": "running-shoes"},
+    {"id": 3, "name": "Casual Shoes", "slug": "casual-shoes"}
+  ]
+}</pre>
 
   <h2>Cart</h2>
   <p>For guests use <code>X-Cart-Session</code> header. If not provided, responses include <code>cart_session</code> you should persist for subsequent requests.</p>
@@ -227,10 +260,10 @@
   <table>
     <tr><th>Headers</th><td><code>Authorization: Bearer &lt;token&gt;</code></td></tr>
     <tr><th>Body</th><td>
-      <code>billing_name</code> (required), <code>billing_email</code> (required),
-      <code>billing_phone</code>, <code>billing_address</code>, <code>billing_city</code>, <code>billing_postcode</code>, <code>billing_country</code>,
-      <code>shipping_name</code>, <code>shipping_phone</code>, <code>shipping_address</code>, <code>shipping_city</code>, <code>shipping_postcode</code>, <code>shipping_country</code>,
-      <code>gateway</code> (one of: <code>stripe</code>, <code>paypal</code>, <code>cod</code>)
+      <code>billing_name</code> (required), <code>billing_email</code> (required), <code>billing_phone</code> (required),
+      <code>billing_division</code>, <code>billing_district</code>, <code>billing_upazila</code>, <code>billing_address</code>, <code>billing_postcode</code>, <code>billing_country</code>,
+      <code>shipping_name</code>, <code>shipping_phone</code>, <code>shipping_division</code>, <code>shipping_district</code>, <code>shipping_upazila</code>, <code>shipping_address</code>, <code>shipping_postcode</code>, <code>shipping_country</code>,
+      <code>gateway</code> (required, one of: <code>bkash</code>, <code>nagad</code>, <code>rocket</code>, <code>ssl_commerce</code>, <code>stripe</code>, <code>paypal</code>, <code>cod</code>)
     </td></tr>
   </table>
 
@@ -250,9 +283,12 @@
     "address_line_2": null,
     "city": "City",
     "state": null,
-    "postal_code": "10001",
-    "country": "US",
-    "phone": null,
+    "division": "Dhaka",
+    "district": "Dhaka",
+    "upazila": "Dhanmondi",
+    "postal_code": "1209",
+    "country": "Bangladesh",
+    "phone": "+8801712345678",
     "is_default": true,
     "created_at": "2025-11-03T10:00:00Z"
   }],
@@ -261,8 +297,8 @@
   <h3><span class="tag post">POST</span> /user/addresses</h3>
   <table>
     <tr><th>Body</th><td>
-      <code>type</code> (billing|shipping), <code>first_name</code>, <code>last_name</code>, <code>company</code>,
-      <code>address_line_1</code>, <code>address_line_2</code>, <code>city</code>, <code>state</code>, <code>postal_code</code>, <code>country</code>, <code>phone</code>, <code>is_default</code> (bool)
+      <code>type</code> (billing|shipping, required), <code>first_name</code> (required), <code>last_name</code> (required), <code>company</code>,
+      <code>address_line_1</code> (required), <code>address_line_2</code>, <code>city</code>, <code>state</code>, <code>division</code>, <code>district</code>, <code>upazila</code>, <code>postal_code</code>, <code>country</code> (required), <code>phone</code>, <code>is_default</code> (bool)
     </td></tr>
   </table>
   <h3><span class="tag put">PUT</span> /user/addresses/{address}</h3>
@@ -310,6 +346,13 @@
   -d '{
     "billing_name": "John Doe",
     "billing_email": "john@example.com",
+    "billing_phone": "+8801712345678",
+    "billing_division": "Dhaka",
+    "billing_district": "Dhaka",
+    "billing_upazila": "Dhanmondi",
+    "billing_address": "123 Main Street",
+    "billing_postcode": "1209",
+    "billing_country": "Bangladesh",
     "gateway": "cod"
   }' \
   https://ecommercelaravel.test/api/checkout</pre>
