@@ -9,6 +9,7 @@ use App\Support\CurrencyManager;
 use App\Models\Currency;
 use App\Models\EmailSetting;
 use App\Models\SiteSetting;
+use App\Models\StorageSetting;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -102,6 +103,95 @@ class AppServiceProvider extends ServiceProvider
                 if ($encryption) config(['mail.mailers.smtp.encryption' => $encryption]);
                 if ($fromAddress) config(['mail.from.address' => $fromAddress]);
                 if ($fromName) config(['mail.from.name' => $fromName]);
+            }
+        } catch (\Throwable $e) {
+            // ignore if table not migrated yet
+        }
+
+        // Dynamic filesystem configuration from DB settings (if available)
+        // This ensures storage/CDN settings from admin panel are applied globally
+        try {
+            $driver = StorageSetting::get('storage_driver', 'local');
+            
+            if ($driver !== 'local') {
+                // Configure based on selected driver
+                switch ($driver) {
+                    case 's3':
+                        config(['filesystems.default' => 's3']);
+                        config(['filesystems.disks.s3' => [
+                            'driver' => 's3',
+                            'key' => StorageSetting::get('s3_key'),
+                            'secret' => StorageSetting::get('s3_secret'),
+                            'region' => StorageSetting::get('s3_region', 'us-east-1'),
+                            'bucket' => StorageSetting::get('s3_bucket'),
+                            'url' => StorageSetting::get('s3_url'),
+                            'endpoint' => StorageSetting::get('s3_endpoint'),
+                            'use_path_style_endpoint' => StorageSetting::isEnabled('s3_use_path_style'),
+                        ]]);
+                        break;
+
+                    case 'cloudflare':
+                        // Cloudflare R2 is S3-compatible
+                        config(['filesystems.default' => 'cloudflare']);
+                        config(['filesystems.disks.cloudflare' => [
+                            'driver' => 's3',
+                            'key' => StorageSetting::get('cloudflare_access_key_id'),
+                            'secret' => StorageSetting::get('cloudflare_secret_access_key'),
+                            'region' => 'auto',
+                            'bucket' => StorageSetting::get('cloudflare_bucket'),
+                            'endpoint' => StorageSetting::get('cloudflare_endpoint') ?: 'https://' . StorageSetting::get('cloudflare_account_id') . '.r2.cloudflarestorage.com',
+                            'use_path_style_endpoint' => false,
+                        ]]);
+                        break;
+
+                    case 'digitalocean':
+                        config(['filesystems.default' => 'digitalocean']);
+                        config(['filesystems.disks.digitalocean' => [
+                            'driver' => 's3',
+                            'key' => StorageSetting::get('digitalocean_key'),
+                            'secret' => StorageSetting::get('digitalocean_secret'),
+                            'region' => StorageSetting::get('digitalocean_region', 'nyc3'),
+                            'bucket' => StorageSetting::get('digitalocean_bucket'),
+                            'endpoint' => StorageSetting::get('digitalocean_endpoint') ?: 'https://' . StorageSetting::get('digitalocean_region', 'nyc3') . '.digitaloceanspaces.com',
+                            'use_path_style_endpoint' => false,
+                        ]]);
+                        break;
+
+                    case 'wasabi':
+                        config(['filesystems.default' => 'wasabi']);
+                        config(['filesystems.disks.wasabi' => [
+                            'driver' => 's3',
+                            'key' => StorageSetting::get('wasabi_key'),
+                            'secret' => StorageSetting::get('wasabi_secret'),
+                            'region' => StorageSetting::get('wasabi_region', 'us-east-1'),
+                            'bucket' => StorageSetting::get('wasabi_bucket'),
+                            'endpoint' => StorageSetting::get('wasabi_endpoint') ?: 'https://s3.' . StorageSetting::get('wasabi_region', 'us-east-1') . '.wasabisys.com',
+                            'use_path_style_endpoint' => false,
+                        ]]);
+                        break;
+
+                    case 'backblaze':
+                        // Backblaze B2 is S3-compatible
+                        config(['filesystems.default' => 'backblaze']);
+                        config(['filesystems.disks.backblaze' => [
+                            'driver' => 's3',
+                            'key' => StorageSetting::get('backblaze_key_id'),
+                            'secret' => StorageSetting::get('backblaze_application_key'),
+                            'region' => 'us-west-004',
+                            'bucket' => StorageSetting::get('backblaze_bucket_name'),
+                            'endpoint' => 'https://s3.us-west-004.backblazeb2.com',
+                            'use_path_style_endpoint' => true,
+                        ]]);
+                        break;
+                }
+            }
+
+            // Configure CDN URL if enabled
+            if (StorageSetting::isEnabled('cdn_enabled')) {
+                $cdnUrl = StorageSetting::get('cdn_url');
+                if ($cdnUrl) {
+                    config(['filesystems.cdn_url' => rtrim($cdnUrl, '/')]);
+                }
             }
         } catch (\Throwable $e) {
             // ignore if table not migrated yet

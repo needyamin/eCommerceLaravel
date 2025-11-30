@@ -20,10 +20,7 @@ class RoleController extends Controller
 	public function create()
 	{
         $routeNames = $this->adminRouteNames();
-        $permissions = Permission::where('guard_name','admin')
-            ->whereNotIn('name', $routeNames)
-            ->get();
-        return view('admin.roles.create', compact('permissions','routeNames'));
+        return view('admin.roles.create', compact('routeNames'));
 	}
 
 	public function store(Request $request)
@@ -50,11 +47,7 @@ class RoleController extends Controller
 	public function edit(Role $role)
 	{
         $routeNames = $this->adminRouteNames();
-        $permissions = Permission::where('guard_name','admin')
-            ->whereNotIn('name', $routeNames)
-            ->get();
-        $assigned = $role->permissions->pluck('id')->toArray();
-        return view('admin.roles.edit', compact('role', 'permissions', 'assigned','routeNames'));
+        return view('admin.roles.edit', compact('role', 'routeNames'));
 	}
 
     protected function adminRouteNames(): array
@@ -99,11 +92,8 @@ class RoleController extends Controller
 	public function copy(Role $role)
 	{
 		$routeNames = $this->adminRouteNames();
-		$permissions = Permission::where('guard_name','admin')
-			->whereNotIn('name', $routeNames)
-			->get();
 		$assigned = $role->permissions->pluck('name')->toArray();
-		return view('admin.roles.copy', compact('role', 'permissions', 'assigned', 'routeNames'));
+		return view('admin.roles.copy', compact('role', 'assigned', 'routeNames'));
 	}
 
 	public function storeCopy(Request $request, Role $role)

@@ -1,3 +1,7 @@
+@php
+use Illuminate\Support\Facades\Storage;
+@endphp
+
 @extends('admin.layouts.app')
 
 @section('title', 'Edit Product')
@@ -13,7 +17,7 @@
                         <h3 class="card-title mb-0 fw-semibold">Edit Product</h3>
                     </div>
                 </div>
-                <form action="{{ route('admin.products.update', $product) }}" method="post">
+                <form action="{{ route('admin.products.update', $product) }}" method="post" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
                     <div class="card-body p-4">
@@ -62,7 +66,7 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-6" id="subcategory_wrapper" style="display: {{ (isset($subcategories) && count($subcategories) > 0) ? 'block' : 'none' }};">
                                     <label class="form-label fw-semibold">
                                         <i class="bi bi-folder2-open me-1 text-muted"></i>Subcategory
                                     </label>
@@ -142,6 +146,77 @@
                             </div>
                         </div>
 
+                        <!-- Product Images Section -->
+                        <div class="form-section mb-4">
+                            <div class="section-header mb-3">
+                                <h5 class="mb-0 fw-semibold text-primary">
+                                    <i class="bi bi-images me-2"></i>Product Images
+                                </h5>
+                                <hr class="mt-2 mb-0">
+                            </div>
+                            <div class="row g-3">
+                                <!-- Existing Images -->
+                                @if($product->images->count() > 0)
+                                    <div class="col-12">
+                                        <label class="form-label fw-semibold">
+                                            <i class="bi bi-arrows-move me-1"></i>Current Images
+                                            <small class="text-muted">(Drag to reorder)</small>
+                                        </label>
+                                        <div class="row g-3 sortable-images" id="existing_images" style="display: flex; flex-wrap: wrap;">
+                                            @foreach($product->images->sortBy('position') as $index => $image)
+                                                <div class="col-md-3 col-6 image-item" data-image-id="{{ $image->id }}" data-position="{{ $image->position }}">
+                                                    <div class="position-relative image-sortable-item" style="cursor: move;">
+                                                        <div class="position-absolute top-0 start-0 m-1">
+                                                            <span class="badge bg-secondary image-order-badge">{{ $index + 1 }}</span>
+                                                        </div>
+                                                        @php
+                                                            $imageUrl = Storage::disk('public')->exists($image->path) 
+                                                                ? Storage::disk('public')->url($image->path) 
+                                                                : asset('storage/' . $image->path);
+                                                        @endphp
+                                                        <img src="{{ $imageUrl }}" class="img-fluid rounded border" style="height: 150px; width: 100%; object-fit: cover;" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'150\' height=\'150\'%3E%3Crect width=\'150\' height=\'150\' fill=\'%23ddd\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%23999\'%3EImage%3C/text%3E%3C/svg%3E';">
+                                                        @if($image->is_primary)
+                                                            <span class="badge bg-primary position-absolute bottom-0 start-0 m-1">Primary</span>
+                                                        @endif
+                                                        <div class="btn-group position-absolute top-0 end-0 m-1">
+                                                            @if(!$image->is_primary)
+                                                                <button type="button" class="btn btn-sm btn-success set-primary-image" data-image-id="{{ $image->id }}" title="Set as Primary">
+                                                                    <i class="bi bi-star"></i>
+                                                                </button>
+                                                            @endif
+                                                            <button type="button" class="btn btn-sm btn-danger delete-image" data-image-id="{{ $image->id }}" title="Delete">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+                                
+                                <!-- Upload New Images -->
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">
+                                        <i class="bi bi-upload me-1 text-muted"></i>Upload New Images
+                                    </label>
+                                    <div class="image-upload-area border rounded p-4 bg-light text-center" style="min-height: 200px; border-style: dashed !important;">
+                                        <input type="file" name="images[]" id="product_images" class="d-none" multiple accept="image/*">
+                                        <div id="image_upload_placeholder" class="upload-placeholder">
+                                            <i class="bi bi-cloud-upload fs-1 text-muted d-block mb-3"></i>
+                                            <p class="text-muted mb-2">Click to upload or drag and drop</p>
+                                            <p class="text-muted small">PNG, JPG, GIF up to 5MB each</p>
+                                            <button type="button" class="btn btn-outline-primary mt-2" onclick="document.getElementById('product_images').click()">
+                                                <i class="bi bi-plus-circle me-1"></i>Add More Images
+                                            </button>
+                                        </div>
+                                        <div id="image_preview_container" class="row g-3 mt-3" style="display: none;"></div>
+                                    </div>
+                                    <small class="text-muted">You can upload multiple images. The first image will be set as primary if no primary exists.</small>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Status & Options Section -->
                         <div class="form-section mb-4">
                             <div class="section-header mb-3">
@@ -191,6 +266,50 @@
 @push('styles')
 <!-- Quill Editor CSS -->
 <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<!-- SortableJS CSS -->
+<style>
+    .sortable-images {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .sortable-images .image-item {
+        transition: transform 0.2s;
+        cursor: move;
+    }
+    .sortable-images .image-item.sortable-ghost {
+        opacity: 0.4;
+        background: #f0f0f0;
+        border: 2px dashed #667eea !important;
+    }
+    .sortable-images .image-item.sortable-drag {
+        opacity: 0.8;
+        transform: scale(1.05);
+        z-index: 1000;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    }
+    .image-sortable-item {
+        user-select: none;
+        cursor: move !important;
+    }
+    .image-sortable-item:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .image-sortable-item img,
+    .image-sortable-item .badge {
+        pointer-events: none;
+    }
+    .image-sortable-item .btn-group,
+    .image-sortable-item .btn {
+        pointer-events: auto;
+        cursor: pointer;
+    }
+    .image-order-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        z-index: 10;
+        font-weight: bold;
+    }
+</style>
 <style>
     
     .form-section {
@@ -329,6 +448,8 @@
 @push('scripts')
 <!-- Quill Editor JS -->
 <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<!-- SortableJS -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Create editor container
@@ -520,8 +641,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const categorySelect = document.getElementById('category_id');
     const subcategorySelect = document.getElementById('subcategory_id');
     
+    const subcategoryWrapper = document.getElementById('subcategory_wrapper');
+    
     categorySelect.addEventListener('change', function() {
         const categoryId = this.value;
+        
+        // Hide subcategory wrapper by default
+        if (subcategoryWrapper) {
+            subcategoryWrapper.style.display = 'none';
+        }
         
         // Clear subcategory dropdown
         subcategorySelect.innerHTML = '<option value="">Select Subcategory (Optional)</option>';
@@ -533,6 +661,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(response => response.json())
                 .then(data => {
                     if (data.subcategories && data.subcategories.length > 0) {
+                        // Show subcategory wrapper
+                        if (subcategoryWrapper) {
+                            subcategoryWrapper.style.display = 'block';
+                        }
+                        
                         data.subcategories.forEach(sub => {
                             const option = document.createElement('option');
                             option.value = sub.id;
@@ -546,12 +679,18 @@ document.addEventListener('DOMContentLoaded', function() {
                         });
                         subcategorySelect.disabled = false;
                     } else {
-                        subcategorySelect.innerHTML = '<option value="">No subcategories available</option>';
+                        // Hide subcategory wrapper if no subcategories
+                        if (subcategoryWrapper) {
+                            subcategoryWrapper.style.display = 'none';
+                        }
                     }
                 })
                 .catch(error => {
                     console.error('Error fetching subcategories:', error);
-                    subcategorySelect.innerHTML = '<option value="">Error loading subcategories</option>';
+                    // Hide subcategory wrapper on error
+                    if (subcategoryWrapper) {
+                        subcategoryWrapper.style.display = 'none';
+                    }
                 });
         }
     });
@@ -579,6 +718,299 @@ document.addEventListener('DOMContentLoaded', function() {
             categorySelect.disabled = true;
         }
     });
+});
+
+// Image upload functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const imageInput = document.getElementById('product_images');
+    const previewContainer = document.getElementById('image_preview_container');
+    const placeholder = document.getElementById('image_upload_placeholder');
+    let selectedImages = [];
+
+    // Handle file selection
+    if (imageInput) {
+        imageInput.addEventListener('change', function(e) {
+            const newFiles = Array.from(e.target.files);
+            // Add new files to selectedImages if not already present
+            newFiles.forEach(file => {
+                if (!selectedImages.find(img => img.name === file.name && img.size === file.size)) {
+                    selectedImages.push(file);
+                }
+            });
+            handleFiles(newFiles);
+        });
+    }
+
+    // Drag and drop
+    const uploadArea = document.querySelector('.image-upload-area');
+    if (uploadArea) {
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadArea.classList.add('border-primary');
+        });
+
+        uploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('border-primary');
+        });
+
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('border-primary');
+            const files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
+            // Add new files to selectedImages
+            files.forEach(file => {
+                if (!selectedImages.find(img => img.name === file.name && img.size === file.size)) {
+                    selectedImages.push(file);
+                }
+            });
+            handleFiles(files);
+            // Update input files
+            updateFileInput();
+        });
+    }
+
+    function handleFiles(files) {
+        files.forEach(file => {
+            if (!file.type.startsWith('image/')) {
+                alert(`${file.name} is not an image file`);
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                alert(`${file.name} is too large. Maximum size is 5MB`);
+                return;
+            }
+
+            selectedImages.push(file);
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const col = document.createElement('div');
+                col.className = 'col-md-3 col-6 image-item';
+                const orderNumber = selectedImages.length;
+                col.innerHTML = `
+                    <div class="position-relative image-sortable-item" style="cursor: move;">
+                        <div class="position-absolute top-0 start-0 m-1">
+                            <span class="badge bg-secondary image-order-badge">${orderNumber}</span>
+                        </div>
+                        <img src="${e.target.result}" class="img-fluid rounded border" style="height: 150px; width: 100%; object-fit: cover;">
+                        <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 remove-image" data-filename="${file.name}">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                `;
+                previewContainer.appendChild(col);
+                previewContainer.style.display = 'flex';
+                if (placeholder) placeholder.style.display = 'none';
+                
+                // Initialize Sortable if not already done
+                if (typeof Sortable !== 'undefined' && !previewContainer.sortableInstance) {
+                    previewContainer.sortableInstance = Sortable.create(previewContainer, {
+                        animation: 150,
+                        handle: '.image-sortable-item',
+                        ghostClass: 'sortable-ghost',
+                        dragClass: 'sortable-drag',
+                        onEnd: function() {
+                            updateOrderBadges();
+                        }
+                    });
+                }
+                
+                updateOrderBadges();
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function updateOrderBadges() {
+        if (previewContainer) {
+            const items = previewContainer.querySelectorAll('.image-item');
+            items.forEach((item, index) => {
+                const badge = item.querySelector('.image-order-badge');
+                if (badge) {
+                    badge.textContent = index + 1;
+                }
+            });
+        }
+    }
+
+    // Remove image from preview
+    if (previewContainer) {
+        previewContainer.addEventListener('click', function(e) {
+            if (e.target.closest('.remove-image')) {
+                const btn = e.target.closest('.remove-image');
+                const filename = btn.dataset.filename;
+                selectedImages = selectedImages.filter(img => img.name !== filename);
+                btn.closest('.image-item').remove();
+                
+                // Update input files
+                updateFileInput();
+
+                if (selectedImages.length === 0 && placeholder) {
+                    previewContainer.style.display = 'none';
+                    placeholder.style.display = 'block';
+                } else {
+                    updateOrderBadges();
+                }
+            }
+        });
+    }
+
+    // Function to update file input with selected images
+    function updateFileInput() {
+        if (imageInput && selectedImages.length > 0) {
+            const dataTransfer = new DataTransfer();
+            selectedImages.forEach(file => {
+                if (file instanceof File) {
+                    dataTransfer.items.add(file);
+                }
+            });
+            imageInput.files = dataTransfer.files;
+        }
+    }
+
+    // Ensure files are attached before form submission
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            // Update file input one more time before submission
+            updateFileInput();
+            
+            // Verify files are attached
+            if (imageInput && imageInput.files.length === 0 && selectedImages.length > 0) {
+                console.warn('Files not properly attached to input, attempting to fix...');
+                updateFileInput();
+            }
+        });
+    }
+
+    // Initialize Sortable for existing images
+    const existingImages = document.getElementById('existing_images');
+    
+    if (existingImages && typeof Sortable !== 'undefined') {
+        // Define functions first
+        function updateExistingOrderBadges() {
+            const items = existingImages.querySelectorAll('.image-item');
+            items.forEach((item, index) => {
+                const badge = item.querySelector('.image-order-badge');
+                if (badge) {
+                    badge.textContent = index + 1;
+                }
+            });
+        }
+
+        function saveImageOrder() {
+            const items = existingImages.querySelectorAll('.image-item');
+            const order = Array.from(items).map((item, index) => ({
+                id: item.dataset.imageId,
+                position: index + 1
+            }));
+
+            fetch('{{ route("admin.products.images.update-order", $product->id) }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ order: order })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update data-position attributes
+                    items.forEach((item, index) => {
+                        item.dataset.position = index + 1;
+                    });
+                } else {
+                    console.error('Error updating order:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        // Make functions available globally for delete handler
+        window.updateExistingOrderBadges = updateExistingOrderBadges;
+
+        // Initialize Sortable
+        const sortable = Sortable.create(existingImages, {
+            animation: 150,
+            handle: '.image-sortable-item',
+            ghostClass: 'sortable-ghost',
+            dragClass: 'sortable-drag',
+            filter: '.btn, .btn-group',
+            preventOnFilter: false,
+            onEnd: function(evt) {
+                // Update order badges
+                updateExistingOrderBadges();
+                // Save new order
+                saveImageOrder();
+            }
+        });
+    }
+
+    // Delete existing image
+    if (existingImages) {
+        existingImages.addEventListener('click', function(e) {
+            if (e.target.closest('.delete-image')) {
+                const btn = e.target.closest('.delete-image');
+                const imageId = btn.dataset.imageId;
+                
+                if (confirm('Are you sure you want to delete this image?')) {
+                    fetch(`/admin/products/images/${imageId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            btn.closest('.image-item').remove();
+                            // Update order badges after deletion
+                            if (typeof window.updateExistingOrderBadges === 'function') {
+                                window.updateExistingOrderBadges();
+                            }
+                        } else {
+                            alert(data.message || 'Error deleting image');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error deleting image');
+                    });
+                }
+            }
+
+            // Set primary image
+            if (e.target.closest('.set-primary-image')) {
+                const btn = e.target.closest('.set-primary-image');
+                const imageId = btn.dataset.imageId;
+                
+                fetch(`/admin/products/images/${imageId}/set-primary`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert(data.message || 'Error setting primary image');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error setting primary image');
+                });
+            }
+        });
+    }
 });
 </script>
 @endpush

@@ -121,6 +121,7 @@ Route::post('/wishlist/toggle', [WishlistController::class, 'toggle'])->name('wi
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/products/search', [ProductController::class, 'search'])->name('products.search');
 Route::get('/products/{slug}', [ProductController::class, 'show'])->name('products.show');
+Route::get('/products/{slug}/custom', [ProductController::class, 'customPage'])->name('products.custom');
 Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('categories.show');
 
 // Pages (frontend)
@@ -220,6 +221,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('products/lookup', [AdminProductController::class, 'lookup'])->name('products.lookup');
         Route::get('products/{product}/json', [AdminProductController::class, 'showJson'])->name('products.json');
         Route::post('products/check-slug', [AdminProductController::class, 'checkSlug'])->name('products.check-slug');
+        Route::get('products/{product}/page-builder', [AdminProductController::class, 'pageBuilder'])->name('products.page-builder');
+        Route::post('products/{product}/page-builder', [AdminProductController::class, 'savePageBuilder'])->name('products.page-builder.save');
+        Route::delete('products/images/{image}', [AdminProductController::class, 'deleteImage'])->name('products.images.delete');
+        Route::post('products/images/{image}/set-primary', [AdminProductController::class, 'setPrimaryImage'])->name('products.images.set-primary');
+        Route::post('products/{product}/images/update-order', [AdminProductController::class, 'updateImageOrder'])->name('products.images.update-order');
         Route::resource('products', AdminProductController::class);
         Route::get('orders/create', [AdminOrderController::class, 'create'])->name('orders.create');
         Route::post('orders', [AdminOrderController::class, 'store'])->name('orders.store');
@@ -235,6 +241,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('email-settings', [AdminEmailSettingsController::class, 'index'])->name('email-settings.index');
             Route::put('email-settings', [AdminEmailSettingsController::class, 'update'])->name('email-settings.update');
             Route::post('email-settings/test', [AdminEmailSettingsController::class, 'testEmail'])->name('email-settings.test');
+            Route::get('storage-settings', [\App\Http\Controllers\Admin\StorageSettingsController::class, 'index'])->name('storage-settings.index');
+            Route::put('storage-settings', [\App\Http\Controllers\Admin\StorageSettingsController::class, 'update'])->name('storage-settings.update');
             Route::resource('roles', AdminRoleController::class)->except(['show']);
             Route::get('roles/{role}/copy', [AdminRoleController::class, 'copy'])->name('roles.copy');
             Route::post('roles/{role}/copy', [AdminRoleController::class, 'storeCopy'])->name('roles.copy.store');

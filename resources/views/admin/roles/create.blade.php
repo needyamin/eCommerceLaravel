@@ -11,19 +11,6 @@
 		<input name="name" class="form-control" required />
 	</div>
 	<div class="mb-3">
-		<label class="form-label">Permissions</label>
-		<div class="row">
-			@foreach($permissions as $permission)
-				<div class="col-md-3">
-					<label class="form-check">
-						<input type="checkbox" class="form-check-input" name="permissions[]" value="{{ $permission->name }}" />
-						<span class="form-check-label">{{ $permission->name }}</span>
-					</label>
-				</div>
-			@endforeach
-		</div>
-	</div>
-	<div class="mb-3">
 		<label class="form-label d-flex justify-content-between align-items-center">
 			<span>Route Permissions (auto-from route names)</span>
 			<span class="d-flex gap-2">

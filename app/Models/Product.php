@@ -25,6 +25,8 @@ class Product extends Model
         'is_featured',
         'meta_title',
         'meta_description',
+        'use_custom_page',
+        'page_builder_data',
     ];
 
     protected $casts = [
@@ -32,6 +34,8 @@ class Product extends Model
         'compare_at_price' => 'decimal:2',
         'is_active' => 'boolean',
         'is_featured' => 'boolean',
+        'use_custom_page' => 'boolean',
+        'page_builder_data' => 'array',
     ];
 
     public function category(): BelongsTo

@@ -68,7 +68,7 @@
 					</a>
 				</li>
 				@endcan
-				@if(auth()->guard('admin')->user()->can('admin.site-settings.index') || auth()->guard('admin')->user()->can('admin.email-settings.index') || auth()->guard('admin')->user()->can('admin.payment-gateways.index') || auth()->guard('admin')->user()->can('admin.shipping-settings.index') || auth()->guard('admin')->user()->can('admin.otp-settings.index') || auth()->guard('admin')->user()->can('admin.coin-settings.index'))
+				@if(auth()->guard('admin')->user()->can('admin.site-settings.index') || auth()->guard('admin')->user()->can('admin.email-settings.index') || auth()->guard('admin')->user()->can('admin.payment-gateways.index') || auth()->guard('admin')->user()->can('admin.shipping-settings.index') || auth()->guard('admin')->user()->can('admin.otp-settings.index') || auth()->guard('admin')->user()->can('admin.coin-settings.index') || auth()->guard('admin')->user()->can('admin.storage-settings.index'))
 				<li class="nav-item">
 					<a href="#" class="nav-link">
 						<i class="nav-icon bi bi-gear"></i>
@@ -120,6 +120,14 @@
 							<a href="{{ route('admin.otp-settings.index') }}" class="nav-link">
 								<i class="nav-icon bi bi-shield-lock"></i>
 								<p>OTP Settings</p>
+							</a>
+						</li>
+						@endcan
+						@can('admin.storage-settings.index')
+						<li class="nav-item">
+							<a href="{{ route('admin.storage-settings.index') }}" class="nav-link">
+								<i class="nav-icon bi bi-cloud-upload"></i>
+								<p>Storage & CDN</p>
 							</a>
 						</li>
 						@endcan
