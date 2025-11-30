@@ -45,6 +45,35 @@ A comprehensive, modern eCommerce platform built with Laravel 12, featuring a be
 
 ## 🛠️ Installation
 
+### Option 1: Web-Based Installer (Recommended)
+
+1. **Clone and install dependencies:**
+```bash
+git clone https://github.com/needyamin/eCommerceLaravel
+cd eCommerceLaravel
+composer install
+npm install
+```
+
+2. **Start server:**
+```bash
+php artisan serve
+```
+
+3. **Access the installer:**
+Visit `http://localhost:8000/installer` in your browser
+
+The installer will guide you through:
+- ✅ System requirements check (PHP version, extensions, folder permissions)
+- ✅ Database configuration (with connection testing)
+- ✅ Admin account setup
+- ✅ Automatic database migration and seeding
+- ✅ Installation completion
+
+After successful installation, the installer is automatically disabled in the database for security. To re-enable it, update `installer_enabled = true` in the `site_settings` table.
+
+### Option 2: Manual Installation
+
 1. **Clone and install dependencies:**
 ```bash
 git clone https://github.com/needyamin/eCommerceLaravel
@@ -101,18 +130,18 @@ Visit `http://localhost:8000`
 
 ## 👤 Default Accounts
 
-After running the seeder, you can login with:
+After installation (via installer or manual seeding), you can login with:
 
 - **Admin Panel**: `http://localhost:8000/admin/login`
-  - Email: `needyamin@gmail.com`
-  - Password: `needyamin@gmail.com`
+  - Email: The email you provided during installation (or `needyamin@gmail.com` if using manual seeding)
+  - Password: The password you set during installation (or `needyamin@gmail.com` if using manual seeding)
   - Role: Super Admin (has all permissions)
 
 - **User Account** (Storefront):
-  - Email: `needyamin@gmail.com`
-  - Password: `needyamin@gmail.com`
+  - Email: Same as admin email
+  - Password: Same as admin password
 
-> **Note**: Both admin and user accounts use the same email. The admin account has the Super Admin role with all permissions automatically assigned.
+> **Note**: If using the web installer, you'll set custom admin credentials during installation. The installer automatically creates the admin account with Super Admin role and all permissions.
 
 ## 💳 Payment Gateways
 
@@ -179,7 +208,7 @@ Configure from Admin → Storage & CDN:
 
 ## 🔧 Configuration
 
-- **Site Settings**: Admin → Site Settings (SEO, Schema.org, Sitemap, social links, feature toggles, product display columns)
+- **Site Settings**: Admin → Site Settings (SEO, Schema.org, Sitemap, social links, feature toggles, product display columns, installer control)
 - **Products**: Admin → Products (with image management and page builder)
 - **Categories**: Admin → Categories (hierarchical with subcategories)
 - **Coupons**: Admin → Coupons (create and manage discount codes)
@@ -193,6 +222,17 @@ Configure from Admin → Storage & CDN:
 - **OTP Settings**: Admin → OTP Settings (Email & SMS with multiple providers)
 - **Storage & CDN**: Admin → Storage & CDN (S3, Cloudflare R2, DigitalOcean Spaces, Wasabi, Backblaze B2)
 - **Pages**: Admin → Pages (manage static pages)
+
+## 🔒 Installer Security
+
+The web-based installer includes built-in security features:
+
+- **Automatic Disabling**: After successful installation, the installer is automatically disabled in the database (`installer_enabled = false` in `site_settings` table)
+- **Access Control**: Installer routes return 404 when disabled
+- **Database-Based**: Installer control is managed via database settings (no file deletion)
+- **Re-enable Option**: To re-enable the installer, update `installer_enabled = true` in the `site_settings` table
+- **Requirements Check**: Validates PHP version, extensions, and folder permissions before installation
+- **Database Testing**: Tests database connection before proceeding with installation
 
 ## 🔐 Roles & Permissions
 

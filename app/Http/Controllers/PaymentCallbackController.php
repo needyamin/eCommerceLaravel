@@ -340,17 +340,6 @@ class PaymentCallbackController extends Controller
         }
     }
     
-    
-    /**
-     * bKash Callback
-     */
-    public function bkashCallback(Request $request)
-    {
-        // Handle bKash webhook/callback
-        Log::info('bKash callback received', $request->all());
-        return response()->json(['status' => 'received']);
-    }
-    
     /**
      * Nagad Callback - Handle response from Nagad payment gateway
      */

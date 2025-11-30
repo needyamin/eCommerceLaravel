@@ -27,23 +27,41 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Admin/test user (idempotent)
+        // Admin/test user (idempotent) - use installer admin email if available
+        $installerAdminData = config('installer.admin_data');
+        $userEmail = $installerAdminData['email'] ?? 'needyamin@gmail.com';
+        $userName = $installerAdminData['name'] ?? 'Test User';
+        $userPassword = $installerAdminData['password'] ?? 'needyamin@gmail.com';
+        
         User::query()->firstOrCreate(
-            ['email' => 'needyamin@gmail.com'],
+            ['email' => $userEmail],
             [
-                'name' => 'Test User',
-                'password' => bcrypt('needyamin@gmail.com'),
+                'name' => $userName,
+                'password' => bcrypt($userPassword),
             ]
         );
 
-        // Default admin
+        // Default admin - use installer data if available, otherwise use default
+        $installerAdminData = config('installer.admin_data');
+        $adminEmail = $installerAdminData['email'] ?? 'needyamin@gmail.com';
+        $adminName = $installerAdminData['name'] ?? 'Admin';
+        $adminPassword = $installerAdminData['password'] ?? 'needyamin@gmail.com';
+        
         $admin = Admin::query()->firstOrCreate(
-            ['email' => 'needyamin@gmail.com'],
+            ['email' => $adminEmail],
             [
-                'name' => 'Admin',
-                'password' => bcrypt('needyamin@gmail.com'),
+                'name' => $adminName,
+                'password' => bcrypt($adminPassword),
             ]
         );
+        
+        // Update password if admin already exists (from installer)
+        if ($installerAdminData && $admin->wasRecentlyCreated === false) {
+            $admin->update([
+                'name' => $adminName,
+                'password' => bcrypt($adminPassword),
+            ]);
+        }
 
         // Roles & Permissions (idempotent)
         $super = Role::firstOrCreate(['name' => 'Super Admin', 'guard_name' => 'admin']);

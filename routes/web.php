@@ -27,7 +27,21 @@ use App\Http\Controllers\OTP\SmsOtpController;
 use App\Http\Controllers\OTP\EmailOtpController;
 use App\Http\Controllers\WishlistController;
 
-
+// Installer routes (must be before installation check middleware)
+// Only register if InstallerController exists (will be removed after installation)
+if (class_exists(\App\Http\Controllers\InstallerController::class)) {
+    Route::prefix('installer')->name('installer.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\InstallerController::class, 'index'])->name('index');
+        Route::get('/database', [\App\Http\Controllers\InstallerController::class, 'database'])->name('database');
+        Route::post('/test-database', [\App\Http\Controllers\InstallerController::class, 'testDatabase'])->name('test-database');
+        Route::post('/save-database', [\App\Http\Controllers\InstallerController::class, 'saveDatabase'])->name('save-database');
+        Route::get('/admin', [\App\Http\Controllers\InstallerController::class, 'admin'])->name('admin');
+        Route::post('/install', [\App\Http\Controllers\InstallerController::class, 'install'])->name('install');
+        Route::get('/install', [\App\Http\Controllers\InstallerController::class, 'showInstall'])->name('show-install');
+        Route::post('/process-install', [\App\Http\Controllers\InstallerController::class, 'processInstall'])->name('process-install');
+        Route::get('/complete', [\App\Http\Controllers\InstallerController::class, 'complete'])->name('complete');
+    });
+}
 
 // Storage file serving fallback (for Windows environments where symlinks may not work)
 Route::get('/storage/{path}', function ($path) {

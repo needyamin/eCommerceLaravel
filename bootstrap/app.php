@@ -14,6 +14,11 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias(['admin.permission' => App\Http\Middleware\AdminRoutePermission::class]);
         
+        // Check installation status (except installer routes)
+        $middleware->web(append: [
+            \App\Http\Middleware\CheckInstallation::class,
+        ]);
+        
         // CORS for API and storage
         $middleware->api(prepend: [
             \App\Http\Middleware\CorsMiddleware::class,

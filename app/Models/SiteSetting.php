@@ -17,7 +17,8 @@ class SiteSetting extends Model
         'schema_organization_email','schema_organization_address','schema_organization_type',
         'sitemap_enabled','sitemap_priority_home','sitemap_priority_product','sitemap_priority_category',
         'sitemap_priority_page','sitemap_change_frequency',
-        'google_analytics_code','facebook_pixel_code','microsoft_clarity_code','custom_head_code','custom_body_code'
+        'google_analytics_code','facebook_pixel_code','microsoft_clarity_code','custom_head_code','custom_body_code',
+        'installer_enabled'
     ];
 
     protected $casts = [
@@ -31,6 +32,7 @@ class SiteSetting extends Model
         'newsletter_send_welcome_email' => 'boolean',
         'schema_enabled' => 'boolean',
         'sitemap_enabled' => 'boolean',
+        'installer_enabled' => 'boolean',
     ];
 
     public static function get(): self
