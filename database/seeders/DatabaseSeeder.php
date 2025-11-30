@@ -29,19 +29,19 @@ class DatabaseSeeder extends Seeder
     {
         // Admin/test user (idempotent)
         User::query()->firstOrCreate(
-            ['email' => 'test@example.com'],
+            ['email' => 'needyamin@gmail.com'],
             [
                 'name' => 'Test User',
-                'password' => bcrypt('password'),
+                'password' => bcrypt('needyamin@gmail.com'),
             ]
         );
 
         // Default admin
-        Admin::query()->firstOrCreate(
-            ['email' => 'admin@example.com'],
+        $admin = Admin::query()->firstOrCreate(
+            ['email' => 'needyamin@gmail.com'],
             [
                 'name' => 'Admin',
-                'password' => bcrypt('password'),
+                'password' => bcrypt('needyamin@gmail.com'),
             ]
         );
 
@@ -54,8 +54,8 @@ class DatabaseSeeder extends Seeder
         // Ensure Super Admin has all permissions
         $super->syncPermissions(Permission::where('guard_name', 'admin')->pluck('name')->toArray());
 
-        $admin = Admin::where('email', 'admin@example.com')->first();
-        if ($admin && !$admin->hasRole('Super Admin')) {
+        // Assign Super Admin role to the created admin
+        if (!$admin->hasRole('Super Admin')) {
             $admin->assignRole('Super Admin');
         }
 

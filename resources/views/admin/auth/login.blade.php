@@ -71,7 +71,7 @@
 			position: relative;
 			z-index: 1;
 			width: 100%;
-			max-width: 440px;
+			max-width: 640px;
 			padding: 20px;
 		}
 		

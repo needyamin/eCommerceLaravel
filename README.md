@@ -3,40 +3,45 @@
 A comprehensive, modern eCommerce platform built with Laravel 12, featuring a beautiful storefront and powerful admin panel with role-based access control.
 
 ![Laravel](https://img.shields.io/badge/Laravel-12.x-red.svg)
-![PHP](https://img.shields.io/badge/PHP-8.3+-blue.svg)
+![PHP](https://img.shields.io/badge/PHP-8.2+-blue.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 
 ## ✨ Key Features
 
 ### Storefront
 - Product catalog with categories and subcategories
-- Live search, shopping cart, wishlist
+- Live search, shopping cart, wishlist (guest and authenticated)
 - Checkout with Bangladeshi address system (Division, District, Upazila)
 - Payment gateways: bKash, Nagad, Rocket, SSL Commerce, Stripe, PayPal, COD
-- Product reviews, ratings, and newsletter
-- Coins (loyalty points) system
+- **Coupon/Discount System** - Percentage and fixed discounts with usage limits
+- Product reviews, ratings, and newsletter subscriptions
+- **Coins (Loyalty Points) System** - Earn and redeem points
+- **Referral System** - User referral codes and rewards
 - Custom product pages with visual page builder
 - HTML-rich product descriptions
-- Responsive Bootstrap 5 design
+- Responsive Tailwind CSS 4.0 design
 
 ### Admin Panel
 - Dashboard with analytics
+- **Role-Based Access Control (RBAC)** - Spatie Permissions with automatic route permission discovery
 - Products & Categories (with subcategories support)
 - **Product Page Builder** - Visual drag-and-drop page builder for custom product pages
 - **Product Image Management** - Drag-and-drop upload, reorder, set primary, delete
-- Orders, Users, Roles & Permissions
+- Orders, Users, Coupons management
+- **Multi-Currency Support** - BDT, USD, EUR, GBP with currency switching
 - Payment Gateway management (with sandbox/test mode)
 - Shipping & Tax settings (Bangladeshi divisions/districts)
 - Email & SMS OTP settings (multiple SMS providers)
 - **Storage & CDN Settings** - Configure S3, Cloudflare R2, DigitalOcean Spaces, Wasabi, Backblaze B2
+- **Site Settings** - SEO, Schema.org, Sitemap, Newsletter, Reviews configuration
 - Server-side DataTables for performance
 
 ## 📋 Requirements
 
-- PHP 8.3+
+- PHP 8.2+
 - Composer
 - MySQL/PostgreSQL/SQLite
-- Node.js (optional, for asset compilation)
+- Node.js 18+ (for asset compilation with Vite)
 
 ## 🛠️ Installation
 
@@ -69,7 +74,25 @@ DB_PASSWORD=your_password
 php artisan migrate --seed
 ```
 
-5. **Start server:**
+This will create:
+- Default admin and user accounts
+- 6 categories with 12 products each (72 products total)
+- 3 product images per product
+- 4 currencies (BDT, USD, EUR, GBP)
+- 5 sample coupons
+- Bangladesh districts and upazilas data
+- Default pages
+- All admin route permissions
+- Super Admin role with all permissions
+
+5. **Build assets (optional for development):**
+```bash
+npm run build
+# or for development
+npm run dev
+```
+
+6. **Start server:**
 ```bash
 php artisan serve
 ```
@@ -78,66 +101,46 @@ Visit `http://localhost:8000`
 
 ## 👤 Default Accounts
 
-- **Admin**: `admin@example.com` / `password`
-- **User**: `test@example.com` / `password`
+After running the seeder, you can login with:
 
-## 📚 API Documentation
+- **Admin Panel**: `http://localhost:8000/admin/login`
+  - Email: `needyamin@gmail.com`
+  - Password: `needyamin@gmail.com`
+  - Role: Super Admin (has all permissions)
 
-RESTful API for mobile app integration. Full documentation: `documentation/api_documentation.html`
+- **User Account** (Storefront):
+  - Email: `needyamin@gmail.com`
+  - Password: `needyamin@gmail.com`
 
-### Key Endpoints
-
-**Authentication:**
-- `POST /api/register` - Register user
-- `POST /api/login` - Login
-- `GET /api/user` - Get profile
-- `PUT /api/user` - Update profile
-
-**Products & Categories:**
-- `GET /api/products` - List products (supports `q`, `category_id`, `per_page`)
-- `GET /api/products/{slug}` - Product details
-- `GET /api/categories` - List categories (supports `parent_only`, `subcategories_only`)
-- `GET /api/categories/{slug}` - Category with subcategories
-
-**Cart & Orders:**
-- `GET /api/cart` - Get cart (guest: use `X-Cart-Session` header)
-- `POST /api/cart/add` - Add to cart
-- `POST /api/checkout` - Place order (requires: `billing_name`, `billing_email`, `billing_phone`, `gateway`, optional: `billing_division`, `billing_district`, `billing_upazila`)
-- `GET /api/orders` - List orders
-- `GET /api/orders/{id}` - Order details
-
-**Addresses:**
-- `GET /api/user/addresses` - List addresses
-- `POST /api/user/addresses` - Create address (fields: `division`, `district`, `upazila`, `city`, `state`, etc.)
-- `PUT /api/user/addresses/{address}` - Update address
-- `DELETE /api/user/addresses/{address}` - Delete address
-
-**Authentication:** Use `Authorization: Bearer {token}` header for protected endpoints.
-
-**Guest Sessions:** Use `X-Cart-Session` and `X-Wishlist-Session` headers for guest operations.
+> **Note**: Both admin and user accounts use the same email. The admin account has the Super Admin role with all permissions automatically assigned.
 
 ## 💳 Payment Gateways
 
 Configure from Admin → Payment Gateways:
-- **bKash** - Mobile banking (Tokenized Checkout API)
-- **Nagad** - Mobile banking
-- **Rocket** - Mobile banking
-- **SSL Commerce** - Card payments
-- **Stripe** - Card payments
-- **PayPal** - Online payments
-- **Cash on Delivery (COD)**
+- **bKash** - Mobile banking (Tokenized Checkout API) - Sandbox credentials pre-configured
+- **Nagad** - Mobile banking - Sandbox mode supported
+- **Rocket** - Mobile banking - Sandbox mode supported
+- **SSL Commerce** - Card payments - Test store credentials pre-configured
+- **Stripe** - Card payments - Test keys pre-configured
+- **PayPal** - Online payments - Sandbox mode supported
+- **Cash on Delivery (COD)** - Always available
 
-All gateways support sandbox/test mode for testing.
+All gateways support sandbox/test mode for testing. Default test credentials are seeded automatically.
 
 ## 🚚 Shipping & Tax
 
 Configure from Admin → Shipping Settings:
 - Enable/disable shipping
+- Flat rate shipping
 - Free shipping threshold
 - Division-based rates (flat or percentage)
 - District-based rates (flat or percentage)
 - Tax settings (flat or percentage)
-- Default currency: BDT (৳)
+- Default currency: BDT (৳) - Pre-configured with BDT, USD, EUR, GBP
+
+**Bangladesh Address System:**
+- Complete Division, District, and Upazila data seeded automatically
+- Address fields support all administrative levels
 
 ## 📧 Email & SMS
 
@@ -151,6 +154,17 @@ Configure from Admin → Shipping Settings:
 - **Page Builder**: Visual drag-and-drop page builder for custom product pages
 - **HTML Descriptions**: Rich HTML content support in product descriptions
 - **Subcategories**: Hierarchical category system with parent/child relationships
+- **Product Factory**: Generates sample products with images automatically during seeding
+
+## 🎫 Coupon & Discount System
+
+- **Coupon Types**: Percentage or fixed amount discounts
+- **Usage Limits**: Global and per-user usage limits
+- **Minimum Amount**: Set minimum order value requirements
+- **Maximum Discount**: Cap discount amounts for percentage coupons
+- **Validity Period**: Start and expiration dates
+- **Category/Product Specific**: Apply coupons to specific categories or products
+- **Pre-seeded Coupons**: 5 sample coupons created during seeding (WELCOME10, SAVE20, FREESHIP, HOLIDAY25, STUDENT15)
 
 ## ☁️ Storage & CDN
 
@@ -165,21 +179,51 @@ Configure from Admin → Storage & CDN:
 
 ## 🔧 Configuration
 
-- **Site Settings**: Admin → Site Settings (SEO, social links, feature toggles)
+- **Site Settings**: Admin → Site Settings (SEO, Schema.org, Sitemap, social links, feature toggles, product display columns)
 - **Products**: Admin → Products (with image management and page builder)
+- **Categories**: Admin → Categories (hierarchical with subcategories)
+- **Coupons**: Admin → Coupons (create and manage discount codes)
+- **Currencies**: Admin → Currencies (manage multiple currencies)
+- **Orders**: Admin → Orders (view and manage customer orders)
+- **Users**: Admin → Users (manage customer accounts, coins, referrals)
+- **Roles & Permissions**: Admin → Roles & Permissions (manage admin roles and route permissions)
 - **Payment Gateways**: Admin → Payment Gateways (sandbox/test mode support)
 - **Shipping Settings**: Admin → Shipping Settings (Bangladeshi divisions/districts)
 - **Email Settings**: Admin → Email Settings (SMTP with cPanel auto-detection)
 - **OTP Settings**: Admin → OTP Settings (Email & SMS with multiple providers)
 - **Storage & CDN**: Admin → Storage & CDN (S3, Cloudflare R2, DigitalOcean Spaces, Wasabi, Backblaze B2)
+- **Pages**: Admin → Pages (manage static pages)
+
+## 🔐 Roles & Permissions
+
+- **Automatic Permission Discovery**: All admin routes are automatically discovered and permissions created
+- **Super Admin Role**: Pre-configured with all permissions
+- **Route-Based Permissions**: Each admin route requires specific permission
+- **Permission Middleware**: `admin.permission` middleware checks route permissions automatically
 
 ## 📄 License
 
 MIT License - see [LICENSE](LICENSE) file
 
+## 📦 Seeded Data
+
+After running `php artisan migrate --seed`, the following data is created:
+
+- **Users**: 1 test user account
+- **Admins**: 1 admin account with Super Admin role
+- **Categories**: 6 categories
+- **Products**: 72 products (12 per category)
+- **Product Images**: 216 images (3 per product)
+- **Currencies**: 4 currencies (BDT, USD, EUR, GBP)
+- **Coupons**: 5 sample coupons
+- **Bangladesh Data**: All divisions, districts, and upazilas
+- **Pages**: Default pages
+- **Permissions**: All admin route permissions (124+ permissions)
+- **Roles**: Super Admin role with all permissions
+
 ## 📞 Support
 
-Email: needyain@gmail.com or create an issue on GitHub.
+Email: needyamin@gmail.com or create an issue on GitHub.
 
 ---
 

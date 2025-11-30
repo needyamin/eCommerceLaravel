@@ -36,6 +36,7 @@ class BangladeshDistrictsSeeder extends Seeder
             'Mymensingh' => ['Jamalpur', 'Mymensingh', 'Netrokona', 'Sherpur'],
         ];
 
+        $totalDistricts = 0;
         foreach ($districts as $division => $districtNames) {
             foreach ($districtNames as $index => $districtName) {
                 District::updateOrCreate(
@@ -45,8 +46,11 @@ class BangladeshDistrictsSeeder extends Seeder
                         'sort_order' => $index,
                     ]
                 );
+                $totalDistricts++;
             }
         }
+        
+        $this->command->info("Seeded {$totalDistricts} districts across " . count($districts) . " divisions.");
     }
 }
 

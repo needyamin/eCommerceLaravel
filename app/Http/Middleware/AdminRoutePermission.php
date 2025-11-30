@@ -17,7 +17,7 @@ class AdminRoutePermission
 			return $next($request);
 		}
 		$user = auth('admin')->user();
-		if ($user && $user->getAllPermissions()->contains('name', $name)) {
+		if ($user && $user->hasPermissionTo($name, 'admin')) {
 			return $next($request);
 		}
 		abort(403);

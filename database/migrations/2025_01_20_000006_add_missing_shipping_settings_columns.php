@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (!Schema::hasTable('shipping_settings')) {
+            return;
+        }
+
         Schema::table('shipping_settings', function (Blueprint $table) {
             // Add missing columns if they don't exist
             if (!Schema::hasColumn('shipping_settings', 'global_rate_enabled')) {
@@ -24,6 +28,10 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (!Schema::hasTable('shipping_settings')) {
+            return;
+        }
+
         Schema::table('shipping_settings', function (Blueprint $table) {
             if (Schema::hasColumn('shipping_settings', 'global_rate_enabled')) {
                 $table->dropColumn('global_rate_enabled');

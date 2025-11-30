@@ -215,17 +215,9 @@
                                             @foreach($districts->where('division', $selectedDivision) as $district)
                                                 <option value="{{ $district->name }}" 
                                                     data-district-id="{{ $district->id }}"
-                                                    {{ $selectedDistrict == $district->name ? 'selected' : '' }}>
-                                                    {{ $district->name }}
-                                                </option>
-                                            @endforeach
-                                        @else
-                                            @foreach($districts as $district)
-                                                <option value="{{ $district->name }}" 
-                                                    data-district-id="{{ $district->id }}"
                                                     data-division="{{ $district->division }}"
                                                     {{ $selectedDistrict == $district->name ? 'selected' : '' }}>
-                                                    {{ $district->name }} ({{ $district->division }})
+                                                    {{ $district->name }}
                                                 </option>
                                             @endforeach
                                         @endif
@@ -413,14 +405,7 @@
                             
                             <script>
                                 document.addEventListener('DOMContentLoaded', function() {
-                                    // Check on page load
-                                    const checkedRadio = document.querySelector('.payment-gateway-radio:checked');
-                                    if (checkedRadio && mobileGateways.includes(checkedRadio.value)) {
-                                        phoneContainer.style.display = 'block';
-                                        phoneInput.required = true;
-                                    }
-                                    
-                                    // District dynamic loading
+                                    // District dynamic loading - DO THIS FIRST
                                     const divisionSelect = document.getElementById('billing_division');
                                     const districtSelect = document.getElementById('billing_district');
                                     
@@ -428,6 +413,13 @@
                                     const districtsData = @json($districts->map(function($d) {
                                         return ['id' => $d->id, 'name' => $d->name, 'division' => $d->division];
                                     }));
+                                    
+                                    // Debug: Log districts data
+                                    console.log('Districts Data Loaded:', districtsData.length, 'districts');
+                                    if (districtsData.length > 0) {
+                                        console.log('Sample district:', districtsData[0]);
+                                        console.log('Unique divisions:', [...new Set(districtsData.map(d => d.division))]);
+                                    }
                                     
                                     // Currency formatting (simplified for BDT)
                                     const CURRENCY = {
@@ -551,42 +543,65 @@
                                     }
                                     
                                     // Load districts when division changes
-                                    divisionSelect.addEventListener('change', function() {
-                                        const selectedDivision = this.value;
-                                        districtSelect.innerHTML = '<option value="">Select District</option>';
+                                    if (divisionSelect && districtSelect) {
+                                        console.log('Division and District selects found, attaching event listeners');
                                         
-                                        if (selectedDivision) {
-                                            districtsData.forEach(district => {
-                                                if (district.division === selectedDivision) {
-                                                    const option = document.createElement('option');
-                                                    option.value = district.name;
-                                                    option.textContent = district.name;
-                                                    option.setAttribute('data-district-id', district.id);
-                                                    option.setAttribute('data-division', district.division);
-                                                    districtSelect.appendChild(option);
+                                        divisionSelect.addEventListener('change', function() {
+                                            const selectedDivision = this.value.trim();
+                                            console.log('Division changed to:', selectedDivision);
+                                            
+                                            // Clear district dropdown
+                                            districtSelect.innerHTML = '<option value="">Select District</option>';
+                                            
+                                            // Reset district selection
+                                            districtSelect.value = '';
+                                            
+                                            if (selectedDivision && districtsData && districtsData.length > 0) {
+                                                let foundCount = 0;
+                                                districtsData.forEach(district => {
+                                                    // Use case-insensitive comparison and trim whitespace
+                                                    const districtDivision = district.division ? district.division.toString().trim() : '';
+                                                    if (districtDivision && 
+                                                        districtDivision.toLowerCase() === selectedDivision.toLowerCase()) {
+                                                        const option = document.createElement('option');
+                                                        option.value = district.name;
+                                                        option.textContent = district.name;
+                                                        option.setAttribute('data-district-id', district.id);
+                                                        option.setAttribute('data-division', district.division);
+                                                        districtSelect.appendChild(option);
+                                                        foundCount++;
+                                                    }
+                                                });
+                                                
+                                                console.log('Found', foundCount, 'districts for division:', selectedDivision);
+                                                
+                                                // Debug log
+                                                if (foundCount === 0) {
+                                                    console.warn('No districts found for division:', selectedDivision);
+                                                    console.log('Available divisions:', [...new Set(districtsData.map(d => d.division))]);
                                                 }
-                                            });
-                                        } else {
-                                            // Show all districts with division names
-                                            districtsData.forEach(district => {
-                                                const option = document.createElement('option');
-                                                option.value = district.name;
-                                                option.textContent = district.name + ' (' + district.division + ')';
-                                                option.setAttribute('data-district-id', district.id);
-                                                option.setAttribute('data-division', district.division);
-                                                districtSelect.appendChild(option);
-                                            });
-                                        }
+                                            } else {
+                                                console.warn('Cannot filter districts:', {
+                                                    selectedDivision: selectedDivision,
+                                                    hasDistrictsData: !!districtsData,
+                                                    districtsDataLength: districtsData ? districtsData.length : 0
+                                                });
+                                            }
+                                            
+                                            // Update shipping and tax when division changes
+                                            updateShippingAndTax();
+                                        });
                                         
-                                        // Update shipping and tax when division changes
-                                        updateShippingAndTax();
-                                    });
-                                    
-                                    // Update shipping and tax when district changes
-                                    districtSelect.addEventListener('change', function() {
                                         // Update shipping and tax when district changes
-                                        updateShippingAndTax();
-                                    });
+                                        districtSelect.addEventListener('change', function() {
+                                            updateShippingAndTax();
+                                        });
+                                    } else {
+                                        console.error('Division or District select elements not found!', {
+                                            divisionSelect: !!divisionSelect,
+                                            districtSelect: !!districtSelect
+                                        });
+                                    }
                                     
                                     // Trigger division change if division is already selected
                                     if (divisionSelect.value) {

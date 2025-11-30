@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasTable('orders')) {
+            return;
+        }
+
         Schema::table('orders', function (Blueprint $table) {
             // Remove unused city fields (we use upazila now)
             if (Schema::hasColumn('orders', 'billing_city')) {
@@ -27,9 +31,25 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (!Schema::hasTable('orders')) {
+            return;
+        }
+
         Schema::table('orders', function (Blueprint $table) {
-            $table->string('billing_city')->nullable()->after('billing_address');
-            $table->string('shipping_city')->nullable()->after('shipping_address');
+            if (!Schema::hasColumn('orders', 'billing_city')) {
+                if (Schema::hasColumn('orders', 'billing_address')) {
+                    $table->string('billing_city')->nullable()->after('billing_address');
+                } else {
+                    $table->string('billing_city')->nullable();
+                }
+            }
+            if (!Schema::hasColumn('orders', 'shipping_city')) {
+                if (Schema::hasColumn('orders', 'shipping_address')) {
+                    $table->string('shipping_city')->nullable()->after('shipping_address');
+                } else {
+                    $table->string('shipping_city')->nullable();
+                }
+            }
         });
     }
 };

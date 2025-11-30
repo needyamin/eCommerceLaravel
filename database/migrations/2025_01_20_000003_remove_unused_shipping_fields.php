@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (!Schema::hasTable('shipping_settings')) {
+            return;
+        }
+
         Schema::table('shipping_settings', function (Blueprint $table) {
             // Remove courier_services and country_rates columns
             if (Schema::hasColumn('shipping_settings', 'courier_services')) {
@@ -21,10 +25,18 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (!Schema::hasTable('shipping_settings')) {
+            return;
+        }
+
         Schema::table('shipping_settings', function (Blueprint $table) {
             // Restore columns if needed
-            $table->json('courier_services')->nullable();
-            $table->json('country_rates')->nullable();
+            if (!Schema::hasColumn('shipping_settings', 'courier_services')) {
+                $table->json('courier_services')->nullable();
+            }
+            if (!Schema::hasColumn('shipping_settings', 'country_rates')) {
+                $table->json('country_rates')->nullable();
+            }
         });
     }
 };

@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasTable('orders')) {
+            return;
+        }
+
         Schema::table('orders', function (Blueprint $table) {
             if (Schema::hasColumn('orders', 'billing_union')) {
                 $table->dropColumn('billing_union');
@@ -26,9 +30,25 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (!Schema::hasTable('orders')) {
+            return;
+        }
+
         Schema::table('orders', function (Blueprint $table) {
-            $table->string('billing_union')->nullable()->after('billing_upazila');
-            $table->string('shipping_union')->nullable()->after('shipping_upazila');
+            if (!Schema::hasColumn('orders', 'billing_union')) {
+                if (Schema::hasColumn('orders', 'billing_upazila')) {
+                    $table->string('billing_union')->nullable()->after('billing_upazila');
+                } else {
+                    $table->string('billing_union')->nullable();
+                }
+            }
+            if (!Schema::hasColumn('orders', 'shipping_union')) {
+                if (Schema::hasColumn('orders', 'shipping_upazila')) {
+                    $table->string('shipping_union')->nullable()->after('shipping_upazila');
+                } else {
+                    $table->string('shipping_union')->nullable();
+                }
+            }
         });
     }
 };
