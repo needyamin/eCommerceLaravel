@@ -15,15 +15,20 @@ A comprehensive, modern eCommerce platform built with Laravel 12, featuring a be
 - Payment gateways: bKash, Nagad, Rocket, SSL Commerce, Stripe, PayPal, COD
 - Product reviews, ratings, and newsletter
 - Coins (loyalty points) system
+- Custom product pages with visual page builder
+- HTML-rich product descriptions
 - Responsive Bootstrap 5 design
 
 ### Admin Panel
 - Dashboard with analytics
 - Products & Categories (with subcategories support)
+- **Product Page Builder** - Visual drag-and-drop page builder for custom product pages
+- **Product Image Management** - Drag-and-drop upload, reorder, set primary, delete
 - Orders, Users, Roles & Permissions
-- Payment Gateway management
+- Payment Gateway management (with sandbox/test mode)
 - Shipping & Tax settings (Bangladeshi divisions/districts)
-- Email & SMS OTP settings
+- Email & SMS OTP settings (multiple SMS providers)
+- **Storage & CDN Settings** - Configure S3, Cloudflare R2, DigitalOcean Spaces, Wasabi, Backblaze B2
 - Server-side DataTables for performance
 
 ## 📋 Requirements
@@ -137,15 +142,36 @@ Configure from Admin → Shipping Settings:
 ## 📧 Email & SMS
 
 - **Email Settings**: Admin → Email Settings (SMTP configuration with cPanel auto-detection)
-- **OTP Settings**: Admin → OTP Settings (Email & SMS OTP with multiple SMS providers)
+- **OTP Settings**: Admin → OTP Settings (Email & SMS OTP with multiple SMS providers: Twilio, Vonage, MessageBird, AWS SNS, Clickatell, Plivo, Laravel BDSMS, Custom)
+
+## 🖼️ Product Management
+
+- **Image Upload**: Drag-and-drop multiple images with preview
+- **Image Management**: Reorder, set primary, delete images
+- **Page Builder**: Visual drag-and-drop page builder for custom product pages
+- **HTML Descriptions**: Rich HTML content support in product descriptions
+- **Subcategories**: Hierarchical category system with parent/child relationships
+
+## ☁️ Storage & CDN
+
+Configure from Admin → Storage & CDN:
+- **Local Storage** (default)
+- **AWS S3**
+- **Cloudflare R2** (S3-compatible)
+- **DigitalOcean Spaces** (S3-compatible)
+- **Wasabi** (S3-compatible)
+- **Backblaze B2** (S3-compatible)
+- **CDN Support** - Configure CDN URL for static assets
 
 ## 🔧 Configuration
 
 - **Site Settings**: Admin → Site Settings (SEO, social links, feature toggles)
-- **Payment Gateways**: Admin → Payment Gateways
-- **Shipping Settings**: Admin → Shipping Settings
-- **Email Settings**: Admin → Email Settings
-- **OTP Settings**: Admin → OTP Settings
+- **Products**: Admin → Products (with image management and page builder)
+- **Payment Gateways**: Admin → Payment Gateways (sandbox/test mode support)
+- **Shipping Settings**: Admin → Shipping Settings (Bangladeshi divisions/districts)
+- **Email Settings**: Admin → Email Settings (SMTP with cPanel auto-detection)
+- **OTP Settings**: Admin → OTP Settings (Email & SMS with multiple providers)
+- **Storage & CDN**: Admin → Storage & CDN (S3, Cloudflare R2, DigitalOcean Spaces, Wasabi, Backblaze B2)
 
 ## 📄 License
 
