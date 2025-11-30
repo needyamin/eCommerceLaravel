@@ -191,6 +191,9 @@ class DatabaseSeeder extends Seeder
         PaymentGatewaySetting::setGatewaySetting('ssl_commerce', 'fail_url', url('/payment/ssl-commerce/fail'), 'URL to redirect after failed payment');
         PaymentGatewaySetting::setGatewaySetting('ssl_commerce', 'cancel_url', url('/payment/ssl-commerce/cancel'), 'URL to redirect after cancelled payment');
         PaymentGatewaySetting::setGatewaySetting('ssl_commerce', 'sandbox_mode', true, 'Use SSL Commerce sandbox for testing');
+        
+        // Cash on Delivery (COD) - Always available by default
+        PaymentGatewaySetting::setGatewaySetting('cod', 'enabled', true, 'Enable or disable Cash on Delivery payment method');
 
         // Coupons
         $coupons = [

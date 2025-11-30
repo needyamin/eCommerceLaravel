@@ -426,12 +426,27 @@ class CheckoutController extends Controller
         }
         
         // Process payment for payment gateways
-        $gatewayName = $request->string('gateway');
-        $isCod = ($gatewayName === 'cod');
+        $gatewayName = trim((string) $request->input('gateway', ''));
+        $isCod = (strtolower($gatewayName) === 'cod');
         
         if (!$isCod) {
             // Payment gateway - process payment and redirect to gateway
             $gatewayManager = new PaymentGatewayManager();
+            
+            // Check if gateway exists in the manager
+            if (!$gatewayManager->hasGateway($gatewayName)) {
+                $order->payment_status = 'failed';
+                $order->save();
+                
+                \Log::error('Payment gateway not found', [
+                    'order_id' => $order->id,
+                    'gateway' => $gatewayName,
+                ]);
+                
+                return redirect()->back()
+                    ->with('error', 'Selected payment method is not available. Please choose a different payment method.');
+            }
+            
             $gateway = $gatewayManager->getGateway($gatewayName);
             if ($gateway) {
                 $paymentData = [
@@ -522,17 +537,17 @@ class CheckoutController extends Controller
                         ->with('error', 'Payment processing failed: ' . $e->getMessage() . '. Please try again or contact support.');
                 }
             } else {
-                // Gateway not found
+                // Gateway class not found (shouldn't happen if hasGateway returned true)
                 $order->payment_status = 'failed';
                 $order->save();
                 
-                \Log::error('Payment gateway not found', [
+                \Log::error('Payment gateway class not found', [
                     'order_id' => $order->id,
                     'gateway' => $gatewayName,
                 ]);
                 
                 return redirect()->back()
-                    ->with('error', 'Selected payment method is not available. Please choose a different payment method.');
+                    ->with('error', 'Payment gateway error. Please try again or contact support.');
             }
         } else {
             // COD - No payment processing needed, clear cart and complete order
