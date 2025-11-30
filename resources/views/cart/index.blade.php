@@ -383,33 +383,80 @@ document.addEventListener('DOMContentLoaded', function() {
             submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i>';
             submitBtn.disabled = true;
 
-            // Get CSRF token
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            // Get CSRF token - try multiple sources
+            let csrfToken = null;
+            const metaToken = document.querySelector('meta[name="csrf-token"]');
+            if (metaToken) {
+                csrfToken = metaToken.getAttribute('content');
+            }
+            if (!csrfToken) {
+                const formToken = document.querySelector('input[name="_token"]');
+                if (formToken) {
+                    csrfToken = formToken.value;
+                }
+            }
+            if (!csrfToken) {
+                showMessage('CSRF token not found. Please refresh the page and try again.', 'danger');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                return;
+            }
 
             fetch('{{ route("coupons.apply") }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
-                body: JSON.stringify({ code: code })
+                body: JSON.stringify({ code: code }),
+                credentials: 'same-origin'
             })
             .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    return response.json().then(data => {
+                        return {
+                            ok: response.ok,
+                            status: response.status,
+                            data: data
+                        };
+                    });
+                } else {
+                    // Handle non-JSON responses (like 419 page expired)
+                    return {
+                        ok: false,
+                        status: response.status,
+                        data: {
+                            message: response.status === 419 
+                                ? 'Your session has expired. Please refresh the page and try again.' 
+                                : 'An error occurred. Please try again.'
+                        }
+                    };
                 }
-                return response.json();
             })
-            .then(data => {
-                if (data.success) {
-                    showMessage(data.message, 'success');
+            .then(result => {
+                if (result.status === 419) {
+                    // Session expired - reload page
+                    showMessage('Your session has expired. Refreshing page...', 'warning');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                    return;
+                }
+                
+                if (result.ok && result.data.success) {
+                    showMessage(result.data.message || 'Coupon applied successfully!', 'success');
                     // Reload page to show updated cart
                     setTimeout(() => {
                         window.location.reload();
                     }, 1500);
                 } else {
-                    showMessage(data.message, 'danger');
+                    // Handle validation errors and other errors
+                    const errorMessage = result.data.message || result.data.error || 'An error occurred. Please try again.';
+                    showMessage(errorMessage, 'danger');
                 }
             })
             .catch(error => {
@@ -425,10 +472,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function showMessage(message, type) {
         couponMessage.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
-            <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+            <i class="bi bi-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'exclamation-triangle'} me-2"></i>
             ${message}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>`;
+    }
+    
+    // Refresh CSRF token function
+    function refreshCsrfToken() {
+        const metaToken = document.querySelector('meta[name="csrf-token"]');
+        if (metaToken) {
+            // Try to get fresh token from a simple GET request
+            fetch('{{ route("home") }}', {
+                method: 'GET',
+                credentials: 'same-origin'
+            }).then(() => {
+                // Token should be refreshed in the page
+                const newToken = document.querySelector('meta[name="csrf-token"]');
+                if (newToken) {
+                    return newToken.getAttribute('content');
+                }
+            });
+        }
     }
     // Clear all with SweetAlert2
     const clearForm = document.getElementById('cartClearForm');

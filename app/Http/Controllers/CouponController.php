@@ -19,7 +19,15 @@ class CouponController extends Controller
                 'code' => 'required|string|max:255',
             ]);
 
-            $coupon = Coupon::where('code', $request->code)->first();
+            $code = trim($request->input('code', ''));
+            if (empty($code)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Please enter a coupon code.'
+                ], 422);
+            }
+
+            $coupon = Coupon::where('code', $code)->first();
 
             if (!$coupon) {
                 return response()->json([
@@ -190,33 +198,40 @@ class CouponController extends Controller
     /**
      * Get current cart
      */
-    private function getCurrentCart(Request $request): Cart
+    private function getCurrentCart(Request $request): ?Cart
     {
-        $sessionId = $request->session()->get('cart_session_id');
-        
-        if (!$sessionId) {
-            $sessionId = (string) \Illuminate\Support\Str::uuid();
-            $request->session()->put('cart_session_id', $sessionId);
-        }
-        
-        // If user is authenticated, try to find their cart first
-        if (Auth::check()) {
-            $cart = Cart::where('user_id', Auth::id())->with('items')->first();
-            if ($cart) {
-                return $cart;
+        try {
+            $sessionId = $request->session()->get('cart_session_id');
+            
+            if (!$sessionId) {
+                $sessionId = (string) \Illuminate\Support\Str::uuid();
+                $request->session()->put('cart_session_id', $sessionId);
             }
+            
+            // If user is authenticated, try to find their cart first
+            if (Auth::check()) {
+                $cart = Cart::where('user_id', Auth::id())->with('items')->first();
+                if ($cart) {
+                    return $cart;
+                }
+            }
+            
+            // Otherwise, use session-based cart
+            $cart = Cart::with('items')->firstOrCreate([
+                'session_id' => $sessionId,
+            ], [
+                'user_id' => Auth::id(),
+                'subtotal' => 0,
+                'discount_total' => 0,
+                'tax_total' => 0,
+                'grand_total' => 0,
+                'coupon_discount' => 0,
+            ]);
+            
+            return $cart;
+        } catch (\Exception $e) {
+            \Log::error('Error in getCurrentCart: ' . $e->getMessage());
+            return null;
         }
-        
-        // Otherwise, use session-based cart
-        return Cart::with('items')->firstOrCreate([
-            'session_id' => $sessionId,
-        ], [
-            'user_id' => Auth::id(),
-            'subtotal' => 0,
-            'discount_total' => 0,
-            'tax_total' => 0,
-            'grand_total' => 0,
-            'coupon_discount' => 0,
-        ]);
     }
 }
