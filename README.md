@@ -241,6 +241,49 @@ The web-based installer includes built-in security features:
 - **Route-Based Permissions**: Each admin route requires specific permission
 - **Permission Middleware**: `admin.permission` middleware checks route permissions automatically
 
+## 🔒 License & Code Protection
+
+The application includes a built-in license validation system to protect against unauthorized use:
+
+### License System Features
+
+- **License Key Management**: Activate and manage license keys from Admin → Site Settings → Theme tab
+- **Remote Validation**: Validates license with your server (optional)
+- **Offline Mode**: 7-day grace period if license server is unreachable
+- **Domain Locking**: License can be tied to specific domain
+- **Automatic Checks**: Validates every 24 hours
+- **License Removal**: Option to remove active license from admin panel
+
+### Quick Setup
+
+1. **Run Migration**:
+   ```bash
+   php artisan migrate
+   ```
+
+2. **Activate License**:
+   - Visit Admin → Site Settings → Theme tab
+   - Enter your license key and click "Validate"
+   - Or visit `/admin/license/activate` for dedicated activation page
+
+3. **Enable License Middleware** (Optional):
+   - Edit `bootstrap/app.php` and uncomment `CheckLicense` middleware
+   - This will block frontend and admin access without a valid license
+
+4. **License Server** (Optional):
+   - Update `app/Support/LicenseHelper.php` with your license server URL
+   - Server should accept POST with `license_key` and `domain`, return JSON: `{"valid": true/false}`
+
+### Code Protection Options
+
+For additional protection, consider:
+- **Code Obfuscation**: Use IonCube Encoder or Zend Guard for PHP encryption
+- **Domain Restrictions**: Add domain/IP whitelisting in middleware
+- **Legal Protection**: Create license agreements and copyright notices
+- **Monitoring**: Log license validation attempts and track usage
+
+> **Note**: Complete code protection is impossible for interpreted languages like PHP. The goal is to make unauthorized use difficult and legally risky, not impossible.
+
 ## 📄 License
 
 MIT License - see [LICENSE](LICENSE) file
