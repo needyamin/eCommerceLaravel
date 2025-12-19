@@ -131,7 +131,7 @@
                                                 @endif
                                             </td>
                                             <td class="text-muted">{{ $log->ip_address ?? 'N/A' }}</td>
-                                            <td class="text-muted">{{ $log->created_at ? $log->created_at->format('M d, Y H:i') : 'N/A' }}</td>
+                                            <td class="text-muted">{{ $log->created_at ? \App\Support\DateHelper::format($log->created_at) : 'N/A' }}</td>
                                         </tr>
                                         
                                         <!-- Log Data Modal -->

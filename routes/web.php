@@ -80,8 +80,12 @@ Route::post('/otp/request-email', [EmailOtpController::class, 'request'])->name(
 Route::post('/otp/verify-email', [EmailOtpController::class, 'verify'])->name('otp.verify.email');
 Route::post('/otp/request-sms', [SmsOtpController::class, 'request'])->name('otp.request.sms');
 Route::post('/otp/verify-sms', [SmsOtpController::class, 'verify'])->name('otp.verify.sms');
-Route::view('/otp/email', 'auth.otp.email')->name('otp.form.email');
-Route::view('/otp/sms', 'auth.otp.sms')->name('otp.form.sms');
+Route::get('/otp/email', function() {
+    return view(\App\Support\ThemeHelper::view('auth.otp.email'));
+})->name('otp.form.email');
+Route::get('/otp/sms', function() {
+    return view(\App\Support\ThemeHelper::view('auth.otp.sms'));
+})->name('otp.form.sms');
 
 // Authentication Routes
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -212,6 +216,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/login', [AdminLoginController::class, 'login'])->name('login.attempt');
     Route::post('/logout', [AdminLoginController::class, 'logout'])->name('logout');
     Route::get('/captcha', [App\Http\Controllers\Admin\CaptchaController::class, 'generate'])->name('captcha');
+    
+    // License routes (accessible without license check)
+    Route::get('/license/activate', [App\Http\Controllers\Admin\LicenseController::class, 'show'])->name('license.activate');
+    Route::post('/license/activate', [App\Http\Controllers\Admin\LicenseController::class, 'activate'])->name('license.activate.post');
+    Route::post('/license/remove', [App\Http\Controllers\Admin\LicenseController::class, 'remove'])->name('license.remove');
+    Route::get('/license/check', [App\Http\Controllers\Admin\LicenseController::class, 'check'])->name('license.check');
 
     // Lightweight admin AJAX routes (auth only, no permission gate)
     Route::middleware('auth:admin')->group(function(){

@@ -40,7 +40,7 @@
         <div class="col-8">
           <h2 class="mb-1">Invoice</h2>
           <div class="text-muted">Order #: {{ $order->number }}</div>
-          <div class="text-muted">Date: {{ $order->created_at->format('Y-m-d H:i') }}</div>
+          <div class="text-muted">Date: @formatDate($order->created_at)</div>
         </div>
         <div class="col-4 text-end">
           @if($s && ($s->site_name ?? false))

@@ -82,7 +82,7 @@
                 <tr>
                   <td>{{ $o->number }}</td>
                   <td>@currency($o->grand_total)</td>
-                  <td>{{ $o->created_at->format('M d') }}</td>
+                  <td>{{ $o->created_at->format('d M') }}</td>
                 </tr>
               @empty
                 <tr><td colspan="3" class="text-center">No data</td></tr>

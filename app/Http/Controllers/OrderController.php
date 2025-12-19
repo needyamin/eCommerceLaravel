@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Order;
+use App\Support\ThemeHelper;
 
 class OrderController extends Controller
 {
@@ -12,7 +13,7 @@ class OrderController extends Controller
 		$orders = Order::where('user_id', auth()->id())
 			->latest()
 			->paginate(20);
-		return view('orders.index', compact('orders'));
+		return view(ThemeHelper::view('orders.index'), compact('orders'));
 	}
 
 	public function show(int $id)
@@ -20,7 +21,7 @@ class OrderController extends Controller
 		$order = Order::with('items.product')
 			->where('user_id', auth()->id())
 			->findOrFail($id);
-		return view('orders.show', compact('order'));
+		return view(ThemeHelper::view('orders.show'), compact('order'));
 	}
 
     public function invoice(int $id)
@@ -28,7 +29,7 @@ class OrderController extends Controller
         $order = Order::with('items')
             ->where('user_id', auth()->id())
             ->findOrFail($id);
-        return view('orders.invoice', compact('order'));
+        return view(ThemeHelper::view('orders.invoice'), compact('order'));
     }
 
     public function showGuest(Order $order)

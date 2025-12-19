@@ -10,6 +10,7 @@ use App\Notifications\OrderConfirmation;
 use Illuminate\Support\Str;
 use App\Http\Controllers\PaymentGateway\PaymentGatewayManager;
 use App\Support\PointService;
+use App\Support\ThemeHelper;
 use App\Models\CoinSetting;
 use App\Models\ShippingSetting;
 
@@ -172,7 +173,7 @@ class CheckoutController extends Controller
             }
         }
 
-        return view('checkout.show', [
+        return view(ThemeHelper::view('checkout.show'), [
             'cart' => $cart,
             'gateways' => $enabledGateways,
             'gatewaySandboxModes' => $gatewaySandboxModes,
@@ -505,7 +506,7 @@ class CheckoutController extends Controller
                     // Redirect to payment gateway
                     // For SSL Commerce, we need to POST form data
                     if ($gatewayName === 'ssl_commerce' && !empty($paymentResult['post_data'])) {
-                        return view('payment.redirect', [
+                        return view(ThemeHelper::view('payment.redirect'), [
                             'gateway' => $gatewayName,
                             'redirect_url' => $paymentResult['redirect_url'],
                             'post_data' => $paymentResult['post_data'],

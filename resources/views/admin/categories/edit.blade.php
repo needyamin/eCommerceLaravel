@@ -195,7 +195,12 @@ document.addEventListener('DOMContentLoaded', function() {
     form.addEventListener('submit', function(e) {
         if (window.slugDuplicate) {
             e.preventDefault();
-            alert('Please fix the slug error before submitting.');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Slug Error',
+                text: 'Please fix the slug error before submitting.',
+                confirmButtonColor: '#667eea'
+            });
             return false;
         }
     });

@@ -142,13 +142,23 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.success) {
                 window.location.href = '{{ route("installer.admin") }}';
             } else {
-                alert('Error: ' + (data.message || 'Failed to save database configuration'));
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.message || 'Failed to save database configuration',
+                    confirmButtonColor: '#667eea'
+                });
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i class="bi bi-arrow-right me-2"></i>Continue';
             }
         })
         .catch(error => {
-            alert('Error: ' + error.message);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.message || 'An error occurred',
+                confirmButtonColor: '#667eea'
+            });
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="bi bi-arrow-right me-2"></i>Continue';
         });

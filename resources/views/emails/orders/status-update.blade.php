@@ -17,7 +17,7 @@
     <table class="email-table">
         <tr>
             <td>Order Date</td>
-            <td>{{ $order->created_at->format('F d, Y h:i A') }}</td>
+            <td>@formatDate($order->created_at)</td>
         </tr>
         <tr>
             <td>Payment Status</td>

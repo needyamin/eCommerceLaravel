@@ -17,12 +17,12 @@
                     <dt class="col-sm-4">Name</dt><dd class="col-sm-8">{{ $user->name }}</dd>
                     <dt class="col-sm-4">Email</dt><dd class="col-sm-8">{{ $user->email ?? '—' }}</dd>
                     <dt class="col-sm-4">Phone</dt><dd class="col-sm-8">{{ $user->phone ?? '—' }}</dd>
-                    <dt class="col-sm-4">Joined</dt><dd class="col-sm-8">{{ $user->created_at->format('M d, Y') }}</dd>
+                    <dt class="col-sm-4">Joined</dt><dd class="col-sm-8">@formatDate($user->created_at)</dd>
                         <dt class="col-sm-4">Coins</dt><dd class="col-sm-8"><span class="badge text-bg-success">{{ $user->coins_balance ?? 0 }}</span></dd>
                 </dl>
                 <form action="{{ route('admin.users.reset-password', $user) }}" method="POST" class="d-inline">
                     @csrf
-                    <button type="submit" class="btn btn-sm btn-secondary" onclick="return confirm('Reset password to \"password\"?')">
+                    <button type="submit" class="btn btn-sm btn-secondary" onclick="event.preventDefault(); Swal.fire({icon: 'warning', title: 'Reset Password?', text: 'Reset password to \"password\"?', showCancelButton: true, confirmButtonColor: '#dc3545', cancelButtonColor: '#6c757d', confirmButtonText: 'Yes, Reset', cancelButtonText: 'Cancel'}).then((result) => { if (result.isConfirmed) { this.closest('form').submit(); } }); return false;">
                         <i class="fas fa-key"></i> Reset Password
                     </button>
                 </form>
@@ -55,7 +55,7 @@
                     </form>
                     <form action="{{ route('admin.users.coins.reset', $user) }}" method="POST" class="mt-2">
                         @csrf
-                        <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Reset coins to 0?')">Reset Coins</button>
+                        <button type="submit" class="btn btn-outline-danger" onclick="event.preventDefault(); Swal.fire({icon: 'warning', title: 'Reset Coins?', text: 'Reset coins to 0?', showCancelButton: true, confirmButtonColor: '#dc3545', cancelButtonColor: '#6c757d', confirmButtonText: 'Yes, Reset', cancelButtonText: 'Cancel'}).then((result) => { if (result.isConfirmed) { this.closest('form').submit(); } }); return false;">Reset Coins</button>
                     </form>
                 </div>
             </div>
@@ -96,7 +96,7 @@
                                 <td>{{ $order->number }}</td>
                                 <td><span class="badge text-bg-{{ $order->status === 'delivered' ? 'success' : ($order->status === 'pending' ? 'warning text-dark' : 'secondary') }}">{{ ucfirst($order->status) }}</span></td>
                                 <td>@currency($order->grand_total)</td>
-                                <td>{{ $order->created_at->format('M d, Y') }}</td>
+                                <td>@formatDate($order->created_at)</td>
                                 <td><a href="{{ route('admin.orders.show', $order) }}" class="btn btn-xs btn-primary">View</a></td>
                             </tr>
                         @empty
@@ -124,7 +124,7 @@
                                         <span class="text-muted">(deleted product)</span>
                                     @endif
                                 </td>
-                                <td>{{ $w->created_at->format('Y-m-d H:i') }}</td>
+                                <td>@formatDate($w->created_at)</td>
                             </tr>
                         @empty
                             <tr><td colspan="2" class="text-center text-muted py-3">No wishlist items</td></tr>
@@ -152,7 +152,7 @@
                                     @endif
                                 </td>
                                 <td>{{ (int) $ci->quantity }}</td>
-                                <td>{{ $ci->created_at->format('Y-m-d H:i') }}</td>
+                                <td>@formatDate($ci->created_at)</td>
                             </tr>
                         @empty
                             <tr><td colspan="3" class="text-center text-muted py-3">No recent cart items</td></tr>

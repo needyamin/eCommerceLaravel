@@ -8,6 +8,7 @@ use App\Models\SiteSetting;
 use App\Models\Wishlist;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use App\Support\ThemeHelper;
 
 class WishlistController extends Controller
 {
@@ -41,7 +42,7 @@ class WishlistController extends Controller
             }
         }
 
-        return view('user.wishlist.index', compact('items'));
+        return view(ThemeHelper::view('user.wishlist.index'), compact('items'));
     }
 
     public function toggle(Request $request)

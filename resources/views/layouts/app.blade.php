@@ -166,7 +166,10 @@
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
-    @include('partials.nav')
+    @php
+        $currentTheme = $currentTheme ?? \App\Support\ThemeHelper::current();
+    @endphp
+    @include('themes.' . $currentTheme . '.partials.nav')
     
     <main class="flex-grow-1">
         <div class="container">
@@ -188,7 +191,7 @@
         @yield('content')
     </main>
     
-    @include('partials.footer')
+    @include('themes.' . $currentTheme . '.partials.footer')
     
     <!-- Mobile Floating Bottom Navigation -->
     <div class="mobile-bottom-nav d-md-none">
@@ -259,6 +262,88 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+    // Replace all confirm() calls with SweetAlert2
+    (function() {
+        function replaceFormConfirms() {
+            // Handle forms with onsubmit="return confirm()"
+            document.querySelectorAll('form[onsubmit*="confirm"]').forEach(form => {
+                const originalOnsubmit = form.getAttribute('onsubmit');
+                if (originalOnsubmit && originalOnsubmit.includes('confirm')) {
+                    const match = originalOnsubmit.match(/confirm\(['"]([^'"]+)['"]\)/);
+                    const confirmMessage = match ? match[1] : 'Are you sure?';
+                    
+                    form.removeAttribute('onsubmit');
+                    
+                    form.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        const formElement = this;
+                        
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Confirm Action',
+                            text: confirmMessage,
+                            showCancelButton: true,
+                            confirmButtonColor: '#dc3545',
+                            cancelButtonColor: '#6c757d',
+                            confirmButtonText: 'Yes, Continue',
+                            cancelButtonText: 'Cancel'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                formElement.removeEventListener('submit', arguments.callee);
+                                formElement.submit();
+                            }
+                        });
+                    });
+                }
+            });
+            
+            // Handle buttons with onclick="return confirm()"
+            document.querySelectorAll('button[onclick*="confirm"], input[type="submit"][onclick*="confirm"]').forEach(btn => {
+                const originalOnclick = btn.getAttribute('onclick');
+                if (originalOnclick && originalOnclick.includes('confirm')) {
+                    const match = originalOnclick.match(/confirm\(['"]([^'"]+)['"]\)/);
+                    const confirmMessage = match ? match[1] : 'Are you sure?';
+                    
+                    btn.removeAttribute('onclick');
+                    
+                    btn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const buttonElement = this;
+                        const form = buttonElement.closest('form');
+                        
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Confirm Action',
+                            text: confirmMessage,
+                            showCancelButton: true,
+                            confirmButtonColor: '#dc3545',
+                            cancelButtonColor: '#6c757d',
+                            confirmButtonText: 'Yes, Continue',
+                            cancelButtonText: 'Cancel'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                if (form) {
+                                    form.submit();
+                                } else {
+                                    buttonElement.click();
+                                }
+                            }
+                        });
+                    });
+                }
+            });
+        }
+        
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', replaceFormConfirms);
+        } else {
+            replaceFormConfirms();
+        }
+        
+        setTimeout(replaceFormConfirms, 500);
+    })();
+    </script>
     <script>
     (function(){
         if(window.__wishlistListenerBound) return; // avoid duplicates
@@ -492,7 +577,14 @@
                     });
                 } else {
                     // Fallback to alert if SweetAlert not loaded
-                    alert(data.message || (data.success ? 'Subscribed successfully!' : 'Something went wrong.'));
+                    Swal.fire({
+                        icon: data.success ? 'success' : 'error',
+                        title: data.success ? 'Success!' : 'Error',
+                        text: data.message || (data.success ? 'Subscribed successfully!' : 'Something went wrong.'),
+                        confirmButtonColor: '#667eea',
+                        timer: data.success ? 3000 : null,
+                        timerProgressBar: data.success
+                    });
                 }
             })
             .catch(error => {
@@ -509,7 +601,12 @@
                         confirmButtonColor: '#667eea'
                     });
                 } else {
-                    alert(error.message || 'An error occurred. Please try again.');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: error.message || 'An error occurred. Please try again.',
+                        confirmButtonColor: '#667eea'
+                    });
                 }
             });
         });

@@ -2,6 +2,10 @@
 
 @section('title', 'Site Settings')
 
+@php
+use Illuminate\Support\Facades\Schema;
+@endphp
+
 @push('styles')
 <style>
   /* Site Settings Tabs Styling */
@@ -148,6 +152,11 @@
           <li class="nav-item" role="presentation">
             <button class="nav-link" id="seo-tab" data-bs-toggle="tab" data-bs-target="#seo" type="button" role="tab" aria-controls="seo" aria-selected="false">
               <i class="bi bi-search"></i>SEO & Sitemap
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="theme-tab" data-bs-toggle="tab" data-bs-target="#theme" type="button" role="tab" aria-controls="theme" aria-selected="false">
+              <i class="bi bi-palette"></i>Theme
             </button>
           </li>
           <li class="nav-item" role="presentation">
@@ -541,6 +550,136 @@
             </div>
           </div>
 
+          <!-- Theme Tab -->
+          <div class="tab-pane fade" id="theme" role="tabpanel" aria-labelledby="theme-tab">
+            <!-- Theme Selection -->
+            @php
+              $themeColumnExists = false;
+              try {
+                $themeColumnExists = \Schema::hasColumn('site_settings', 'theme');
+              } catch (\Exception $e) {
+                $themeColumnExists = false;
+              }
+              $currentTheme = 'theme1';
+              if ($themeColumnExists) {
+                try {
+                  $currentTheme = $settings->theme ?? 'theme1';
+                } catch (\Exception $e) {
+                  $currentTheme = 'theme1';
+                }
+              }
+            @endphp
+            @if($themeColumnExists)
+            <div class="settings-section">
+              <h5><i class="bi bi-palette"></i>Theme Selection</h5>
+              <div class="row g-3">
+                <div class="col-md-12">
+                  <label class="form-label">Active Theme <span class="text-danger">*</span></label>
+                  <select name="theme" class="form-select @error('theme') is-invalid @enderror" required>
+                    @foreach(\App\Support\ThemeHelper::available() as $key => $theme)
+                      <option value="{{ $key }}" {{ old('theme', $currentTheme) == $key ? 'selected' : '' }}>
+                        {{ $theme['name'] }} - {{ $theme['description'] }}
+                      </option>
+                    @endforeach
+                  </select>
+                  <small class="text-muted">Choose the active theme for your storefront. Changes will be visible immediately.</small>
+                  @error('theme')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
+              </div>
+            </div>
+            @else
+            <div class="alert alert-info">
+              <i class="bi bi-info-circle me-2"></i>
+              <strong>Theme Selection:</strong> Run the migration to enable theme switching. 
+              <code>php artisan migrate</code>
+            </div>
+            @endif
+
+            <!-- License Key Section -->
+            @php
+              $licenseColumnExists = false;
+              try {
+                $licenseColumnExists = \Schema::hasColumn('site_settings', 'license_key');
+              } catch (\Exception $e) {
+                $licenseColumnExists = false;
+              }
+              $licenseInfo = [];
+              if ($licenseColumnExists) {
+                try {
+                  $licenseInfo = \App\Support\LicenseHelper::getLicenseInfo();
+                } catch (\Exception $e) {
+                  $licenseInfo = ['is_valid' => false, 'key' => null];
+                }
+              }
+            @endphp
+            @if($licenseColumnExists)
+            <div class="settings-section">
+              <h5><i class="bi bi-key"></i>License Key</h5>
+              <div class="row g-3">
+                <div class="col-md-12">
+                  <label class="form-label">License Key</label>
+                  <div class="input-group">
+                    <input 
+                      type="text" 
+                      name="license_key" 
+                      class="form-control @error('license_key') is-invalid @enderror" 
+                      value="{{ old('license_key', $settings->license_key ?? '') }}" 
+                      placeholder="Enter your license key"
+                    >
+                    <button type="button" class="btn btn-outline-secondary" onclick="checkLicense()" id="checkLicenseBtn">
+                      <i class="bi bi-check-circle me-1"></i>Validate
+                    </button>
+                  </div>
+                  <small class="text-muted">
+                    Enter your license key to activate the application. 
+                    <a href="{{ route('admin.license.activate') }}" class="text-decoration-none">Go to License Activation Page</a>
+                  </small>
+                  @error('license_key')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                  
+                  @if($licenseInfo['key'] || $settings->license_key ?? null)
+                    <div class="mt-3">
+                      <div class="d-flex align-items-center gap-3 mb-2">
+                        <strong>Status:</strong>
+                        @if($licenseInfo['is_valid'] ?? false)
+                          <span class="badge bg-success">
+                            <i class="bi bi-check-circle me-1"></i>Active
+                          </span>
+                        @else
+                          <span class="badge bg-warning">
+                            <i class="bi bi-exclamation-triangle me-1"></i>Not Validated
+                          </span>
+                        @endif
+                      </div>
+                      @if($licenseInfo['last_validation'] ?? null)
+                        <small class="text-muted d-block mb-2">Last validated: {{ $licenseInfo['last_validation']->format('d M Y, h:i A') }}</small>
+                      @endif
+                      <button 
+                        type="button" 
+                        class="btn btn-danger btn-sm" 
+                        onclick="removeLicense()" 
+                        id="removeLicenseBtn"
+                        title="Remove active license key"
+                      >
+                        <i class="bi bi-trash me-1"></i>Remove License
+                      </button>
+                      <small class="text-muted d-block mt-2">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Removing the license will block access to the application until a new license is activated.
+                      </small>
+                    </div>
+                  @endif
+                </div>
+              </div>
+            </div>
+            @else
+            <div class="alert alert-info">
+              <i class="bi bi-info-circle me-2"></i>
+              <strong>License Key:</strong> Run the migration to enable license key management. 
+              <code>php artisan migrate</code>
+            </div>
+            @endif
+          </div>
+
           <!-- Tracking Codes Tab -->
           <div class="tab-pane fade" id="tracking" role="tabpanel" aria-labelledby="tracking-tab">
             <!-- Google Analytics -->
@@ -636,5 +775,139 @@
       });
     });
   });
+
+  // License validation function
+  function checkLicense() {
+    const btn = document.getElementById('checkLicenseBtn');
+    const licenseKey = document.querySelector('input[name="license_key"]').value;
+    
+    if (!licenseKey) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'License Key Required',
+        text: 'Please enter a license key first',
+        confirmButtonColor: '#667eea'
+      });
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Validating...';
+
+    fetch('{{ route("admin.license.check") }}', {
+      method: 'GET',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'application/json',
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-check-circle me-1"></i>Validate';
+      
+      if (data.valid) {
+        Swal.fire({
+          icon: 'success',
+          title: 'License Valid!',
+          text: 'Your license key is valid and active.',
+          confirmButtonColor: '#667eea',
+          timer: 2000,
+          timerProgressBar: true,
+          showConfirmButton: false
+        }).then(() => {
+          location.reload();
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'License Invalid',
+          text: 'License validation failed. Please check your license key.',
+          confirmButtonColor: '#667eea'
+        });
+      }
+    })
+    .catch(error => {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-check-circle me-1"></i>Validate';
+      Swal.fire({
+        icon: 'error',
+        title: 'Validation Error',
+        text: 'Error validating license. Please try again.',
+        confirmButtonColor: '#667eea'
+      });
+      console.error('License validation error:', error);
+    });
+  }
+
+  // Remove license function
+  function removeLicense() {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Remove License?',
+      text: 'This will block access to the application until a new license is activated.',
+      showCancelButton: true,
+      confirmButtonColor: '#dc3545',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Yes, Remove It',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+      if (!result.isConfirmed) {
+        return;
+      }
+
+      const btn = document.getElementById('removeLicenseBtn');
+      const originalText = btn.innerHTML;
+      
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Removing...';
+
+      fetch('{{ route("admin.license.remove") }}', {
+        method: 'POST',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+        
+        if (data.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'License Removed',
+            text: data.message || 'License key removed successfully!',
+            confirmButtonColor: '#667eea',
+            timer: 2000,
+            timerProgressBar: true
+          }).then(() => {
+            location.reload();
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Removal Failed',
+            text: data.message || 'Failed to remove license key. Please try again.',
+            confirmButtonColor: '#667eea'
+          });
+        }
+      })
+      .catch(error => {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Error removing license. Please try again.',
+          confirmButtonColor: '#667eea'
+        });
+        console.error('License removal error:', error);
+      });
+    });
+  }
 </script>
 @endpush

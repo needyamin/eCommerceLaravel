@@ -373,12 +373,24 @@ document.addEventListener('DOMContentLoaded', function() {
         
         div.querySelector('.delete-block')?.addEventListener('click', function(e) {
             e.stopPropagation();
-            if (confirm('Delete this block?')) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Delete Block?',
+                text: 'Are you sure you want to delete this block?',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, Delete It',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (!result.isConfirmed) {
+                    return;
+                }
                 blocks.splice(index, 1);
                 selectedBlockIndex = null;
                 updateCanvas();
                 updateSettings();
-            }
+            });
         });
         
         return div;
@@ -1090,14 +1102,32 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('Page builder saved successfully!');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'Page builder saved successfully!',
+                    confirmButtonColor: '#667eea',
+                    timer: 2000,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
             } else {
-                alert('Error saving page builder');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error saving page builder',
+                    confirmButtonColor: '#667eea'
+                });
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Error saving page builder');
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Error saving page builder',
+                confirmButtonColor: '#667eea'
+            });
         });
     });
 

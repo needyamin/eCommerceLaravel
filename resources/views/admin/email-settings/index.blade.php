@@ -359,7 +359,12 @@ function fillCpanelSmtp() {
     }
     
     // Show success message
-    alert('SMTP settings have been filled from detected configuration. Please review and save.');
+    Swal.fire({
+        icon: 'info',
+        title: 'Settings Detected',
+        text: 'SMTP settings have been filled from detected configuration. Please review and save.',
+        confirmButtonColor: '#667eea'
+    });
 }
 @endif
 </script>

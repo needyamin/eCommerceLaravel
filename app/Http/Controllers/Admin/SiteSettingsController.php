@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\SiteSetting;
+use Illuminate\Support\Facades\Schema;
 
 class SiteSettingsController extends Controller
 {
@@ -16,7 +17,7 @@ class SiteSettingsController extends Controller
 
     public function update(Request $request)
     {
-        $data = $request->validate([
+        $validationRules = [
             'site_name' => ['required','string','max:100'],
             'site_tagline' => ['nullable','string','max:150'],
             'logo_url' => ['nullable','string','max:255'],
@@ -64,7 +65,19 @@ class SiteSettingsController extends Controller
             'microsoft_clarity_code' => ['nullable','string'],
             'custom_head_code' => ['nullable','string'],
             'custom_body_code' => ['nullable','string'],
-        ]);
+        ];
+        
+        // Only validate theme if column exists
+        if (Schema::hasColumn('site_settings', 'theme')) {
+            $validationRules['theme'] = ['required','string','in:theme1,theme2'];
+        }
+        
+        // Only validate license_key if column exists
+        if (Schema::hasColumn('site_settings', 'license_key')) {
+            $validationRules['license_key'] = ['nullable','string','max:255'];
+        }
+        
+        $data = $request->validate($validationRules);
         $data['wishlist_enabled'] = (bool) ($request->input('wishlist_enabled') ?? false);
         $data['reviews_enabled'] = (bool) ($request->input('reviews_enabled') ?? false);
         $data['reviews_require_purchase'] = (bool) ($request->input('reviews_require_purchase') ?? false);
@@ -82,6 +95,17 @@ class SiteSettingsController extends Controller
         $data['sitemap_priority_category'] = (int) ($request->input('sitemap_priority_category') ?? 7);
         $data['sitemap_priority_page'] = (int) ($request->input('sitemap_priority_page') ?? 6);
         $data['sitemap_change_frequency'] = $request->input('sitemap_change_frequency') ?? 'weekly';
+        
+        // Handle theme field - only include if column exists
+        if (Schema::hasColumn('site_settings', 'theme') && $request->has('theme')) {
+            $data['theme'] = $request->input('theme', 'theme1');
+        }
+        
+        // Handle license_key field - only include if column exists
+        if (Schema::hasColumn('site_settings', 'license_key') && $request->has('license_key')) {
+            $data['license_key'] = $request->input('license_key');
+        }
+        
         $settings = SiteSetting::get();
         $settings->update($data);
         return back()->with('success','Site settings updated.');

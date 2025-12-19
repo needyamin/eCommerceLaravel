@@ -19,6 +19,11 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\CheckInstallation::class,
         ]);
         
+        // Check license validity (blocks all access without valid license)
+        $middleware->web(append: [
+            \App\Http\Middleware\CheckLicense::class,
+        ]);
+        
         // CORS for API and storage
         $middleware->api(prepend: [
             \App\Http\Middleware\CorsMiddleware::class,

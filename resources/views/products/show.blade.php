@@ -529,7 +529,7 @@
                                                             <span class="badge bg-success ms-2"><i class="bi bi-check-circle me-1"></i>Verified Purchase</span>
                                                         @endif
                                                     </div>
-                                                    <div class="text-muted small">{{ $review->created_at->format('M d, Y') }}</div>
+                                                    <div class="text-muted small">@formatDate($review->created_at)</div>
                                                 </div>
                                                 <div class="mb-2">
                                                     @for($i = 1; $i <= 5; $i++)
@@ -721,7 +721,12 @@ function pdAddToCartAjax(e, form){
                 reEnableButton();
                 // Show error message if available
                 if(data && data.message) {
-                    alert(data.message);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message,
+                        confirmButtonColor: '#667eea'
+                    });
                 }
                 return;
             }
@@ -767,7 +772,12 @@ function pdAddToCartAjax(e, form){
             console.error('Add to cart error:', error);
             reEnableButton();
             // Show user-friendly error message
-            alert(error.message || 'Failed to add item to cart. Please try again.');
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.message || 'Failed to add item to cart. Please try again.',
+                confirmButtonColor: '#667eea'
+            });
         });
     } else {
         // Fallback if button not found
@@ -1063,7 +1073,14 @@ document.addEventListener('DOMContentLoaded', function(){
                     timerProgressBar: true
                 });
             } else {
-                alert(data.message);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: data.message,
+                    confirmButtonColor: '#667eea',
+                    timer: 3000,
+                    timerProgressBar: true
+                });
             }
             
             // Update review stats in header
@@ -1187,7 +1204,12 @@ document.addEventListener('DOMContentLoaded', function(){
                     confirmButtonColor: '#667eea'
                 });
             } else {
-                alert(error.message || 'An error occurred. Please try again.');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message || 'An error occurred. Please try again.',
+                    confirmButtonColor: '#667eea'
+                });
             }
         });
     });

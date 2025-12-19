@@ -9,6 +9,7 @@ use App\Models\Product;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use App\Support\PointService;
+use App\Support\ThemeHelper;
 use App\Models\CoinSetting;
 use App\Models\UserPoint;
 
@@ -60,7 +61,7 @@ class CartController extends Controller
 		$unavailableItems = $cart->items->filter(function ($item) {
 			return !$item->product || !$item->product->is_active || (int) $item->product->stock <= 0;
 		});
-		return view('cart.index', compact('cart', 'availableItems', 'unavailableItems'));
+		return view(ThemeHelper::view('cart.index'), compact('cart', 'availableItems', 'unavailableItems'));
 	}
 
 	public function add(Request $request)

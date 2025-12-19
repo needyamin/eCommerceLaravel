@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Page;
 use Illuminate\Http\Request;
+use App\Support\ThemeHelper;
 
 class PageController extends Controller
 {
@@ -13,6 +14,6 @@ class PageController extends Controller
             ->where('is_active', true)
             ->firstOrFail();
 
-        return view('pages.show', compact('page'));
+        return view(ThemeHelper::view('pages.show'), compact('page'));
     }
 }

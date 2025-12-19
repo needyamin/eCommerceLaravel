@@ -18,7 +18,7 @@ class SiteSetting extends Model
         'sitemap_enabled','sitemap_priority_home','sitemap_priority_product','sitemap_priority_category',
         'sitemap_priority_page','sitemap_change_frequency',
         'google_analytics_code','facebook_pixel_code','microsoft_clarity_code','custom_head_code','custom_body_code',
-        'installer_enabled'
+        'installer_enabled','theme','license_key'
     ];
 
     protected $casts = [

@@ -433,7 +433,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // Prevent submission if slug is duplicate
         if (window.slugDuplicate) {
             e.preventDefault();
-            alert('Please fix the slug error before submitting.');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Slug Error',
+                text: 'Please fix the slug error before submitting.',
+                confirmButtonColor: '#667eea'
+            });
             return false;
         }
     });
@@ -697,11 +702,21 @@ document.addEventListener('DOMContentLoaded', function() {
     function handleFiles(files) {
         files.forEach(file => {
             if (!file.type.startsWith('image/')) {
-                alert(`${file.name} is not an image file`);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid File',
+                    text: `${file.name} is not an image file`,
+                    confirmButtonColor: '#667eea'
+                });
                 return;
             }
             if (file.size > 5 * 1024 * 1024) {
-                alert(`${file.name} is too large. Maximum size is 5MB`);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'File Too Large',
+                    text: `${file.name} is too large. Maximum size is 5MB`,
+                    confirmButtonColor: '#667eea'
+                });
                 return;
             }
 

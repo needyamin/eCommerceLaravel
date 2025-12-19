@@ -490,7 +490,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // Prevent submission if slug is duplicate
         if (window.slugDuplicate) {
             e.preventDefault();
-            alert('Please fix the slug error before submitting.');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Slug Error',
+                text: 'Please fix the slug error before submitting.',
+                confirmButtonColor: '#667eea'
+            });
             return false;
         }
     });
@@ -773,11 +778,21 @@ document.addEventListener('DOMContentLoaded', function() {
     function handleFiles(files) {
         files.forEach(file => {
             if (!file.type.startsWith('image/')) {
-                alert(`${file.name} is not an image file`);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid File',
+                    text: `${file.name} is not an image file`,
+                    confirmButtonColor: '#667eea'
+                });
                 return;
             }
             if (file.size > 5 * 1024 * 1024) {
-                alert(`${file.name} is too large. Maximum size is 5MB`);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'File Too Large',
+                    text: `${file.name} is too large. Maximum size is 5MB`,
+                    confirmButtonColor: '#667eea'
+                });
                 return;
             }
 
@@ -957,7 +972,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 const btn = e.target.closest('.delete-image');
                 const imageId = btn.dataset.imageId;
                 
-                if (confirm('Are you sure you want to delete this image?')) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Delete Image?',
+                    text: 'Are you sure you want to delete this image?',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, Delete It',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (!result.isConfirmed) {
+                        return;
+                    }
+                    
                     fetch(`/admin/products/images/${imageId}`, {
                         method: 'DELETE',
                         headers: {
@@ -974,12 +1002,22 @@ document.addEventListener('DOMContentLoaded', function() {
                                 window.updateExistingOrderBadges();
                             }
                         } else {
-                            alert(data.message || 'Error deleting image');
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: data.message || 'Error deleting image',
+                                confirmButtonColor: '#667eea'
+                            });
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('Error deleting image');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Error deleting image',
+                            confirmButtonColor: '#667eea'
+                        });
                     });
                 }
             }
@@ -1001,12 +1039,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (data.success) {
                         location.reload();
                     } else {
-                        alert(data.message || 'Error setting primary image');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.message || 'Error setting primary image',
+                            confirmButtonColor: '#667eea'
+                        });
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Error setting primary image');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Error setting primary image',
+                        confirmButtonColor: '#667eea'
+                    });
                 });
             }
         });

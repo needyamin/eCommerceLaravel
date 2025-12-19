@@ -118,7 +118,7 @@ class ReviewController extends Controller
                     'comment' => $review->comment,
                     'user_name' => $review->user ? $review->user->name : 'Anonymous',
                     'is_verified_purchase' => $review->is_verified_purchase,
-                    'created_at' => $review->created_at->format('M d, Y'),
+                    'created_at' => \App\Support\DateHelper::format($review->created_at),
                     'is_approved' => $review->is_approved,
                 ],
                 'stats' => [

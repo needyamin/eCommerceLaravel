@@ -5,13 +5,14 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\UserAddress;
 use Illuminate\Support\Facades\Auth;
+use App\Support\ThemeHelper;
 
 class AddressController extends Controller
 {
     public function index()
     {
         $addresses = Auth::user()->addresses()->latest()->get();
-        return view('addresses.index', compact('addresses'));
+        return view(ThemeHelper::view('addresses.index'), compact('addresses'));
     }
 
     public function create()
@@ -22,7 +23,7 @@ class AddressController extends Controller
             ->orderBy('sort_order')
             ->orderBy('name')
             ->get();
-        return view('addresses.create', compact('divisions', 'districts'));
+        return view(ThemeHelper::view('addresses.create'), compact('divisions', 'districts'));
     }
 
     public function store(Request $request)
@@ -75,7 +76,7 @@ class AddressController extends Controller
             ->orderBy('sort_order')
             ->orderBy('name')
             ->get();
-        return view('addresses.edit', compact('address', 'divisions', 'districts'));
+        return view(ThemeHelper::view('addresses.edit'), compact('address', 'divisions', 'districts'));
     }
 
     public function update(Request $request, UserAddress $address)

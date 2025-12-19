@@ -84,13 +84,23 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.success) {
                 window.location.href = '{{ route("installer.show-install") }}';
             } else {
-                alert('Error: ' + (data.message || 'Failed to save admin data'));
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.message || 'Failed to save admin data',
+                    confirmButtonColor: '#667eea'
+                });
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i class="bi bi-rocket-takeoff me-2"></i>Start Installation';
             }
         })
         .catch(error => {
-            alert('Error: ' + error.message);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.message || 'An error occurred',
+                confirmButtonColor: '#667eea'
+            });
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="bi bi-rocket-takeoff me-2"></i>Start Installation';
         });

@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\SiteSetting;
 use App\Models\ProductReview;
 use App\Support\SchemaOrgHelper;
+use App\Support\ThemeHelper;
 use Illuminate\Support\Str;
 
 class ProductController extends Controller
@@ -95,7 +96,7 @@ class ProductController extends Controller
 		$products = $query->paginate($perPage)->withQueryString();
 		$categories = Category::where('is_active', true)->orderBy('name')->get();
 		
-		return view('products.index', compact('products', 'categories'));
+		return view(ThemeHelper::view('products.index'), compact('products', 'categories'));
 	}
 
 	public function customPage(string $slug)
@@ -110,7 +111,7 @@ class ProductController extends Controller
 			['name' => $product->category->name ?? 'Products', 'url' => $product->category ? route('categories.show', $product->category->slug) : route('products.index')],
 			['name' => $product->name, 'url' => route('products.show', $product->slug)],
 		]);
-		return view('products.custom-page', compact('product', 'settings', 'productSchema', 'breadcrumbs'));
+		return view(ThemeHelper::view('products.custom-page'), compact('product', 'settings', 'productSchema', 'breadcrumbs'));
 	}
 
 	public function show(string $slug)
@@ -142,7 +143,7 @@ class ProductController extends Controller
 			['name' => $product->name, 'url' => route('products.show', $product->slug)],
 		]);
 		
-		return view('products.show', compact('product', 'related', 'settings', 'userCanReview', 'userHasReviewed', 'productSchema', 'breadcrumbs'));
+		return view(ThemeHelper::view('products.show'), compact('product', 'related', 'settings', 'userCanReview', 'userHasReviewed', 'productSchema', 'breadcrumbs'));
 	}
 
 	public function search(Request $request)

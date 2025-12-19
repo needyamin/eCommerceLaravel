@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Category;
 use App\Models\Product;
 use App\Support\SchemaOrgHelper;
+use App\Support\ThemeHelper;
 
 class CategoryController extends Controller
 {
@@ -25,6 +26,6 @@ class CategoryController extends Controller
 			['name' => $category->name, 'url' => route('categories.show', $category->slug)],
 		]);
 
-		return view('categories.show', compact('category', 'products', 'collectionSchema', 'breadcrumbs'));
+		return view(ThemeHelper::view('categories.show'), compact('category', 'products', 'collectionSchema', 'breadcrumbs'));
 	}
 }

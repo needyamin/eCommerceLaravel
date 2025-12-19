@@ -644,7 +644,7 @@
                                         <div>
                                             <code class="text-primary">{{ $log->action }}</code>
                                             <br>
-                                            <small class="text-muted">{{ $log->created_at->format('M d, H:i') }}</small>
+                                            <small class="text-muted">@formatDate($log->created_at)</small>
                                         </div>
                                         @if($log->data)
                                             <button type="button" class="btn btn-sm btn-outline-info" 

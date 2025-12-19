@@ -7,7 +7,7 @@
     
     <div class="info-box">
         <p><strong>Order Number:</strong> #{{ $order->number }}</p>
-        <p><strong>Order Date:</strong> {{ $order->created_at->format('F d, Y h:i A') }}</p>
+        <p><strong>Order Date:</strong> @formatDate($order->created_at)</p>
         <p><strong>Order Status:</strong> <span class="status-badge status-{{ $order->status === 'completed' ? 'success' : ($order->status === 'cancelled' ? 'warning' : 'info') }}">{{ ucfirst($order->status) }}</span></p>
         <p><strong>Payment Status:</strong> <span class="status-badge status-{{ $order->payment_status === 'paid' ? 'success' : 'warning' }}">{{ ucfirst($order->payment_status) }}</span></p>
     </div>

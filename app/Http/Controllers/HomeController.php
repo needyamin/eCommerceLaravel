@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
 use App\Support\SchemaOrgHelper;
+use App\Support\ThemeHelper;
 
 class HomeController extends Controller
 {
@@ -32,6 +33,6 @@ class HomeController extends Controller
 		$organizationSchema = $schemaHelper->organization();
 		$websiteSchema = $schemaHelper->website();
 
-		return view('home.index', compact('featuredProducts', 'latestProducts', 'categories', 'organizationSchema', 'websiteSchema'));
+		return view(ThemeHelper::view('home.index'), compact('featuredProducts', 'latestProducts', 'categories', 'organizationSchema', 'websiteSchema'));
 	}
 }

@@ -9,13 +9,14 @@ use Illuminate\Validation\Rules\Password;
 use App\Models\User;
 use App\Models\Cart;
 use App\Support\PointService;
+use App\Support\ThemeHelper;
 use App\Models\CoinSetting;
 
 class AuthController extends Controller
 {
     public function showLoginForm()
     {
-        return view('auth.login');
+        return view(ThemeHelper::view('auth.login'));
     }
 
     public function login(Request $request)
@@ -60,7 +61,7 @@ class AuthController extends Controller
     {
         $referralCode = $request->session()->get('referral_code');
         $referrerName = $request->session()->get('referrer_name');
-        return view('auth.register', compact('referralCode', 'referrerName'));
+        return view(ThemeHelper::view('auth.register'), compact('referralCode', 'referrerName'));
     }
 
     public function register(Request $request)
@@ -158,7 +159,7 @@ class AuthController extends Controller
         $coinsBalance = (int) $coins;
         $recentPoints = \App\Models\UserPoint::where('user_id', $user->id)->latest()->limit(20)->get();
         $myReviews = $user->reviews()->with('product')->latest()->paginate(5);
-        return view('auth.profile', compact('user', 'coinsBalance', 'recentPoints', 'myReviews'));
+        return view(ThemeHelper::view('auth.profile'), compact('user', 'coinsBalance', 'recentPoints', 'myReviews'));
     }
 
     public function updateProfile(Request $request)

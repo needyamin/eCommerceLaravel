@@ -189,7 +189,7 @@ class DataTableController extends Controller
                 'payment_status' => '<span class="badge text-bg-' . $payClass . '">' . e(ucfirst($o->payment_status)) . '</span>',
                 'shipping_status' => '<span class="badge text-bg-' . $shipClass . '">' . e(ucfirst($o->shipping_status)) . '</span>',
                 'grand_total' => '$' . number_format((float) $o->grand_total, 2),
-                'created_at' => $o->created_at->format('M d, Y'),
+                'created_at' => \App\Support\DateHelper::format($o->created_at),
                 'actions' => '<a href="' . route('admin.orders.show', $o) . '" class="btn btn-sm btn-primary">View</a>',
             ];
         })->all();
@@ -232,7 +232,7 @@ class DataTableController extends Controller
                 'phone' => e($u->phone ?? 'N/A'),
                 'addresses_count' => '<span class="badge text-bg-info">' . (int) $u->addresses_count . '</span>',
                 'orders_count' => '<span class="badge text-bg-success">' . (int) $u->orders_count . '</span>',
-                'created_at' => $u->created_at->format('M d, Y'),
+                'created_at' => \App\Support\DateHelper::format($u->created_at),
                 'actions' => $this->safeRenderView('admin.users._dt_actions', compact('u')),
             ];
         })->all();
@@ -511,7 +511,7 @@ class DataTableController extends Controller
                 'rating' => $stars,
                 'review' => $reviewText,
                 'status' => $statusBadge,
-                'created_at' => $r->created_at->format('M d, Y'),
+                'created_at' => \App\Support\DateHelper::format($r->created_at),
                 'actions' => $actions,
             ];
         })->all();
@@ -583,7 +583,7 @@ class DataTableController extends Controller
                     ? '<a href="' . route('products.show', $item->product->slug) . '" target="_blank">' . e($item->product->name) . '</a>'
                     : '<span class="text-muted">(deleted product)</span>',
                 'quantity' => (int) $item->quantity,
-                'created_at' => $item->created_at->format('Y-m-d H:i'),
+                'created_at' => \App\Support\DateHelper::format($item->created_at),
             ];
         })->all();
 
@@ -645,7 +645,7 @@ class DataTableController extends Controller
                 'product' => $it->product 
                     ? '<a href="' . route('products.show', $it->product->slug) . '" target="_blank">' . e($it->product->name) . '</a>'
                     : '<span class="text-muted">(deleted product)</span>',
-                'created_at' => $it->created_at->format('Y-m-d H:i'),
+                'created_at' => \App\Support\DateHelper::format($it->created_at),
             ];
         })->all();
 
@@ -701,7 +701,7 @@ class DataTableController extends Controller
                     ? '<a href="' . route('products.show', $g->product->slug) . '" target="_blank">' . e($g->product->name) . '</a>'
                     : '<span class="text-muted">(deleted product)</span>',
                 'session' => '<code class="small text-muted">' . e($g->session_id) . '</code>',
-                'created_at' => $g->created_at->format('Y-m-d H:i'),
+                'created_at' => \App\Support\DateHelper::format($g->created_at),
             ];
         })->all();
 

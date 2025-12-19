@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Blade;
 use App\Support\CurrencyManager;
+use App\Support\ThemeHelper;
 use App\Models\Currency;
 use App\Models\EmailSetting;
 use App\Models\SiteSetting;
@@ -33,12 +34,18 @@ class AppServiceProvider extends ServiceProvider
             return "<?php echo \\App\\Support\\CurrencyManager::format($expression); ?>";
         });
 
+        // Date formatter directive - Format: "12 Feb 2025, 10:00 PM"
+        Blade::directive('formatDate', function ($expression) {
+            return "<?php echo \\App\\Support\\DateHelper::format($expression); ?>";
+        });
+
         // Share currencies and current currency with all views
         view()->composer('*', function ($view) {
             $view->with('currentCurrency', CurrencyManager::current());
             $view->with('activeCurrencies', Currency::where('is_active', true)->get());
             try {
                 $view->with('siteSettings', SiteSetting::get());
+                $view->with('currentTheme', ThemeHelper::current());
             } catch (\Throwable $e) {
                 // ignored before migrations
             }
