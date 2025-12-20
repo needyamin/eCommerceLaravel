@@ -139,7 +139,6 @@ Route::post('/wishlist/toggle', [WishlistController::class, 'toggle'])->name('wi
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/products/search', [ProductController::class, 'search'])->name('products.search');
 Route::get('/products/{slug}', [ProductController::class, 'show'])->name('products.show');
-Route::get('/products/{slug}/custom', [ProductController::class, 'customPage'])->name('products.custom');
 Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('categories.show');
 
 // Pages (frontend)
@@ -245,8 +244,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('products/lookup', [AdminProductController::class, 'lookup'])->name('products.lookup');
         Route::get('products/{product}/json', [AdminProductController::class, 'showJson'])->name('products.json');
         Route::post('products/check-slug', [AdminProductController::class, 'checkSlug'])->name('products.check-slug');
-        Route::get('products/{product}/page-builder', [AdminProductController::class, 'pageBuilder'])->name('products.page-builder');
-        Route::post('products/{product}/page-builder', [AdminProductController::class, 'savePageBuilder'])->name('products.page-builder.save');
         Route::delete('products/images/{image}', [AdminProductController::class, 'deleteImage'])->name('products.images.delete');
         Route::post('products/images/{image}/set-primary', [AdminProductController::class, 'setPrimaryImage'])->name('products.images.set-primary');
         Route::post('products/{product}/images/update-order', [AdminProductController::class, 'updateImageOrder'])->name('products.images.update-order');
@@ -278,6 +275,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('newsletter', [App\Http\Controllers\Admin\NewsletterController::class, 'index'])->name('newsletter.index');
             Route::post('newsletter/{subscriber}/toggle', [App\Http\Controllers\Admin\NewsletterController::class, 'toggle'])->name('newsletter.toggle');
             Route::delete('newsletter/{subscriber}', [App\Http\Controllers\Admin\NewsletterController::class, 'destroy'])->name('newsletter.destroy');
+            
+            // Backup & Restore
+            Route::get('backup', [\App\Http\Controllers\Admin\BackupController::class, 'index'])->name('backup.index');
+            Route::get('backup/export/product/{product}', [\App\Http\Controllers\Admin\BackupController::class, 'exportProduct'])->name('backup.export-product');
+            Route::get('backup/export/all', [\App\Http\Controllers\Admin\BackupController::class, 'exportAll'])->name('backup.export-all');
+            Route::get('backup/import', [\App\Http\Controllers\Admin\BackupController::class, 'import'])->name('backup.import');
+            Route::post('backup/import', [\App\Http\Controllers\Admin\BackupController::class, 'processImport'])->name('backup.process-import');
+            Route::get('backup/import/wordpress', [\App\Http\Controllers\Admin\BackupController::class, 'importWordPress'])->name('backup.import-wordpress');
+            Route::post('backup/import/wordpress', [\App\Http\Controllers\Admin\BackupController::class, 'processWordPressImport'])->name('backup.process-wordpress-import');
+            Route::get('backup/import/shopify', [\App\Http\Controllers\Admin\BackupController::class, 'importShopify'])->name('backup.import-shopify');
+            Route::post('backup/import/shopify', [\App\Http\Controllers\Admin\BackupController::class, 'processShopifyImport'])->name('backup.process-shopify-import');
             
             // Reviews
             Route::get('reviews', [App\Http\Controllers\Admin\ReviewController::class, 'index'])->name('reviews.index');

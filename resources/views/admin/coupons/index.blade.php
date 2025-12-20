@@ -51,7 +51,7 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function(){
-    const table = $('#couponsTable').DataTable({
+    const table = initDataTableWithExport('#couponsTable', {
         processing: true,
         serverSide: true,
         ajax: {
@@ -70,9 +70,9 @@ document.addEventListener('DOMContentLoaded', function(){
             { data: 'usages_count', name: 'usages_count', searchable: false, className: 'text-center' },
             { data: 'is_active', name: 'is_active', searchable: false },
             { data: 'expires_at', name: 'expires_at' },
-            { data: 'actions', name: 'actions', orderable: false, searchable: false, className: 'text-center' },
+            { data: 'actions', name: 'actions', orderable: false, searchable: false, className: 'text-center', exportable: false },
         ]
-    });
+    }, 'Coupons');
     ['f_coupon_type','f_coupon_active'].forEach(id => document.getElementById(id).addEventListener('change', ()=>table.ajax.reload()));
 });
 </script>

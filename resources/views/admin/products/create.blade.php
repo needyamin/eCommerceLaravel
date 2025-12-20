@@ -208,8 +208,73 @@
 </div>
 
 @push('styles')
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
 <!-- Quill Editor CSS -->
 <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<style>
+/* Select2 Custom Styling - Ensure it doesn't break Quill Editor */
+.select2-container {
+    width: 100% !important;
+    z-index: 9999;
+}
+.select2-container--bootstrap-5 .select2-selection {
+    min-height: 48px;
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    padding: 0.375rem 0.75rem;
+}
+.select2-container--bootstrap-5 .select2-selection--single {
+    height: 48px;
+    line-height: 48px;
+}
+.select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+    line-height: 48px;
+    padding-left: 0;
+    padding-right: 20px;
+    font-size: 1rem;
+    font-weight: 400;
+}
+.select2-container--bootstrap-5 .select2-selection--single .select2-selection__arrow {
+    height: 46px;
+    right: 8px;
+}
+.select2-dropdown {
+    z-index: 10000;
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    font-size: 1rem;
+}
+.select2-search--dropdown .select2-search__field {
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    font-weight: 400;
+}
+.select2-results__option {
+    font-size: 1rem;
+    padding: 0.5rem 0.75rem;
+    line-height: 1.5;
+}
+.select2-results__option--highlighted {
+    font-size: 1rem;
+}
+.select2-container--bootstrap-5 .select2-selection {
+    font-size: 1rem;
+}
+/* Ensure Quill Editor is not affected */
+#product_editor {
+    z-index: 1;
+}
+.ql-toolbar {
+    z-index: 1;
+}
+.ql-container {
+    z-index: 1;
+}
+</style>
 <!-- SortableJS CSS -->
 <style>
     .sortable-images {
@@ -389,6 +454,8 @@
 @endpush
 
 @push('scripts')
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <!-- Quill Editor JS -->
 <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 <!-- SortableJS -->
@@ -412,7 +479,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 [{ 'color': [] }, { 'background': [] }],
                 [{ 'list': 'ordered'}, { 'list': 'bullet' }],
                 [{ 'align': [] }],
-                ['link', 'image', 'video'],
+                ['link'],
                 ['blockquote', 'code-block'],
                 ['clean']
             ]
@@ -576,17 +643,50 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Subcategory functionality
-document.addEventListener('DOMContentLoaded', function() {
+// Subcategory functionality with Select2
+// Initialize Select2 after page load
+setTimeout(function() {
+    if (typeof jQuery === 'undefined' || typeof jQuery.fn.select2 === 'undefined') {
+        console.error('jQuery or Select2 not loaded');
+        return;
+    }
+    
     const categorySelect = document.getElementById('category_id');
     const subcategorySelect = document.getElementById('subcategory_id');
     
-    if (!categorySelect || !subcategorySelect) return;
+    if (!categorySelect || !subcategorySelect) {
+        console.error('Category or subcategory select not found');
+        return;
+    }
     
     const subcategoryWrapper = document.getElementById('subcategory_wrapper');
     
-    categorySelect.addEventListener('change', function() {
-        const categoryId = this.value;
+    // Initialize Select2 on category dropdown
+    jQuery(categorySelect).select2({
+        theme: 'bootstrap-5',
+        placeholder: 'Select Category (Optional)',
+        allowClear: true,
+        width: '100%'
+    });
+    
+    // Initialize Select2 on subcategory dropdown
+    jQuery(subcategorySelect).select2({
+        theme: 'bootstrap-5',
+        placeholder: 'Select Subcategory (Optional)',
+        allowClear: true,
+        width: '100%',
+        disabled: true
+    });
+    
+    function loadSubcategories(categoryId) {
+        if (!categoryId) {
+            // Hide subcategory wrapper if no category selected
+            if (subcategoryWrapper) {
+                subcategoryWrapper.style.display = 'none';
+            }
+            jQuery(subcategorySelect).empty().append('<option value="">Select Subcategory (Optional)</option>').prop('disabled', true).trigger('change');
+            return;
+        }
         
         // Hide subcategory wrapper by default
         if (subcategoryWrapper) {
@@ -594,49 +694,56 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Clear subcategory dropdown
-        subcategorySelect.innerHTML = '<option value="">Select Subcategory (Optional)</option>';
-        subcategorySelect.disabled = true;
+        jQuery(subcategorySelect).empty().append('<option value="">Select Subcategory (Optional)</option>');
+        jQuery(subcategorySelect).prop('disabled', true).trigger('change');
         
-        if (categoryId) {
-            // Fetch subcategories for selected category
-            fetch(`/admin/api/categories/${categoryId}/subcategories`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.subcategories && data.subcategories.length > 0) {
-                        // Show subcategory wrapper
-                        if (subcategoryWrapper) {
-                            subcategoryWrapper.style.display = 'block';
-                        }
-                        
-                        data.subcategories.forEach(sub => {
-                            const option = document.createElement('option');
-                            option.value = sub.id;
-                            option.textContent = sub.name;
-                            subcategorySelect.appendChild(option);
-                        });
-                        subcategorySelect.disabled = false;
-                    } else {
-                        // Hide subcategory wrapper if no subcategories
-                        if (subcategoryWrapper) {
-                            subcategoryWrapper.style.display = 'none';
-                        }
+        // Fetch subcategories for selected category
+        fetch(`/admin/api/categories/${categoryId}/subcategories`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.subcategories && data.subcategories.length > 0) {
+                    // Show subcategory wrapper
+                    if (subcategoryWrapper) {
+                        subcategoryWrapper.style.display = 'block';
                     }
-                })
-                .catch(error => {
-                    console.error('Error fetching subcategories:', error);
-                    // Hide subcategory wrapper on error
+                    
+                    data.subcategories.forEach(sub => {
+                        const option = new Option(sub.name, sub.id, false, false);
+                        jQuery(subcategorySelect).append(option);
+                    });
+                    jQuery(subcategorySelect).prop('disabled', false).trigger('change');
+                } else {
+                    // Hide subcategory wrapper if no subcategories
                     if (subcategoryWrapper) {
                         subcategoryWrapper.style.display = 'none';
                     }
-                });
-        }
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching subcategories:', error);
+                // Hide subcategory wrapper on error
+                if (subcategoryWrapper) {
+                    subcategoryWrapper.style.display = 'none';
+                }
+            });
+    }
+    
+    // Use Select2 change event
+    jQuery(categorySelect).on('change', function() {
+        const categoryId = jQuery(this).val();
+        loadSubcategories(categoryId);
     });
     
     // Handle form submission - use subcategory if selected, otherwise use category
     const form = document.querySelector('form');
     if (form) {
         form.addEventListener('submit', function(e) {
-            const subcategoryId = subcategorySelect.value;
+            const subcategoryId = jQuery(subcategorySelect).val();
             
             // If subcategory is selected, use it; otherwise use the parent category
             if (subcategoryId) {
@@ -647,11 +754,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 hiddenInput.value = subcategoryId;
                 form.appendChild(hiddenInput);
                 // Disable the original category select
-                categorySelect.disabled = true;
+                jQuery(categorySelect).prop('disabled', true);
             }
         });
     }
-});
+}, 100);
 
 // Image upload functionality
 document.addEventListener('DOMContentLoaded', function() {

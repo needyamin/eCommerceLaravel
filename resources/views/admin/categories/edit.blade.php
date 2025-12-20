@@ -14,11 +14,11 @@
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label">Name</label>
-                    <input name="name" id="category_name" class="form-control" required value="{{ old('name', $category->name) }}" />
+                    <input name="name" id="category_name" class="form-control" required value="{{ old('name', $category->name) }}" placeholder="Enter category name" />
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Slug</label>
-                    <input name="slug" id="category_slug" class="form-control" required value="{{ old('slug', $category->slug) }}" />
+                    <input name="slug" id="category_slug" class="form-control" required value="{{ old('slug', $category->slug) }}" placeholder="category-slug" />
                     <div id="slug_error" class="text-danger small mt-1 fw-semibold" style="display: none;"></div>
                     <div id="slug_success" class="text-success small mt-1 fw-semibold" style="display: none;"></div>
                 </div>
@@ -33,7 +33,7 @@
                 </div>
                 <div class="col-12">
                     <label class="form-label">Description</label>
-                    <textarea name="description" rows="4" class="form-control">{{ old('description', $category->description) }}</textarea>
+                    <textarea name="description" rows="4" class="form-control" placeholder="Enter category description (optional)">{{ old('description', $category->description) }}</textarea>
                 </div>
                 <div class="col-md-3">
                     <div class="form-check mt-4">

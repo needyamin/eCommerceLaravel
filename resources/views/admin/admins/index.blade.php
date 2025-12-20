@@ -27,7 +27,7 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function(){
-  $('#adminsTable').DataTable({
+  initDataTableWithExport('#adminsTable', {
     processing: true,
     serverSide: true,
     ajax: { url: '{{ route('admin.datatables', 'admins') }}' },
@@ -37,9 +37,9 @@ document.addEventListener('DOMContentLoaded', function(){
       { data: 'name', name: 'name' },
       { data: 'email', name: 'email' },
       { data: 'roles', name: 'roles', orderable: false, searchable: false },
-      { data: 'actions', name: 'actions', orderable: false, searchable: false, className: 'text-center' }
+      { data: 'actions', name: 'actions', orderable: false, searchable: false, className: 'text-center', exportable: false }
     ]
-  });
+  }, 'Administrators');
 });
 </script>
 @endpush

@@ -1,53 +1,24 @@
 # 🛒 Laravel eCommerce System
 
-A comprehensive, modern eCommerce platform built with Laravel 12, featuring a beautiful storefront and powerful admin panel with role-based access control.
+A modern, feature-rich eCommerce platform built with Laravel 12. Perfect for online stores with a powerful admin panel and beautiful storefront.
 
 ![Laravel](https://img.shields.io/badge/Laravel-12.x-red.svg)
 ![PHP](https://img.shields.io/badge/PHP-8.2+-blue.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 
-## ✨ Key Features
+---
 
-### Storefront
-- Product catalog with categories and subcategories
-- Live search, shopping cart, wishlist (guest and authenticated)
-- Checkout with Bangladeshi address system (Division, District, Upazila)
-- Payment gateways: bKash, Nagad, Rocket, SSL Commerce, Stripe, PayPal, COD
-- **Coupon/Discount System** - Percentage and fixed discounts with usage limits
-- Product reviews, ratings, and newsletter subscriptions
-- **Coins (Loyalty Points) System** - Earn and redeem points
-- **Referral System** - User referral codes and rewards
-- Custom product pages with visual page builder
-- HTML-rich product descriptions
-- Responsive Tailwind CSS 4.0 design
+## 🚀 Installation & Setup
 
-### Admin Panel
-- Dashboard with analytics
-- **Role-Based Access Control (RBAC)** - Spatie Permissions with automatic route permission discovery
-- Products & Categories (with subcategories support)
-- **Product Page Builder** - Visual drag-and-drop page builder for custom product pages
-- **Product Image Management** - Drag-and-drop upload, reorder, set primary, delete
-- Orders, Users, Coupons management
-- **Multi-Currency Support** - BDT, USD, EUR, GBP with currency switching
-- Payment Gateway management (with sandbox/test mode)
-- Shipping & Tax settings (Bangladeshi divisions/districts)
-- Email & SMS OTP settings (multiple SMS providers)
-- **Storage & CDN Settings** - Configure S3, Cloudflare R2, DigitalOcean Spaces, Wasabi, Backblaze B2
-- **Site Settings** - SEO, Schema.org, Sitemap, Newsletter, Reviews configuration
-- Server-side DataTables for performance
-
-## 📋 Requirements
-
+### Requirements
 - PHP 8.2+
 - Composer
 - MySQL/PostgreSQL/SQLite
-- Node.js 18+ (for asset compilation with Vite)
+- Node.js 18+ (for asset compilation)
 
-## 🛠️ Installation
+### Quick Installation (3 Steps)
 
-### Option 1: Web-Based Installer (Recommended)
-
-1. **Clone and install dependencies:**
+1. **Clone and install:**
 ```bash
 git clone https://github.com/needyamin/eCommerceLaravel
 cd eCommerceLaravel
@@ -60,35 +31,156 @@ npm install
 php artisan serve
 ```
 
-3. **Access the installer:**
-Visit `http://localhost:8000/installer` in your browser
+3. **Access web installer:**
+Visit `http://localhost:8000/installer` - The installer will automatically:
+- ✅ Check system requirements (PHP, extensions, permissions)
+- ✅ Test database connection
+- ✅ Create database tables
+- ✅ Seed sample data
+- ✅ Create admin account
+- ✅ Disable installer after completion
 
-The installer will guide you through:
-- ✅ System requirements check (PHP version, extensions, folder permissions)
-- ✅ Database configuration (with connection testing)
-- ✅ Admin account setup
-- ✅ Automatic database migration and seeding
-- ✅ Installation completion
+**That's it!** The installer handles everything automatically.
 
-After successful installation, the installer is automatically disabled in the database for security. To re-enable it, update `installer_enabled = true` in the `site_settings` table.
+> **Default Login** (if using manual seeding):  
+> Admin Panel: `http://localhost:8000/admin/login`  
+> Email: `needyamin@gmail.com`  
+> Password: `needyamin@gmail.com`  
+> Role: Super Admin (has all permissions)
 
-### Option 2: Manual Installation
+### 📦 What Gets Created?
 
-1. **Clone and install dependencies:**
-```bash
-git clone https://github.com/needyamin/eCommerceLaravel
-cd eCommerceLaravel
-composer install
-npm install
-```
+After installation, you'll have:
+- ✅ **1 Admin Account** - Super Admin with all permissions
+- ✅ **1 User Account** - Test customer account
+- ✅ **6 Categories** - With subcategories
+- ✅ **72 Products** - 12 products per category with images
+- ✅ **216 Product Images** - 3 images per product
+- ✅ **4 Currencies** - BDT, USD, EUR, GBP
+- ✅ **5 Sample Coupons** - Ready-to-use discount codes
+- ✅ **Bangladesh Data** - All divisions, districts, upazilas
+- ✅ **124+ Permissions** - All admin route permissions
+- ✅ **Default Pages** - About, Terms, Privacy, etc.
 
-2. **Environment setup:**
+### 🔒 Installer Security
+
+- **Auto-Disable**: Installer is automatically disabled after successful installation
+- **Database Control**: Installer status stored in `site_settings` table
+- **Re-enable**: Update `installer_enabled = true` in database to re-enable
+- **Security Check**: Validates PHP version, extensions, and folder permissions
+- **Database Testing**: Tests database connection before proceeding
+
+### 📊 Database Structure
+
+The system includes **30+ database tables** organized into:
+
+**Core E-commerce Tables:**
+- `admins`, `users` - User accounts
+- `categories`, `products`, `product_images` - Product management
+- `orders`, `order_items` - Order processing
+- `carts`, `cart_items` - Shopping cart
+- `coupons`, `coupon_usages` - Discount system
+- `wishlists`, `guest_wishlists` - Wishlist functionality
+- `product_reviews` - Reviews and ratings
+- `user_addresses` - Customer addresses
+- `user_points` - Coins/loyalty points
+- `currencies` - Multi-currency support
+
+**Location Data:**
+- `districts` - Bangladesh districts (64 districts)
+- `upazilas` - Bangladesh upazilas (500+ upazilas)
+
+**Settings & Configuration:**
+- `site_settings` - Site config, SEO, theme, license
+- `email_settings` - SMTP configuration
+- `otp_settings` - OTP/SMS settings
+- `payment_gateway_settings` - Payment gateways
+- `shipping_settings` - Shipping and tax
+- `storage_settings` - Storage/CDN config
+- `coin_settings` - Coins system settings
+- `newsletter_settings` - Newsletter config
+- `pages` - Static pages
+
+**System Tables:**
+- `roles`, `permissions` - RBAC (Spatie Permissions)
+- `model_has_roles`, `model_has_permissions` - Role assignments
+- `cache`, `sessions` - Application cache and sessions
+- `jobs`, `failed_jobs` - Queue system
+- `newsletter_subscribers` - Newsletter subscribers
+
+**Database File:** `ecommerce.sql` - Complete database dump with all tables and sample data
+
+---
+
+## ✨ Key Features
+
+### Storefront
+- Product catalog with categories and subcategories
+- Live search, shopping cart, and wishlist
+- Checkout with Bangladeshi address system (Division, District, Upazila)
+- Multiple payment gateways (bKash, Nagad, Rocket, SSL Commerce, Stripe, PayPal, COD)
+- Coupon/Discount system with usage limits
+- Product reviews and ratings
+- Newsletter subscriptions
+- Coins (Loyalty Points) system
+- Referral system with user codes
+- Responsive design with Tailwind CSS 4.0
+
+### Admin Panel
+- **Dashboard** with analytics and statistics
+- **Role-Based Access Control (RBAC)** - Complete permission system
+- **Advanced Product Management**
+  - Product images with drag-and-drop upload
+  - Image reordering and primary image selection
+  - Rich HTML descriptions with Quill Editor
+  - Category and subcategory support
+  - Stock management
+  - Featured products
+  - Sale pricing (Original Price vs Current Price)
+- **Advanced Product Filters** ⭐ NEW
+  - Collapsible filter section
+  - Product name search with Select2 (AJAX search)
+  - Category and subcategory filters
+  - Stock status filter (In Stock, Out of Stock, Low Stock)
+  - Featured products filter
+  - On Sale filter
+  - Price range filter (Min/Max)
+  - Status filter (Active/Inactive)
+  - "ALL" indicator when no filter is selected
+  - Clear filters button
+  - Auto-reset on page reload
+- **Enhanced DataTables** ⭐ NEW
+  - Product images in table view
+  - Category and subcategory columns
+  - Price and Original Price columns (centered)
+  - Stock quantity with color-coded badges
+  - Consistent button group styling for actions
+  - CSV export (all data and current view)
+  - Server-side processing for performance
+- **Orders Management** - View and manage customer orders
+- **Users Management** - Manage customers, coins, and referrals
+- **Coupons Management** - Create and manage discount codes
+- **Categories Management** - Hierarchical categories with subcategories
+- **Multi-Currency Support** - BDT, USD, EUR, GBP with switching
+- **Payment Gateways** - Configure multiple gateways with sandbox mode
+- **Shipping & Tax** - Configure rates for Bangladeshi divisions/districts
+- **Email & SMS OTP** - Multiple SMS providers support
+- **Storage & CDN** - S3, Cloudflare R2, DigitalOcean Spaces, Wasabi, Backblaze B2
+- **Site Settings** - SEO, Schema.org, Sitemap, Newsletter, Reviews
+- **Backup & Restore** - Export/import products, WordPress/Shopify import
+- **Pages Management** - Create and manage static pages
+
+## 🛠️ Manual Installation (Alternative)
+
+If you prefer manual installation instead of the web installer:
+
+1. **Environment setup:**
 ```bash
 cp .env.example .env
 php artisan key:generate
 ```
 
-3. **Configure database in `.env`:**
+2. **Configure database in `.env`:**
 ```env
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
@@ -98,50 +190,24 @@ DB_USERNAME=your_username
 DB_PASSWORD=your_password
 ```
 
-4. **Run migrations and seeders:**
+3. **Run migrations and seeders:**
 ```bash
 php artisan migrate --seed
 ```
 
-This will create:
-- Default admin and user accounts
-- 6 categories with 12 products each (72 products total)
-- 3 product images per product
-- 4 currencies (BDT, USD, EUR, GBP)
-- 5 sample coupons
-- Bangladesh districts and upazilas data
-- Default pages
-- All admin route permissions
-- Super Admin role with all permissions
-
-5. **Build assets (optional for development):**
+4. **Build assets (optional):**
 ```bash
 npm run build
 # or for development
 npm run dev
 ```
 
-6. **Start server:**
+5. **Start server:**
 ```bash
 php artisan serve
 ```
 
-Visit `http://localhost:8000`
-
-## 👤 Default Accounts
-
-After installation (via installer or manual seeding), you can login with:
-
-- **Admin Panel**: `http://localhost:8000/admin/login`
-  - Email: The email you provided during installation (or `needyamin@gmail.com` if using manual seeding)
-  - Password: The password you set during installation (or `needyamin@gmail.com` if using manual seeding)
-  - Role: Super Admin (has all permissions)
-
-- **User Account** (Storefront):
-  - Email: Same as admin email
-  - Password: Same as admin password
-
-> **Note**: If using the web installer, you'll set custom admin credentials during installation. The installer automatically creates the admin account with Super Admin role and all permissions.
+Visit `http://localhost:8000` and login with default credentials.
 
 ## 💳 Payment Gateways
 
@@ -180,10 +246,27 @@ Configure from Admin → Shipping Settings:
 
 - **Image Upload**: Drag-and-drop multiple images with preview
 - **Image Management**: Reorder, set primary, delete images
-- **Page Builder**: Visual drag-and-drop page builder for custom product pages
-- **HTML Descriptions**: Rich HTML content support in product descriptions
+- **HTML Descriptions**: Rich HTML content with Quill Editor (image/video options removed)
 - **Subcategories**: Hierarchical category system with parent/child relationships
+- **Select2 Search**: Enhanced dropdowns with search functionality
 - **Product Factory**: Generates sample products with images automatically during seeding
+
+## 🔍 Advanced Filtering System ⭐ NEW
+
+The products page includes a powerful filtering system:
+
+- **Collapsible Filters**: Filters are hidden by default, click "Show Filters" to expand
+- **Product Name Search**: Select2 AJAX search - type to find products instantly
+- **Category Filter**: Select parent categories with Select2 search
+- **Subcategory Filter**: Automatically loads when category is selected
+- **Stock Status**: Filter by In Stock, Out of Stock, or Low Stock (<10 items)
+- **Featured Filter**: Show only featured or non-featured products
+- **Sale Status**: Filter products on sale or regular price
+- **Price Range**: Set minimum and maximum price filters
+- **Status Filter**: Filter by Active or Inactive products
+- **Visual Indicators**: All filters show "ALL" when no filter is applied
+- **Auto Reset**: All filters reset on page reload
+- **Clear Filters**: One-click button to clear all filters
 
 ## 🎫 Coupon & Discount System
 
@@ -206,33 +289,40 @@ Configure from Admin → Storage & CDN:
 - **Backblaze B2** (S3-compatible)
 - **CDN Support** - Configure CDN URL for static assets
 
-## 🔧 Configuration
+## 🔧 Admin Panel Features
 
-- **Site Settings**: Admin → Site Settings (SEO, Schema.org, Sitemap, social links, feature toggles, product display columns, installer control)
-- **Products**: Admin → Products (with image management and page builder)
-- **Categories**: Admin → Categories (hierarchical with subcategories)
-- **Coupons**: Admin → Coupons (create and manage discount codes)
-- **Currencies**: Admin → Currencies (manage multiple currencies)
-- **Orders**: Admin → Orders (view and manage customer orders)
-- **Users**: Admin → Users (manage customer accounts, coins, referrals)
-- **Roles & Permissions**: Admin → Roles & Permissions (manage admin roles and route permissions)
-- **Payment Gateways**: Admin → Payment Gateways (sandbox/test mode support)
-- **Shipping Settings**: Admin → Shipping Settings (Bangladeshi divisions/districts)
-- **Email Settings**: Admin → Email Settings (SMTP with cPanel auto-detection)
-- **OTP Settings**: Admin → OTP Settings (Email & SMS with multiple providers)
-- **Storage & CDN**: Admin → Storage & CDN (S3, Cloudflare R2, DigitalOcean Spaces, Wasabi, Backblaze B2)
-- **Pages**: Admin → Pages (manage static pages)
+### Products Management
+- **List View**: Enhanced DataTable with images, categories, prices, stock
+- **Advanced Filters**: Collapsible filter section with multiple filter options
+- **Product Search**: Select2 AJAX search for quick product finding
+- **Image Display**: Product thumbnails in table view
+- **Bulk Actions**: Export to CSV (all data or current view)
+- **Create/Edit**: Rich form with Select2 dropdowns, Quill Editor, image management
 
-## 🔒 Installer Security
+### DataTables Enhancements ⭐ NEW
+- **Product Images**: Small thumbnails displayed in table
+- **Category Display**: Shows parent category and subcategory separately
+- **Price Columns**: Current Price and Original Price (centered alignment)
+- **Stock Badges**: Color-coded badges (green for in stock, red for out of stock)
+- **Action Buttons**: Consistent button group styling across all tables
+- **CSV Export**: Export all data or current filtered view
+- **Server-Side Processing**: Fast loading even with thousands of products
 
-The web-based installer includes built-in security features:
+### Other Admin Features
+- **Categories**: Hierarchical with subcategories, shows all categories/subcategories
+- **Orders**: View and manage customer orders
+- **Users**: Manage customer accounts, coins, referrals
+- **Coupons**: Create discount codes with usage limits
+- **Currencies**: Multi-currency support with switching
+- **Roles & Permissions**: Complete RBAC system
+- **Payment Gateways**: Configure with sandbox/test mode
+- **Shipping Settings**: Bangladeshi divisions/districts support
+- **Email & SMS**: SMTP and multiple SMS providers
+- **Storage & CDN**: S3-compatible storage options
+- **Site Settings**: SEO, Schema.org, Sitemap configuration
+- **Backup & Restore**: Export/import products, WordPress/Shopify import
+- **Pages**: Manage static pages
 
-- **Automatic Disabling**: After successful installation, the installer is automatically disabled in the database (`installer_enabled = false` in `site_settings` table)
-- **Access Control**: Installer routes return 404 when disabled
-- **Database-Based**: Installer control is managed via database settings (no file deletion)
-- **Re-enable Option**: To re-enable the installer, update `installer_enabled = true` in the `site_settings` table
-- **Requirements Check**: Validates PHP version, extensions, and folder permissions before installation
-- **Database Testing**: Tests database connection before proceeding with installation
 
 ## 🔐 Roles & Permissions
 
@@ -288,21 +378,63 @@ For additional protection, consider:
 
 MIT License - see [LICENSE](LICENSE) file
 
-## 📦 Seeded Data
+## 📦 Complete Seeded Data List
 
-After running `php artisan migrate --seed`, the following data is created:
+After running `php artisan migrate --seed` or using the installer, the following data is automatically created:
 
-- **Users**: 1 test user account
-- **Admins**: 1 admin account with Super Admin role
-- **Categories**: 6 categories
-- **Products**: 72 products (12 per category)
-- **Product Images**: 216 images (3 per product)
-- **Currencies**: 4 currencies (BDT, USD, EUR, GBP)
-- **Coupons**: 5 sample coupons
-- **Bangladesh Data**: All divisions, districts, and upazilas
-- **Pages**: Default pages
-- **Permissions**: All admin route permissions (124+ permissions)
-- **Roles**: Super Admin role with all permissions
+### Accounts
+- **1 Admin Account** - Super Admin role with all permissions
+  - Email: `needyamin@gmail.com` (or custom if using installer)
+  - Password: `needyamin@gmail.com` (or custom if using installer)
+- **1 User Account** - Test customer account (same credentials as admin)
+
+### Products & Categories
+- **6 Parent Categories** - Electronics, Clothing, Books, Home & Garden, Sports, Toys
+- **Multiple Subcategories** - Under each parent category
+- **72 Products** - 12 products per category
+  - Each product includes: name, description, price, stock, SKU
+  - Featured products included
+  - Products with sale prices (compare_at_price)
+- **216 Product Images** - 3 images per product
+  - Images are automatically generated/assigned
+  - Primary images are set
+
+### E-commerce Data
+- **4 Currencies** - BDT (৳), USD ($), EUR (€), GBP (£)
+  - BDT set as default currency
+- **5 Sample Coupons**:
+  - `WELCOME10` - 10% off (Welcome coupon)
+  - `SAVE20` - 20% off
+  - `FREESHIP` - Free shipping
+  - `HOLIDAY25` - 25% off (Holiday special)
+  - `STUDENT15` - 15% off (Student discount)
+
+### Location Data
+- **8 Divisions** - All administrative divisions of Bangladesh
+- **64 Districts** - All districts under divisions
+- **500+ Upazilas** - All upazilas under districts
+
+### System Data
+- **124+ Route Permissions** - All admin routes automatically discovered
+- **1 Super Admin Role** - With all permissions assigned
+- **Default Pages** - About Us, Terms & Conditions, Privacy Policy, etc.
+- **Payment Gateway Settings** - Pre-configured with test/sandbox credentials
+- **Email Settings** - SMTP configuration template
+- **OTP Settings** - Email and SMS OTP providers configured
+
+## 🆕 Recent Updates
+
+### Latest Features (2025)
+- ✅ **Advanced Product Filters** - Collapsible filter section with Select2 search
+- ✅ **Product Name Search** - AJAX-powered product search with Select2
+- ✅ **Enhanced DataTables** - Product images, improved columns, better styling
+- ✅ **Button Group Styling** - Consistent action buttons across all tables
+- ✅ **Filter Auto-Reset** - Filters reset on page reload
+- ✅ **"ALL" Indicators** - Clear visual feedback when no filters are applied
+- ✅ **Category Improvements** - Shows all categories/subcategories, removed slug column
+- ✅ **Price Display** - Original Price column (renamed from Compare at Price)
+- ✅ **Centered Columns** - Image, Price, and Original Price columns centered
+- ✅ **Stock Badges** - Color-coded stock quantity indicators
 
 ## 📞 Support
 

@@ -39,7 +39,7 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function(){
-    const table = $('#usersTable').DataTable({
+    const table = initDataTableWithExport('#usersTable', {
         processing: true,
         serverSide: true,
         ajax: {
@@ -58,9 +58,9 @@ document.addEventListener('DOMContentLoaded', function(){
             { data: 'addresses_count', name: 'addresses_count', orderable: true, searchable: false, className: 'text-center' },
             { data: 'orders_count', name: 'orders_count', orderable: true, searchable: false, className: 'text-center' },
             { data: 'created_at', name: 'created_at' },
-            { data: 'actions', name: 'actions', orderable: false, searchable: false }
+            { data: 'actions', name: 'actions', orderable: false, searchable: false, exportable: false }
         ]
-    });
+    }, 'Users');
     ['u_from','u_to'].forEach(id => document.getElementById(id).addEventListener('change', ()=>table.ajax.reload()));
 });
 </script>

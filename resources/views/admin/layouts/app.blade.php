@@ -5,12 +5,19 @@
     <title>@yield('title', 'Admin Panel')</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
+    @if(!empty($siteSettings->favicon_url ?? null))
+    <link rel="icon" type="image/x-icon" href="{{ $siteSettings->favicon_url }}" />
+    @else
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
+    @endif
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.0.12/index.css" crossorigin="anonymous" media="print" onload="this.media='all'" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/styles/overlayscrollbars.min.css" crossorigin="anonymous" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" crossorigin="anonymous" />
     <link rel="stylesheet" href="{{ asset('admin-assets/css/adminlte.css') }}" />
     <!-- DataTables (Bootstrap 5) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.10/css/dataTables.bootstrap5.min.css" />
+    <!-- DataTables Buttons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/datatables.net-buttons-bs5@2.4.2/css/buttons.bootstrap5.min.css" />
     <style>
     /* Remove underline from all links */
     a {
@@ -125,6 +132,7 @@
     .dataTables_paginate .page-item.active .page-link {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         border-color: #667eea;
+        color: white !important;
     }
     /* Button Improvements */
     .btn-sm {
@@ -203,6 +211,41 @@
         background-color: #f8f9fa !important;
         color: #000000 !important;
     }
+    
+    /* DataTables Buttons Styling */
+    .dt-buttons {
+        margin-bottom: 1rem;
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    .dt-buttons .btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+        border-radius: 0.375rem;
+        transition: all 0.2s ease;
+    }
+    .dt-buttons .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .dt-buttons .btn i {
+        font-size: 0.875rem;
+    }
+    
+    /* Button Group Spacing */
+    .btn-group {
+        gap: 0.25rem;
+    }
+    .btn-group .btn,
+    .btn-group form {
+        margin: 0;
+    }
+    .btn-group form {
+        display: inline-block;
+    }
     </style>
     @stack('styles')
   </head>
@@ -236,6 +279,11 @@
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/datatables.net@1.13.10/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.10/js/dataTables.bootstrap5.min.js"></script>
+    <!-- DataTables Buttons -->
+    <script src="https://cdn.jsdelivr.net/npm/datatables.net-buttons@2.4.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/datatables.net-buttons-bs5@2.4.2/js/buttons.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/datatables.net-buttons@2.4.2/js/buttons.html5.min.js"></script>
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
@@ -320,6 +368,89 @@
         // Also run after a delay to catch dynamically added forms
         setTimeout(replaceFormConfirms, 500);
     })();
+    
+    // DataTables CSV Export Helper
+    window.initDataTableWithExport = function(tableId, options, exportTitle) {
+        // Find columns that should be excluded from export (actions, etc.)
+        const columns = options.columns || [];
+        const exportableColumns = columns.map((col, index) => {
+            return col.exportable !== false ? index : null;
+        }).filter(index => index !== null);
+        
+        const defaultOptions = {
+            dom: 'Bfrtip',
+            buttons: [
+                {
+                    extend: 'csv',
+                    text: '<i class="bi bi-file-earmark-spreadsheet me-1"></i>Export Current View',
+                    className: 'btn btn-sm btn-primary',
+                    exportOptions: {
+                        columns: exportableColumns,
+                        modifier: {
+                            page: 'current'
+                        },
+                        format: {
+                            body: function(data, row, column, node) {
+                                // Remove HTML tags from exported data
+                                if (typeof data === 'string') {
+                                    return data.replace(/<[^>]*>/g, '').trim();
+                                }
+                                return data;
+                            }
+                        }
+                    },
+                    filename: function() {
+                        return (exportTitle || 'export') + '_current_view_' + new Date().toISOString().split('T')[0];
+                    }
+                },
+                {
+                    extend: 'csv',
+                    text: '<i class="bi bi-file-earmark-spreadsheet-fill me-1"></i>Export All',
+                    className: 'btn btn-sm btn-success',
+                    exportOptions: {
+                        columns: exportableColumns,
+                        modifier: {
+                            page: 'all'
+                        },
+                        format: {
+                            body: function(data, row, column, node) {
+                                // Remove HTML tags from exported data
+                                if (typeof data === 'string') {
+                                    return data.replace(/<[^>]*>/g, '').trim();
+                                }
+                                return data;
+                            }
+                        }
+                    },
+                    filename: function() {
+                        return (exportTitle || 'export') + '_all_' + new Date().toISOString().split('T')[0];
+                    }
+                }
+            ],
+            language: {
+                buttons: {
+                    csv: 'CSV'
+                }
+            }
+        };
+        
+        // Merge user options with defaults
+        const mergedOptions = Object.assign({}, defaultOptions, options);
+        
+        // If user provided buttons, merge them
+        if (options && options.buttons) {
+            mergedOptions.buttons = [...defaultOptions.buttons, ...options.buttons];
+        }
+        
+        // Update export options with column indices
+        mergedOptions.buttons.forEach(btn => {
+            if (btn.exportOptions) {
+                btn.exportOptions.columns = exportableColumns;
+            }
+        });
+        
+        return $(tableId).DataTable(mergedOptions);
+    };
     </script>
     @stack('scripts')
   </body>

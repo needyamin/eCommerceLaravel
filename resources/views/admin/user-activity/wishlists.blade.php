@@ -51,7 +51,7 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function(){
-    $('#wishlistsTable').DataTable({
+    initDataTableWithExport('#wishlistsTable', {
         processing: true,
         serverSide: true,
         ajax: { url: '{{ route('admin.datatables', 'wishlists') }}' },
@@ -63,9 +63,9 @@ document.addEventListener('DOMContentLoaded', function(){
             { data: 'created_at', name: 'created_at', orderable: true, searchable: false },
         ],
         order: [[4, 'desc']],
-    });
+    }, 'Wishlist_Activity');
 
-    $('#guestWishlistsTable').DataTable({
+    initDataTableWithExport('#guestWishlistsTable', {
         processing: true,
         serverSide: true,
         ajax: { url: '{{ route('admin.datatables', 'guest-wishlists') }}' },
@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', function(){
             { data: 'created_at', name: 'created_at', orderable: true, searchable: false },
         ],
         order: [[5, 'desc']],
-    });
+    }, 'Guest_Wishlist_Activity');
 });
 </script>
 @endpush

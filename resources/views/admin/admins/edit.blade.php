@@ -10,17 +10,17 @@
   <div class="row g-3">
     <div class="col-md-4">
       <label class="form-label">Name</label>
-      <input name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $admin->name) }}" required>
+      <input name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $admin->name) }}" required placeholder="Enter administrator name">
       @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
     <div class="col-md-4">
       <label class="form-label">Email</label>
-      <input name="email" type="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $admin->email) }}" required>
+      <input name="email" type="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $admin->email) }}" required placeholder="admin@example.com">
       @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
     <div class="col-md-4">
       <label class="form-label">Password (leave blank to keep)</label>
-      <input name="password" type="password" class="form-control @error('password') is-invalid @enderror">
+      <input name="password" type="password" class="form-control @error('password') is-invalid @enderror" placeholder="Leave blank to keep current password">
       @error('password')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
   </div>

@@ -27,15 +27,15 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function(){
-  $('#rolesTable').DataTable({
+  initDataTableWithExport('#rolesTable', {
     processing: true,
     serverSide: true,
     ajax: { url: '{{ route('admin.datatables', 'roles') }}' },
     columns: [
       { data: 'name', name: 'name' },
-      { data: 'actions', name: 'actions', orderable: false, searchable: false }
+      { data: 'actions', name: 'actions', orderable: false, searchable: false, exportable: false }
     ]
-  });
+  }, 'Roles');
 });
 </script>
 @endpush

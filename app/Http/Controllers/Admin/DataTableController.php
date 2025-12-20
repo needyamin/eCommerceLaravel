@@ -46,30 +46,94 @@ class DataTableController extends Controller
 
     protected function resourceProduct(Request $request, int $draw, int $start, int $length, string $search)
     {
-        $query = \App\Models\Product::query()->with('category');
+        $query = \App\Models\Product::query()->with(['category.parent', 'images']);
 
         $recordsTotal = (clone $query)->count();
 
-        // Filters
-        if ($request->filled('category_id')) {
-            $query->where('category_id', (int) $request->input('category_id'));
+        // Filters - Category and Subcategory
+        if ($request->filled('subcategory_id')) {
+            // If subcategory is selected, filter by subcategory only
+            $query->where('category_id', (int) $request->input('subcategory_id'));
+        } elseif ($request->filled('category_id')) {
+            // If only parent category is selected, include parent and all its subcategories
+            $categoryId = (int) $request->input('category_id');
+            $subcategoryIds = \App\Models\Category::where('parent_id', $categoryId)->pluck('id');
+            if ($subcategoryIds->isNotEmpty()) {
+                $query->where(function($q) use ($categoryId, $subcategoryIds) {
+                    $q->where('category_id', $categoryId)
+                      ->orWhereIn('category_id', $subcategoryIds);
+                });
+            } else {
+                // No subcategories, just filter by parent
+                $query->where('category_id', $categoryId);
+            }
         }
+        
+        if ($request->filled('stock')) {
+            $stockFilter = $request->input('stock');
+            if ($stockFilter === 'in_stock') {
+                $query->where('stock', '>', 0);
+            } elseif ($stockFilter === 'out_of_stock') {
+                $query->where('stock', '<=', 0);
+            } elseif ($stockFilter === 'low_stock') {
+                $query->where('stock', '>', 0)->where('stock', '<', 10);
+            }
+        }
+        
+        if ($request->filled('is_featured')) {
+            $query->where('is_featured', (int) $request->input('is_featured'));
+        }
+        
+        if ($request->filled('on_sale')) {
+            if ($request->input('on_sale') == '1') {
+                $query->whereNotNull('compare_at_price')
+                      ->whereColumn('price', '<', 'compare_at_price');
+            } else {
+                $query->where(function($q) {
+                    $q->whereNull('compare_at_price')
+                      ->orWhereColumn('price', '>=', 'compare_at_price');
+                });
+            }
+        }
+        
+        if ($request->filled('price_min')) {
+            $query->where('price', '>=', (float) $request->input('price_min'));
+        }
+        
+        if ($request->filled('price_max')) {
+            $query->where('price', '<=', (float) $request->input('price_max'));
+        }
+        
         if ($request->filled('is_active')) {
             $query->where('is_active', (int) $request->input('is_active'));
         }
-
+        
+        // Product ID filter (from Select2 product name search)
+        if ($request->filled('product_id')) {
+            $productId = $request->input('product_id');
+            // If it's numeric, treat as ID
+            if (is_numeric($productId)) {
+                $query->where('id', (int) $productId);
+            }
+        }
+        
         // Search
         if ($search !== '') {
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('sku', 'like', "%{$search}%");
-            });
+            // If search_only is 'name', only search by name
+            if ($request->input('search_only') === 'name') {
+                $query->where('name', 'like', "%{$search}%");
+            } else {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('sku', 'like', "%{$search}%");
+                });
+            }
         }
 
         $recordsFiltered = (clone $query)->count();
 
         // Ordering
-        $order = $this->extractOrdering($request, ['name', 'category', 'price', 'is_active']);
+        $order = $this->extractOrdering($request, ['name', 'category', 'price', 'stock', 'compare_at_price', 'is_active']);
         if ($order) {
             $hasCategoryJoin = false;
             foreach ($order as [$col, $dir]) {
@@ -90,10 +154,48 @@ class DataTableController extends Controller
         $items = $query->select('products.*')->skip($start)->take($length)->get();
 
         $data = $items->map(function ($p) {
+            $category = $p->category;
+            $parentCategory = $category && $category->parent ? $category->parent : null;
+            $subcategory = $category && $category->parent_id ? $category : null;
+            
+            // Determine category and subcategory display
+            $categoryName = '-';
+            $subcategoryName = '-';
+            
+            if ($subcategory) {
+                // Product is assigned to a subcategory
+                $categoryName = e($parentCategory->name ?? '-');
+                $subcategoryName = e($subcategory->name);
+            } elseif ($category && !$category->parent_id) {
+                // Product is assigned to a parent category
+                $categoryName = e($category->name);
+                $subcategoryName = '-';
+            }
+            
+            // Get product image
+            $imageHtml = '<div class="text-center" style="width: 100%;">';
+            if ($p->images && $p->images->count() > 0) {
+                $firstImage = $p->images->sortBy('position')->first();
+                $imagePath = $firstImage->image_path ?? $firstImage->path;
+                $imageUrl = asset('storage/' . $imagePath);
+                $imageHtml .= '<div class="d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; margin: 0 auto;">';
+                $imageHtml .= '<img src="' . e($imageUrl) . '" alt="' . e($p->name) . '" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover; padding: 2px;">';
+                $imageHtml .= '</div>';
+            } else {
+                $imageHtml .= '<div class="d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; margin: 0 auto;">';
+                $imageHtml .= '<i class="bi bi-image text-muted" style="font-size: 1.5rem;"></i>';
+                $imageHtml .= '</div>';
+            }
+            $imageHtml .= '</div>';
+            
             return [
+                'image' => $imageHtml,
                 'name' => e($p->name),
-                'category' => e(optional($p->category)->name ?? '-'),
-                'price' => '$' . number_format((float) $p->price, 2),
+                'category' => $categoryName,
+                'subcategory' => $subcategoryName,
+                'price' => '<div class="text-center">৳' . number_format((float) $p->price, 2) . '</div>',
+                'stock' => '<span class="badge ' . (($p->stock > 0) ? 'text-bg-success' : 'text-bg-danger') . '">' . number_format((int) $p->stock) . '</span>',
+                'compare_at_price' => $p->compare_at_price ? '<div class="text-center">৳' . number_format((float) $p->compare_at_price, 2) . '</div>' : '<div class="text-center"><span class="text-muted">—</span></div>',
                 'is_active' => $p->is_active ? '<span class="badge text-bg-success">Yes</span>' : '<span class="badge text-bg-secondary">No</span>',
                 'actions' => $this->safeRenderView('admin.products._dt_actions', compact('p')),
             ];
@@ -109,7 +211,7 @@ class DataTableController extends Controller
 
     protected function resourceCategory(Request $request, int $draw, int $start, int $length, string $search)
     {
-        $query = \App\Models\Category::query();
+        $query = \App\Models\Category::query()->with('parent');
         $recordsTotal = (clone $query)->count();
 
         if ($request->filled('is_active')) {
@@ -123,18 +225,22 @@ class DataTableController extends Controller
         }
         $recordsFiltered = (clone $query)->count();
 
-        $order = $this->extractOrdering($request, ['name', 'slug', 'is_active']);
+        $order = $this->extractOrdering($request, ['name', 'is_active']);
         if ($order) {
             foreach ($order as [$col, $dir]) { $query->orderBy($col, $dir); }
         } else {
-            $query->latest('id');
+            $query->orderBy('parent_id')->orderBy('name');
         }
 
         $items = $query->skip($start)->take($length)->get();
         $data = $items->map(function ($c) {
+            $nameDisplay = e($c->name);
+            if ($c->parent_id) {
+                $nameDisplay = '<span class="text-muted">└─</span> ' . $nameDisplay;
+            }
             return [
-                'name' => e($c->name),
-                'slug' => e($c->slug),
+                'name' => $nameDisplay,
+                'parent' => $c->parent ? '<span class="badge text-bg-info">' . e($c->parent->name) . '</span>' : '<span class="text-muted">—</span>',
                 'is_active' => $c->is_active ? '<span class="badge text-bg-success">Yes</span>' : '<span class="badge text-bg-secondary">No</span>',
                 'actions' => $this->safeRenderView('admin.categories._dt_actions', compact('c')),
             ];
@@ -190,7 +296,7 @@ class DataTableController extends Controller
                 'shipping_status' => '<span class="badge text-bg-' . $shipClass . '">' . e(ucfirst($o->shipping_status)) . '</span>',
                 'grand_total' => '$' . number_format((float) $o->grand_total, 2),
                 'created_at' => \App\Support\DateHelper::format($o->created_at),
-                'actions' => '<a href="' . route('admin.orders.show', $o) . '" class="btn btn-sm btn-primary">View</a>',
+                'actions' => '<div class="btn-group" role="group"><a href="' . route('admin.orders.show', $o) . '" class="btn btn-sm btn-outline-primary" title="View"><i class="bi bi-eye"></i></a></div>',
             ];
         })->all();
 

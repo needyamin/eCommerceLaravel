@@ -17,8 +17,17 @@ class AdminRoutePermission
 			return $next($request);
 		}
 		$user = auth('admin')->user();
-		if ($user && $user->hasPermissionTo($name, 'admin')) {
-			return $next($request);
+		if ($user) {
+			try {
+				if ($user->hasPermissionTo($name, 'admin')) {
+					return $next($request);
+				}
+			} catch (\Exception $e) {
+				// Permission doesn't exist yet, allow Super Admin
+				if ($user->hasRole('Super Admin', 'admin')) {
+					return $next($request);
+				}
+			}
 		}
 		abort(403);
 	}

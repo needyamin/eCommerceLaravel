@@ -177,12 +177,12 @@ use Illuminate\Support\Facades\Schema;
               <div class="row g-3">
             <div class="col-md-6">
               <label class="form-label">Site Name <span class="text-danger">*</span></label>
-              <input type="text" name="site_name" class="form-control @error('site_name') is-invalid @enderror" value="{{ old('site_name', $settings->site_name) }}" required>
+              <input type="text" name="site_name" class="form-control @error('site_name') is-invalid @enderror" value="{{ old('site_name', $settings->site_name) }}" required placeholder="Enter site name">
               @error('site_name')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
             <div class="col-md-6">
               <label class="form-label">Tagline</label>
-              <input type="text" name="site_tagline" class="form-control @error('site_tagline') is-invalid @enderror" value="{{ old('site_tagline', $settings->site_tagline) }}">
+              <input type="text" name="site_tagline" class="form-control @error('site_tagline') is-invalid @enderror" value="{{ old('site_tagline', $settings->site_tagline) }}" placeholder="Enter site tagline">
               @error('site_tagline')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
             <div class="col-md-6">
@@ -505,22 +505,22 @@ use Illuminate\Support\Facades\Schema;
               </div>
             <div class="col-md-6">
               <label class="form-label">Homepage Priority (1-10)</label>
-              <input type="number" name="sitemap_priority_home" class="form-control" min="1" max="10" value="{{ old('sitemap_priority_home', $settings->sitemap_priority_home ?? 10) }}">
+              <input type="number" name="sitemap_priority_home" class="form-control" min="1" max="10" value="{{ old('sitemap_priority_home', $settings->sitemap_priority_home ?? 10) }}" placeholder="10">
               <small class="text-muted">Default: 10 (highest priority)</small>
             </div>
             <div class="col-md-6">
               <label class="form-label">Product Priority (1-10)</label>
-              <input type="number" name="sitemap_priority_product" class="form-control" min="1" max="10" value="{{ old('sitemap_priority_product', $settings->sitemap_priority_product ?? 8) }}">
+              <input type="number" name="sitemap_priority_product" class="form-control" min="1" max="10" value="{{ old('sitemap_priority_product', $settings->sitemap_priority_product ?? 8) }}" placeholder="8">
               <small class="text-muted">Default: 8</small>
             </div>
             <div class="col-md-6">
               <label class="form-label">Category Priority (1-10)</label>
-              <input type="number" name="sitemap_priority_category" class="form-control" min="1" max="10" value="{{ old('sitemap_priority_category', $settings->sitemap_priority_category ?? 7) }}">
+              <input type="number" name="sitemap_priority_category" class="form-control" min="1" max="10" value="{{ old('sitemap_priority_category', $settings->sitemap_priority_category ?? 7) }}" placeholder="7">
               <small class="text-muted">Default: 7</small>
             </div>
             <div class="col-md-6">
               <label class="form-label">Page Priority (1-10)</label>
-              <input type="number" name="sitemap_priority_page" class="form-control" min="1" max="10" value="{{ old('sitemap_priority_page', $settings->sitemap_priority_page ?? 6) }}">
+              <input type="number" name="sitemap_priority_page" class="form-control" min="1" max="10" value="{{ old('sitemap_priority_page', $settings->sitemap_priority_page ?? 6) }}" placeholder="6">
               <small class="text-muted">Default: 6</small>
             </div>
             <div class="col-md-6">

@@ -21,19 +21,19 @@
         <div class="row g-3">
           <div class="col-md-6">
             <label for="code" class="form-label">Coupon Code *</label>
-            <input type="text" class="form-control @error('code') is-invalid @enderror" id="code" name="code" value="{{ old('code', $coupon->code) }}" required>
+            <input type="text" class="form-control @error('code') is-invalid @enderror" id="code" name="code" value="{{ old('code', $coupon->code) }}" required placeholder="e.g., WELCOME10">
             @error('code')<div class="invalid-feedback">{{ $message }}</div>@enderror
           </div>
           <div class="col-md-6">
             <label for="name" class="form-label">Coupon Name *</label>
-            <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $coupon->name) }}" required>
+            <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $coupon->name) }}" required placeholder="e.g., Welcome Discount">
             @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
           </div>
         </div>
 
         <div class="mt-3">
           <label for="description" class="form-label">Description</label>
-          <textarea class="form-control @error('description') is-invalid @enderror" id="description" name="description" rows="3">{{ old('description', $coupon->description) }}</textarea>
+          <textarea class="form-control @error('description') is-invalid @enderror" id="description" name="description" rows="3" placeholder="Optional description">{{ old('description', $coupon->description) }}</textarea>
           @error('description')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
 
@@ -48,12 +48,12 @@
           </div>
           <div class="col-md-4">
             <label for="value" class="form-label">Discount Value *</label>
-            <input type="number" step="0.01" min="0" class="form-control @error('value') is-invalid @enderror" id="value" name="value" value="{{ old('value', $coupon->value) }}" required>
+            <input type="number" step="0.01" min="0" class="form-control @error('value') is-invalid @enderror" id="value" name="value" value="{{ old('value', $coupon->value) }}" required placeholder="e.g., 10">
             @error('value')<div class="invalid-feedback">{{ $message }}</div>@enderror
           </div>
           <div class="col-md-4">
             <label for="max_discount_amount" class="form-label">Maximum Discount Amount</label>
-            <input type="number" step="0.01" min="0" class="form-control @error('max_discount_amount') is-invalid @enderror" id="max_discount_amount" name="max_discount_amount" value="{{ old('max_discount_amount', $coupon->max_discount_amount) }}">
+            <input type="number" step="0.01" min="0" class="form-control @error('max_discount_amount') is-invalid @enderror" id="max_discount_amount" name="max_discount_amount" value="{{ old('max_discount_amount', $coupon->max_discount_amount) }}" placeholder="e.g., 25.00">
             @error('max_discount_amount')<div class="invalid-feedback">{{ $message }}</div>@enderror
           </div>
         </div>
@@ -61,17 +61,17 @@
         <div class="row g-3 mt-1">
           <div class="col-md-4">
             <label for="min_order_amount" class="form-label">Minimum Order Amount</label>
-            <input type="number" step="0.01" min="0" class="form-control @error('min_order_amount') is-invalid @enderror" id="min_order_amount" name="min_order_amount" value="{{ old('min_order_amount', $coupon->min_order_amount) }}">
+            <input type="number" step="0.01" min="0" class="form-control @error('min_order_amount') is-invalid @enderror" id="min_order_amount" name="min_order_amount" value="{{ old('min_order_amount', $coupon->min_order_amount) }}" placeholder="e.g., 50.00">
             @error('min_order_amount')<div class="invalid-feedback">{{ $message }}</div>@enderror
           </div>
           <div class="col-md-4">
             <label for="usage_limit_per_coupon" class="form-label">Usage Limit (per coupon)</label>
-            <input type="number" min="0" class="form-control @error('usage_limit_per_coupon') is-invalid @enderror" id="usage_limit_per_coupon" name="usage_limit_per_coupon" value="{{ old('usage_limit_per_coupon', $coupon->usage_limit_per_coupon) }}">
+            <input type="number" min="0" class="form-control @error('usage_limit_per_coupon') is-invalid @enderror" id="usage_limit_per_coupon" name="usage_limit_per_coupon" value="{{ old('usage_limit_per_coupon', $coupon->usage_limit_per_coupon) }}" placeholder="e.g., 100">
             @error('usage_limit_per_coupon')<div class="invalid-feedback">{{ $message }}</div>@enderror
           </div>
           <div class="col-md-4">
             <label for="usage_limit_per_user" class="form-label">Per User Limit</label>
-            <input type="number" min="0" class="form-control @error('usage_limit_per_user') is-invalid @enderror" id="usage_limit_per_user" name="usage_limit_per_user" value="{{ old('usage_limit_per_user', $coupon->usage_limit_per_user) }}">
+            <input type="number" min="0" class="form-control @error('usage_limit_per_user') is-invalid @enderror" id="usage_limit_per_user" name="usage_limit_per_user" value="{{ old('usage_limit_per_user', $coupon->usage_limit_per_user) }}" placeholder="e.g., 1">
             @error('usage_limit_per_user')<div class="invalid-feedback">{{ $message }}</div>@enderror
           </div>
         </div>

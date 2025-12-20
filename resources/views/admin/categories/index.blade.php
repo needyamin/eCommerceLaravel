@@ -27,7 +27,7 @@
                 <thead>
                     <tr>
                         <th>Name</th>
-                        <th>Slug</th>
+                        <th>Parent</th>
                         <th>Active</th>
                         <th style="width:160px">Actions</th>
                     </tr>
@@ -41,7 +41,7 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function(){
-    const table = $('#categoriesTable').DataTable({
+    const table = initDataTableWithExport('#categoriesTable', {
         processing: true,
         serverSide: true,
         ajax: {
@@ -52,12 +52,12 @@ document.addEventListener('DOMContentLoaded', function(){
         },
         columns: [
             { data: 'name', name: 'name' },
-            { data: 'slug', name: 'slug', className: 'text-center' },
+            { data: 'parent', name: 'parent', className: 'text-center', orderable: false, searchable: false },
             { data: 'is_active', name: 'is_active', className: 'text-center', orderable: true, searchable: false },
-            { data: 'actions', name: 'actions', orderable: false, searchable: false, className: 'text-center' },
+            { data: 'actions', name: 'actions', orderable: false, searchable: false, className: 'text-center', exportable: false },
         ],
         order: [[0, 'asc']],
-    });
+    }, 'Categories');
     document.getElementById('filter_cat_active').addEventListener('change', ()=>table.ajax.reload());
 });
 </script>

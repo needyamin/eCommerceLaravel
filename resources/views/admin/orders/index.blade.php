@@ -59,7 +59,7 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function(){
-    const table = $('#ordersTable').DataTable({
+    const table = initDataTableWithExport('#ordersTable', {
         processing: true,
         serverSide: true,
         order: [[6,'desc']],
@@ -80,9 +80,9 @@ document.addEventListener('DOMContentLoaded', function(){
             { data: 'shipping_status', name: 'shipping_status', orderable: true, searchable: false },
             { data: 'grand_total', name: 'grand_total', searchable: false, className: 'text-end' },
             { data: 'created_at', name: 'created_at' },
-            { data: 'actions', name: 'actions', orderable: false, searchable: false, className: 'text-center' }
+            { data: 'actions', name: 'actions', orderable: false, searchable: false, className: 'text-center', exportable: false }
         ]
-    });
+    }, 'Orders');
     ['f_order_status','f_payment_status','f_from','f_to'].forEach(id => document.getElementById(id).addEventListener('change', ()=>table.ajax.reload()))
 });
 </script>

@@ -44,7 +44,7 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function(){
-  const table = $('#currenciesTable').DataTable({
+  const table = initDataTableWithExport('#currenciesTable', {
     processing: true,
     serverSide: true,
     ajax: {
@@ -58,9 +58,9 @@ document.addEventListener('DOMContentLoaded', function(){
       { data: 'symbol', name: 'symbol' },
       { data: 'is_active', name: 'is_active', searchable: false },
       { data: 'is_default', name: 'is_default', searchable: false },
-      { data: 'actions', name: 'actions', orderable: false, searchable: false, className: 'text-center' }
+      { data: 'actions', name: 'actions', orderable: false, searchable: false, className: 'text-center', exportable: false }
     ]
-  });
+  }, 'Currencies');
   document.getElementById('f_curr_active').addEventListener('change', ()=>table.ajax.reload());
 });
 </script>

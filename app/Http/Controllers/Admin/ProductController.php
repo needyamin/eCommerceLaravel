@@ -22,10 +22,15 @@ class ProductController extends Controller
 
     public function create()
     {
-        // Get only parent categories (categories without parent_id)
-        $parentCategories = Category::whereNull('parent_id')->pluck('name', 'id');
-        // Get all categories for fallback
-        $allCategories = Category::pluck('name', 'id');
+        // Get only active parent categories (categories without parent_id)
+        $parentCategories = Category::whereNull('parent_id')
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->pluck('name', 'id');
+        // Get all active categories for fallback
+        $allCategories = Category::where('is_active', true)
+            ->orderBy('name')
+            ->pluck('name', 'id');
         return view('admin.products.create', compact('parentCategories', 'allCategories'));
     }
 
@@ -93,20 +98,31 @@ class ProductController extends Controller
 
     public function edit(Product $product)
     {
-        // Get only parent categories (categories without parent_id)
-        $parentCategories = Category::whereNull('parent_id')->pluck('name', 'id');
-        // Get all categories for fallback
-        $allCategories = Category::pluck('name', 'id');
+        // Get only active parent categories (categories without parent_id)
+        $parentCategories = Category::whereNull('parent_id')
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->pluck('name', 'id');
+        // Get all active categories for fallback
+        $allCategories = Category::where('is_active', true)
+            ->orderBy('name')
+            ->pluck('name', 'id');
         // Get subcategories if product has a category with parent
         $subcategories = [];
         if ($product->category_id) {
             $selectedCategory = Category::find($product->category_id);
             if ($selectedCategory && $selectedCategory->parent_id) {
                 // Product is assigned to a subcategory, get its parent's subcategories
-                $subcategories = Category::where('parent_id', $selectedCategory->parent_id)->pluck('name', 'id');
+                $subcategories = Category::where('parent_id', $selectedCategory->parent_id)
+                    ->where('is_active', true)
+                    ->orderBy('name')
+                    ->pluck('name', 'id');
             } elseif ($selectedCategory && !$selectedCategory->parent_id) {
                 // Product is assigned to a parent category, get its subcategories
-                $subcategories = Category::where('parent_id', $selectedCategory->id)->pluck('name', 'id');
+                $subcategories = Category::where('parent_id', $selectedCategory->id)
+                    ->where('is_active', true)
+                    ->orderBy('name')
+                    ->pluck('name', 'id');
             }
         }
         return view('admin.products.edit', compact('product', 'parentCategories', 'allCategories', 'subcategories'));
@@ -126,18 +142,10 @@ class ProductController extends Controller
             'stock' => 'required|integer|min:0',
             'is_active' => 'nullable|boolean',
             'is_featured' => 'nullable|boolean',
-            'use_custom_page' => 'nullable|boolean',
-            'page_builder_data' => 'nullable|json',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
         ]);
         $validated['is_active'] = $request->boolean('is_active');
         $validated['is_featured'] = $request->boolean('is_featured');
-        $validated['use_custom_page'] = $request->boolean('use_custom_page');
-        
-        // Handle page builder data
-        if ($request->has('page_builder_data') && $request->filled('page_builder_data')) {
-            $validated['page_builder_data'] = json_decode($request->input('page_builder_data'), true);
-        }
         
         $product->update($validated);
 
@@ -502,31 +510,6 @@ class ProductController extends Controller
         }
     }
 
-    public function pageBuilder(Product $product)
-    {
-        return view('admin.products.page-builder', compact('product'));
-    }
-
-    public function savePageBuilder(Request $request, Product $product)
-    {
-        $request->validate([
-            'page_builder_data' => 'required|array',
-            'use_custom_page' => 'nullable|boolean',
-        ]);
-
-        // Get page_builder_data - it might be a JSON string or already decoded array
-        $pageBuilderData = $request->input('page_builder_data');
-        if (is_string($pageBuilderData)) {
-            $pageBuilderData = json_decode($pageBuilderData, true);
-        }
-
-        $product->update([
-            'page_builder_data' => $pageBuilderData,
-            'use_custom_page' => $request->boolean('use_custom_page', true),
-        ]);
-
-        return response()->json(['success' => true, 'message' => 'Page builder saved successfully']);
-    }
 
     public function destroy(Product $product)
     {

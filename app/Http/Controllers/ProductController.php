@@ -99,21 +99,6 @@ class ProductController extends Controller
 		return view(ThemeHelper::view('products.index'), compact('products', 'categories'));
 	}
 
-	public function customPage(string $slug)
-	{
-		$product = Product::with(['images', 'category.parent', 'approvedReviews.user'])->where('slug', $slug)->firstOrFail();
-		
-		$settings = SiteSetting::get();
-		$schemaHelper = new SchemaOrgHelper();
-		$productSchema = $schemaHelper->product($product);
-		$breadcrumbs = $schemaHelper->breadcrumbs([
-			['name' => 'Home', 'url' => route('home')],
-			['name' => $product->category->name ?? 'Products', 'url' => $product->category ? route('categories.show', $product->category->slug) : route('products.index')],
-			['name' => $product->name, 'url' => route('products.show', $product->slug)],
-		]);
-		return view(ThemeHelper::view('products.custom-page'), compact('product', 'settings', 'productSchema', 'breadcrumbs'));
-	}
-
 	public function show(string $slug)
 	{
 		$product = Product::with(['images', 'category.parent', 'approvedReviews.user'])->where('slug', $slug)->firstOrFail();

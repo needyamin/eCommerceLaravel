@@ -48,20 +48,20 @@
                 </span>
               </td>
               <td>
-                <div class="btn-group btn-group-sm">
-                  <button type="button" class="btn btn-outline-primary" onclick="editDistrict({{ $district->id }}, '{{ $district->name }}', '{{ $district->division }}', {{ $district->is_active ? 'true' : 'false' }}, {{ $district->sort_order }})">
+                <div class="btn-group" role="group">
+                  <button type="button" class="btn btn-sm btn-outline-primary" onclick="editDistrict({{ $district->id }}, '{{ $district->name }}', '{{ $district->division }}', {{ $district->is_active ? 'true' : 'false' }}, {{ $district->sort_order }})" title="Edit">
                     <i class="bi bi-pencil"></i>
                   </button>
                   <form action="{{ route('admin.districts.toggle-status', $district) }}" method="POST" class="d-inline">
                     @csrf
-                    <button type="submit" class="btn btn-outline-warning">
+                    <button type="submit" class="btn btn-sm btn-outline-warning" title="Toggle Status">
                       <i class="bi bi-toggle-{{ $district->is_active ? 'on' : 'off' }}"></i>
                     </button>
                   </form>
-                  <form action="{{ route('admin.districts.destroy', $district) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this district?');">
+                  <form action="{{ route('admin.districts.destroy', $district) }}" method="POST" class="d-inline">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="btn btn-outline-danger">
+                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
                       <i class="bi bi-trash"></i>
                     </button>
                   </form>

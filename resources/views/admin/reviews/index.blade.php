@@ -39,7 +39,7 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function(){
-    const table = $('#reviewsTable').DataTable({
+    const table = initDataTableWithExport('#reviewsTable', {
         processing: true,
         serverSide: true,
         ajax: {
@@ -55,10 +55,10 @@ document.addEventListener('DOMContentLoaded', function(){
             { data: 'review', name: 'review', orderable: true, searchable: false },
             { data: 'status', name: 'status', orderable: true, searchable: false, className: 'text-center' },
             { data: 'created_at', name: 'created_at', orderable: true, searchable: false },
-            { data: 'actions', name: 'actions', orderable: false, searchable: false, className: 'text-center' },
+            { data: 'actions', name: 'actions', orderable: false, searchable: false, className: 'text-center', exportable: false },
         ],
         order: [[5, 'desc']],
-    });
+    }, 'Reviews');
     
     const statusSelect = document.getElementById('filter_review_status');
     if (statusSelect) {

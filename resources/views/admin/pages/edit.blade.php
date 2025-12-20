@@ -14,12 +14,12 @@
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label">Title <span class="text-danger">*</span></label>
-                    <input name="title" class="form-control @error('title') is-invalid @enderror" required value="{{ old('title', $page->title) }}" />
+                    <input name="title" class="form-control @error('title') is-invalid @enderror" required value="{{ old('title', $page->title) }}" placeholder="Enter page title" />
                     @error('title')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Slug</label>
-                    <input name="slug" class="form-control @error('slug') is-invalid @enderror" value="{{ old('slug', $page->slug) }}" />
+                    <input name="slug" class="form-control @error('slug') is-invalid @enderror" value="{{ old('slug', $page->slug) }}" placeholder="page-slug" />
                     <small class="text-muted">Leave empty to auto-generate from title</small>
                     @error('slug')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
@@ -30,22 +30,22 @@
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Meta Title</label>
-                    <input name="meta_title" class="form-control @error('meta_title') is-invalid @enderror" value="{{ old('meta_title', $page->meta_title) }}" />
+                    <input name="meta_title" class="form-control @error('meta_title') is-invalid @enderror" value="{{ old('meta_title', $page->meta_title) }}" placeholder="SEO meta title (optional)" />
                     @error('meta_title')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Meta Keywords</label>
-                    <input name="meta_keywords" class="form-control @error('meta_keywords') is-invalid @enderror" value="{{ old('meta_keywords', $page->meta_keywords) }}" />
+                    <input name="meta_keywords" class="form-control @error('meta_keywords') is-invalid @enderror" value="{{ old('meta_keywords', $page->meta_keywords) }}" placeholder="keyword1, keyword2, keyword3" />
                     @error('meta_keywords')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Sort Order</label>
-                    <input type="number" name="sort_order" class="form-control @error('sort_order') is-invalid @enderror" value="{{ old('sort_order', $page->sort_order) }}" min="0" />
+                    <input type="number" name="sort_order" class="form-control @error('sort_order') is-invalid @enderror" value="{{ old('sort_order', $page->sort_order) }}" min="0" placeholder="0" />
                     @error('sort_order')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
                 <div class="col-12">
                     <label class="form-label">Meta Description</label>
-                    <textarea name="meta_description" rows="3" class="form-control @error('meta_description') is-invalid @enderror">{{ old('meta_description', $page->meta_description) }}</textarea>
+                    <textarea name="meta_description" rows="3" class="form-control @error('meta_description') is-invalid @enderror" placeholder="SEO meta description (optional)">{{ old('meta_description', $page->meta_description) }}</textarea>
                     @error('meta_description')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
                 <div class="col-md-3">
@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 [{ 'color': [] }, { 'background': [] }],
                 [{ 'list': 'ordered'}, { 'list': 'bullet' }],
                 [{ 'align': [] }],
-                ['link', 'image', 'video'],
+                ['link'],
                 ['blockquote', 'code-block'],
                 ['clean']
             ]

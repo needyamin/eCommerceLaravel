@@ -42,7 +42,7 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function(){
-  const table = $('#subsTable').DataTable({
+  const table = initDataTableWithExport('#subsTable', {
     processing: true,
     serverSide: true,
     ajax: {
@@ -55,9 +55,9 @@ document.addEventListener('DOMContentLoaded', function(){
       { data: 'status', name: 'status', searchable: false },
       { data: 'source', name: 'source', searchable: false },
       { data: 'subscribed_at', name: 'subscribed_at' },
-      { data: 'actions', name: 'actions', orderable: false, searchable: false, className: 'text-end' },
+      { data: 'actions', name: 'actions', orderable: false, searchable: false, className: 'text-end', exportable: false },
     ]
-  });
+  }, 'Newsletter_Subscribers');
   document.getElementById('f_sub_status').addEventListener('change', ()=>table.ajax.reload());
 });
 </script>

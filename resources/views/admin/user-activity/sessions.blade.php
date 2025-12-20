@@ -61,7 +61,7 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function(){
-    $('#sessionsTable').DataTable({
+    initDataTableWithExport('#sessionsTable', {
         processing: true,
         serverSide: true,
         ajax: { url: '{{ route('admin.datatables', 'sessions') }}' },
@@ -73,10 +73,10 @@ document.addEventListener('DOMContentLoaded', function(){
             { data: 'user_agent', name: 'user_agent', orderable: true, searchable: false },
             { data: 'last_activity', name: 'last_activity', orderable: true, searchable: false },
             { data: 'id', name: 'id', orderable: true, searchable: false },
-            { data: 'actions', name: 'actions', orderable: false, searchable: false, className: 'text-end' },
+            { data: 'actions', name: 'actions', orderable: false, searchable: false, className: 'text-end', exportable: false },
         ],
         order: [[5, 'desc']],
-    });
+    }, 'Login_Activity');
 });
 </script>
 @endpush

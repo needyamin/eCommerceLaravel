@@ -29,7 +29,7 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function(){
-    $('#cartsTable').DataTable({
+    initDataTableWithExport('#cartsTable', {
         processing: true,
         serverSide: true,
         ajax: { url: '{{ route('admin.datatables', 'carts') }}' },
@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function(){
             { data: 'created_at', name: 'created_at', orderable: true, searchable: false },
         ],
         order: [[5, 'desc']],
-    });
+    }, 'Cart_Activity');
 });
 </script>
 @endpush

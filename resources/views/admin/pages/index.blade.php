@@ -42,7 +42,7 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function(){
-    const table = $('#pagesTable').DataTable({
+    const table = initDataTableWithExport('#pagesTable', {
         processing: true,
         serverSide: true,
         ajax: {
@@ -56,10 +56,10 @@ document.addEventListener('DOMContentLoaded', function(){
             { data: 'slug', name: 'slug', className: 'text-center' },
             { data: 'is_active', name: 'is_active', className: 'text-center', orderable: true, searchable: false },
             { data: 'sort_order', name: 'sort_order', className: 'text-center', orderable: true, searchable: false },
-            { data: 'actions', name: 'actions', orderable: false, searchable: false, className: 'text-center' },
+            { data: 'actions', name: 'actions', orderable: false, searchable: false, className: 'text-center', exportable: false },
         ],
         order: [[3, 'asc']],
-    });
+    }, 'Pages');
     document.getElementById('filter_page_active').addEventListener('change', ()=>table.ajax.reload());
 });
 </script>
