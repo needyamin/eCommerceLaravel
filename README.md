@@ -8,6 +8,9 @@ A modern, feature-rich eCommerce platform built with Laravel 12. Perfect for onl
 
 ---
 
+<img width="933" height="917" alt="Image" src="https://github.com/user-attachments/assets/f98a758e-2377-4ea7-95b7-a3edd05c020f" />
+<img width="1919" height="917" alt="Image" src="https://github.com/user-attachments/assets/44e6c9c8-6e69-4221-9ab0-58d3ed3dad40" />
+
 ## 🚀 Installation & Setup
 
 ### Requirements
