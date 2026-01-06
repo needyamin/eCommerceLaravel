@@ -31,7 +31,22 @@ class ShippingSetting extends Model
 
     public static function get(): self
     {
-        return static::first() ?? static::create([]);
+        $setting = static::first();
+        if (!$setting) {
+            $setting = static::create([
+                'enabled' => true,
+                'flat_rate' => 0,
+                'free_shipping_enabled' => true,
+                'free_shipping_min_total' => 0,
+                'tax_enabled' => false,
+                'tax_type' => 'percent',
+                'tax_rate' => 0,
+                'division_rates' => [],
+                'district_rates' => [],
+            ]);
+        }
+        
+        return $setting;
     }
 }
 

@@ -16,7 +16,7 @@ class ThemeHelper
         try {
             $theme = SiteSetting::get()->theme ?? 'theme1';
             // Validate theme exists
-            if (!in_array($theme, ['theme1', 'theme2'])) {
+            if (!in_array($theme, ['theme1', 'theme2', 'theme3'])) {
                 return 'theme1';
             }
             return $theme;
@@ -62,6 +62,11 @@ class ThemeHelper
                 'name' => 'Theme 2',
                 'description' => 'Minimalist Dark/Light Theme',
                 'preview' => 'Dark mode support, minimalist design'
+            ],
+            'theme3' => [
+                'name' => 'Theme 3',
+                'description' => 'Poppins Font, Modern Glass Solutions Theme',
+                'preview' => 'Bootstrap 5, Font Awesome, Poppins font family'
             ]
         ];
     }

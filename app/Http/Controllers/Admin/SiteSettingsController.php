@@ -69,7 +69,7 @@ class SiteSettingsController extends Controller
         
         // Only validate theme if column exists
         if (Schema::hasColumn('site_settings', 'theme')) {
-            $validationRules['theme'] = ['required','string','in:theme1,theme2'];
+            $validationRules['theme'] = ['required','string','in:theme1,theme2,theme3'];
         }
         
         // Only validate license_key if column exists

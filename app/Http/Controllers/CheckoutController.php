@@ -215,6 +215,9 @@ class CheckoutController extends Controller
         $shipping = 0.0;
         $tax = 0.0;
         
+        // Calculate taxable amount (subtotal - discount) for shipping and tax calculations
+        $taxableAmount = $cart->subtotal - $cart->discount_total;
+        
         // Calculate shipping
         if ($shippingSettings && $shippingSettings->enabled) {
             // Free shipping check should use taxable amount (subtotal - discount)
@@ -252,7 +255,8 @@ class CheckoutController extends Controller
                     $type = $found['type'] ?? 'flat';
                     $amount = (float) ($found['amount'] ?? 0);
                     if ($type === 'percent') {
-                        $shipping = round(($cart->subtotal) * ($amount/100), 2);
+                        // Use taxable amount for percentage-based shipping
+                        $shipping = round($taxableAmount * ($amount/100), 2);
                     } else {
                         $shipping = $amount;
                     }
@@ -264,7 +268,6 @@ class CheckoutController extends Controller
         
         // Calculate tax
         $tax = 0.0;
-        $taxableAmount = $cart->subtotal - $cart->discount_total;
         if ($shippingSettings && $shippingSettings->tax_enabled && $shippingSettings->tax_rate > 0) {
             if ($shippingSettings->tax_type === 'percent') {
                 $tax = round($taxableAmount * ($shippingSettings->tax_rate / 100), 2);
@@ -313,6 +316,48 @@ class CheckoutController extends Controller
         if (!$cart || $cart->items->isEmpty()) {
             return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
         }
+        
+        // Validate coupon if one is applied
+        if ($cart->coupon_id) {
+            // Ensure cart items are loaded for validation
+            $cart->load('items.product');
+            
+            $coupon = \App\Models\Coupon::find($cart->coupon_id);
+            
+            if (!$coupon) {
+                // Coupon no longer exists - remove it from cart
+                $cart->removeCoupon();
+                return redirect()->route('checkout.show')->with('error', 'The coupon code is no longer valid and has been removed from your cart.');
+            }
+            
+            // Check if coupon is still valid
+            if (!$coupon->isValid()) {
+                $cart->removeCoupon();
+                return redirect()->route('checkout.show')->with('error', 'The coupon code has expired or is no longer valid and has been removed from your cart.');
+            }
+            
+            // Check if coupon can still be used by this user
+            if (!$coupon->canBeUsedBy($cart->user, $cart->session_id)) {
+                $cart->removeCoupon();
+                return redirect()->route('checkout.show')->with('error', 'You have reached the usage limit for this coupon. It has been removed from your cart.');
+            }
+            
+            // Check if coupon still applies to cart
+            if (!$coupon->appliesToCart($cart)) {
+                $cart->removeCoupon();
+                return redirect()->route('checkout.show')->with('error', 'This coupon is no longer applicable to your cart items and has been removed.');
+            }
+            
+            // Recalculate discount to ensure it's still correct (in case coupon value changed)
+            $newDiscount = $coupon->calculateDiscount($cart->subtotal);
+            if (abs($cart->coupon_discount - $newDiscount) > 0.01) {
+                // Discount amount changed, update it
+                $cart->coupon_discount = $newDiscount;
+                $cart->recalculateTotals();
+                $cart->refresh(); // Refresh to get updated totals
+            }
+        }
+        
         // Block checkout if any item is out of stock or inactive
         foreach ($cart->items as $ci) {
             if (!$ci->product || !$ci->product->is_active || (int) $ci->product->stock <= 0) {

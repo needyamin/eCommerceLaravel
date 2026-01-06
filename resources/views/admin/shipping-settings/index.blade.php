@@ -36,7 +36,7 @@
       <div class="row g-3">
         <div class="col-md-6">
           <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" id="enabled" name="enabled" value="1" {{ $settings->enabled ? 'checked' : '' }}>
+            <input class="form-check-input" type="checkbox" id="enabled" name="enabled" value="1" {{ ($settings->enabled ?? false) ? 'checked' : '' }}>
             <label class="form-check-label fw-semibold" for="enabled">Enable Shipping</label>
           </div>
         </div>
@@ -46,13 +46,13 @@
         </div>
         <div class="col-md-6">
           <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" id="free_shipping_enabled" name="free_shipping_enabled" value="1" {{ $settings->free_shipping_enabled ? 'checked' : '' }}>
+            <input class="form-check-input" type="checkbox" id="free_shipping_enabled" name="free_shipping_enabled" value="1" {{ ($settings->free_shipping_enabled ?? false) ? 'checked' : '' }}>
             <label class="form-check-label fw-semibold" for="free_shipping_enabled">Enable Free Shipping</label>
           </div>
         </div>
         <div class="col-md-6">
           <label class="form-label">Free Shipping Minimum (BDT)</label>
-          <input type="number" step="0.01" name="free_shipping_min_total" class="form-control" value="{{ old('free_shipping_min_total', $settings->free_shipping_min_total) }}" placeholder="0.00">
+          <input type="number" step="0.01" name="free_shipping_min_total" class="form-control" value="{{ old('free_shipping_min_total', $settings->free_shipping_min_total ?? 0) }}" placeholder="0.00" required>
         </div>
       </div>
       
