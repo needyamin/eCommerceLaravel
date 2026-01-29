@@ -222,10 +222,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/license/remove', [App\Http\Controllers\Admin\LicenseController::class, 'remove'])->name('license.remove');
     Route::get('/license/check', [App\Http\Controllers\Admin\LicenseController::class, 'check'])->name('license.check');
 
-    // Lightweight admin AJAX routes (auth only, no permission gate)
+    // Lightweight admin routes (auth only, no permission gate)
     Route::middleware('auth:admin')->group(function(){
-        // User lookup by id/email/phone for POS and tools
         Route::get('users/lookup', [AdminUserController::class, 'lookup'])->name('users.lookup');
+        Route::post('clear-cache', App\Http\Controllers\Admin\ClearCacheController::class)->name('clear-cache');
     });
 
     Route::middleware(['auth:admin','admin.permission'])->group(function () {
@@ -253,6 +253,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('orders', AdminOrderController::class)->only(['index', 'show', 'update']);
         Route::get('orders/{order}/invoice', [AdminOrderController::class, 'invoice'])->name('orders.invoice');
         Route::resource('users', AdminUserController::class)->except(['create', 'store']);
+        Route::resource('media', App\Http\Controllers\Admin\MediaController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
         Route::post('users/{user}/reset-password', [AdminUserController::class, 'resetPassword'])->name('users.reset-password');
         Route::post('users/{user}/toggle-status', [AdminUserController::class, 'toggleStatus'])->name('users.toggle-status');
         Route::post('users/{user}/coins/adjust', [AdminUserController::class, 'adjustCoins'])->name('users.coins.adjust');
@@ -328,6 +329,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             // Administrators
             Route::resource('admins', App\Http\Controllers\Admin\AdminController::class)->except(['show']);
+
+            // Error Logs (central error logging)
+            Route::get('error-logs', [App\Http\Controllers\Admin\ErrorLogController::class, 'index'])->name('error-logs.index');
+            Route::delete('error-logs/clear', [App\Http\Controllers\Admin\ErrorLogController::class, 'clear'])->name('error-logs.clear');
+            Route::post('error-logs/clear-resolved', [App\Http\Controllers\Admin\ErrorLogController::class, 'clearResolved'])->name('error-logs.clear-resolved');
+            Route::post('error-logs/mark-resolved', [App\Http\Controllers\Admin\ErrorLogController::class, 'markResolved'])->name('error-logs.mark-resolved');
+            Route::get('error-logs/{error_log}', [App\Http\Controllers\Admin\ErrorLogController::class, 'show'])->name('error-logs.show');
+            Route::post('error-logs/{error_log}/resolve', [App\Http\Controllers\Admin\ErrorLogController::class, 'resolve'])->name('error-logs.resolve');
+            Route::delete('error-logs/{error_log}', [App\Http\Controllers\Admin\ErrorLogController::class, 'destroy'])->name('error-logs.destroy');
 
             // Coin Settings
             Route::get('coin-settings', [App\Http\Controllers\Admin\CoinSettingsController::class, 'index'])->name('coin-settings.index');

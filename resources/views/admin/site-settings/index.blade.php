@@ -133,34 +133,35 @@ use Illuminate\Support\Facades\Schema;
       <h3 class="card-title mb-0 fw-semibold">Configure Site Settings</h3>
     </div>
     <div class="card-body p-0">
-      <form method="POST" action="{{ route('admin.site-settings.update') }}">
+      @php $activeTab = request('tab', 'general'); if (!in_array($activeTab, ['general','features','seo','theme','tracking'])) { $activeTab = 'general'; } @endphp
+      <form method="POST" action="{{ route('admin.site-settings.update') }}" id="siteSettingsForm">
         @csrf
         @method('PUT')
-        
+        <input type="hidden" name="active_tab" id="activeTabInput" value="{{ $activeTab }}">
         <!-- Tabs Navigation -->
         <ul class="nav nav-tabs settings-tabs px-3 pt-3" role="tablist">
           <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab" aria-controls="general" aria-selected="true">
+            <button class="nav-link {{ $activeTab === 'general' ? 'active' : '' }}" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab" aria-controls="general" aria-selected="{{ $activeTab === 'general' }}">
               <i class="bi bi-info-circle"></i>General
             </button>
           </li>
           <li class="nav-item" role="presentation">
-            <button class="nav-link" id="features-tab" data-bs-toggle="tab" data-bs-target="#features" type="button" role="tab" aria-controls="features" aria-selected="false">
+            <button class="nav-link {{ $activeTab === 'features' ? 'active' : '' }}" id="features-tab" data-bs-toggle="tab" data-bs-target="#features" type="button" role="tab" aria-controls="features" aria-selected="{{ $activeTab === 'features' }}">
               <i class="bi bi-toggle-on"></i>Features
             </button>
           </li>
           <li class="nav-item" role="presentation">
-            <button class="nav-link" id="seo-tab" data-bs-toggle="tab" data-bs-target="#seo" type="button" role="tab" aria-controls="seo" aria-selected="false">
+            <button class="nav-link {{ $activeTab === 'seo' ? 'active' : '' }}" id="seo-tab" data-bs-toggle="tab" data-bs-target="#seo" type="button" role="tab" aria-controls="seo" aria-selected="{{ $activeTab === 'seo' }}">
               <i class="bi bi-search"></i>SEO & Sitemap
             </button>
           </li>
           <li class="nav-item" role="presentation">
-            <button class="nav-link" id="theme-tab" data-bs-toggle="tab" data-bs-target="#theme" type="button" role="tab" aria-controls="theme" aria-selected="false">
+            <button class="nav-link {{ $activeTab === 'theme' ? 'active' : '' }}" id="theme-tab" data-bs-toggle="tab" data-bs-target="#theme" type="button" role="tab" aria-controls="theme" aria-selected="{{ $activeTab === 'theme' }}">
               <i class="bi bi-palette"></i>Theme
             </button>
           </li>
           <li class="nav-item" role="presentation">
-            <button class="nav-link" id="tracking-tab" data-bs-toggle="tab" data-bs-target="#tracking" type="button" role="tab" aria-controls="tracking" aria-selected="false">
+            <button class="nav-link {{ $activeTab === 'tracking' ? 'active' : '' }}" id="tracking-tab" data-bs-toggle="tab" data-bs-target="#tracking" type="button" role="tab" aria-controls="tracking" aria-selected="{{ $activeTab === 'tracking' }}">
               <i class="bi bi-graph-up"></i>Tracking Codes
             </button>
           </li>
@@ -170,7 +171,7 @@ use Illuminate\Support\Facades\Schema;
         <div class="tab-content p-4" id="settingsTabContent">
 
           <!-- General Tab -->
-          <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab">
+          <div class="tab-pane fade {{ $activeTab === 'general' ? 'show active' : '' }}" id="general" role="tabpanel" aria-labelledby="general-tab">
             <!-- Basic Site Information -->
             <div class="settings-section">
               <h5><i class="bi bi-info-circle"></i>Basic Site Information</h5>
@@ -307,7 +308,7 @@ use Illuminate\Support\Facades\Schema;
           </div>
 
           <!-- Features Tab -->
-          <div class="tab-pane fade" id="features" role="tabpanel" aria-labelledby="features-tab">
+          <div class="tab-pane fade {{ $activeTab === 'features' ? 'show active' : '' }}" id="features" role="tabpanel" aria-labelledby="features-tab">
             <!-- Feature Toggles -->
             <div class="settings-section">
               <h5><i class="bi bi-toggle-on"></i>Feature Toggles</h5>
@@ -442,7 +443,7 @@ use Illuminate\Support\Facades\Schema;
           </div>
 
           <!-- SEO & Sitemap Tab -->
-          <div class="tab-pane fade" id="seo" role="tabpanel" aria-labelledby="seo-tab">
+          <div class="tab-pane fade {{ $activeTab === 'seo' ? 'show active' : '' }}" id="seo" role="tabpanel" aria-labelledby="seo-tab">
             <!-- Schema.org Settings -->
             <div class="settings-section">
               <h5><i class="bi bi-code-square"></i>Schema.org (Structured Data) Settings</h5>
@@ -551,7 +552,7 @@ use Illuminate\Support\Facades\Schema;
           </div>
 
           <!-- Theme Tab -->
-          <div class="tab-pane fade" id="theme" role="tabpanel" aria-labelledby="theme-tab">
+          <div class="tab-pane fade {{ $activeTab === 'theme' ? 'show active' : '' }}" id="theme" role="tabpanel" aria-labelledby="theme-tab">
             <!-- Theme Selection -->
             @php
               $themeColumnExists = false;
@@ -681,7 +682,7 @@ use Illuminate\Support\Facades\Schema;
           </div>
 
           <!-- Tracking Codes Tab -->
-          <div class="tab-pane fade" id="tracking" role="tabpanel" aria-labelledby="tracking-tab">
+          <div class="tab-pane fade {{ $activeTab === 'tracking' ? 'show active' : '' }}" id="tracking" role="tabpanel" aria-labelledby="tracking-tab">
             <!-- Google Analytics -->
             <div class="settings-section">
               <h5><i class="bi bi-google"></i>Google Analytics</h5>
@@ -760,17 +761,18 @@ use Illuminate\Support\Facades\Schema;
 
 @push('scripts')
 <script>
-  // Smooth tab switching
   document.addEventListener('DOMContentLoaded', function() {
-    const tabButtons = document.querySelectorAll('[data-bs-toggle="tab"]');
-    tabButtons.forEach(button => {
-      button.addEventListener('shown.bs.tab', function() {
-        // Smooth scroll to top of tab content on mobile
+    var activeTabInput = document.getElementById('activeTabInput');
+    var tabButtons = document.querySelectorAll('[data-bs-toggle="tab"]');
+    tabButtons.forEach(function(btn) {
+      btn.addEventListener('shown.bs.tab', function() {
+        var target = this.getAttribute('data-bs-target');
+        if (target && target.charAt(0) === '#' && activeTabInput) {
+          activeTabInput.value = target.slice(1);
+        }
         if (window.innerWidth < 768) {
-          const tabContent = document.getElementById('settingsTabContent');
-          if (tabContent) {
-            tabContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
+          var tabContent = document.getElementById('settingsTabContent');
+          if (tabContent) tabContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
       });
     });

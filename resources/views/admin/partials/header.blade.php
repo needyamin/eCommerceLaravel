@@ -20,6 +20,11 @@
                         <i class="bi bi-house me-1"></i>View Site
                     </a>
                 </li>
+                <li class="nav-item d-none d-md-block">
+                    <a href="#" class="nav-link" id="adminClearCacheLink">
+                        <i class="bi bi-trash me-1"></i>Clear cache
+                    </a>
+                </li>
             </ul>
             <ul class="navbar-nav ms-auto align-items-center">
                 <li class="nav-item me-2 d-none d-md-block text-muted small">

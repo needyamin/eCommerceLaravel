@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Blade;
 use App\Support\CurrencyManager;
+use App\Support\MediaHelper;
 use App\Support\ThemeHelper;
 use App\Models\Currency;
 use App\Models\EmailSetting;
@@ -38,16 +39,27 @@ class AppServiceProvider extends ServiceProvider
         Blade::directive('formatDate', function ($expression) {
             return "<?php echo \\App\\Support\\DateHelper::format($expression); ?>";
         });
+        Blade::directive('mediaContent', function ($expression) {
+            return "<?php echo \\App\\Support\\MediaHelper::replaceShortcodes($expression); ?>";
+        });
 
         // Share currencies and current currency with all views
         view()->composer('*', function ($view) {
-            $view->with('currentCurrency', CurrencyManager::current());
-            $view->with('activeCurrencies', Currency::where('is_active', true)->get());
             try {
+                $view->with('currentCurrency', CurrencyManager::current());
+                $view->with('activeCurrencies', Currency::where('is_active', true)->get());
                 $view->with('siteSettings', SiteSetting::get());
                 $view->with('currentTheme', ThemeHelper::current());
             } catch (\Throwable $e) {
-                // ignored before migrations
+                $name = $view->name() ?? '';
+                if (str_starts_with($name, 'errors.') || str_starts_with($name, 'errors::') || str_contains($name, 'exception') || str_contains($name, 'laravel-exceptions-renderer')) {
+                    $view->with('currentCurrency', null);
+                    $view->with('activeCurrencies', collect());
+                    $view->with('siteSettings', new \stdClass);
+                    $view->with('currentTheme', 'theme1');
+                } else {
+                    throw $e;
+                }
             }
         });
 

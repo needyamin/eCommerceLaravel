@@ -63,7 +63,7 @@
                 <!-- Page Content -->
                 <div class="page-content-card">
                     <div class="page-content-body">
-                        {!! $page->content !!}
+                        @mediaContent($page->content)
                     </div>
                 </div>
 

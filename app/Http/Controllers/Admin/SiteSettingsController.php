@@ -108,7 +108,9 @@ class SiteSettingsController extends Controller
         
         $settings = SiteSetting::get();
         $settings->update($data);
-        return back()->with('success','Site settings updated.');
+        $tab = in_array($request->input('active_tab'), ['general','features','seo','theme','tracking'], true)
+            ? $request->input('active_tab') : 'general';
+        return redirect()->route('admin.site-settings.index', ['tab' => $tab])->with('success','Site settings updated.');
     }
 }
 

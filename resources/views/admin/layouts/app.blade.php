@@ -451,6 +451,60 @@
         
         return $(tableId).DataTable(mergedOptions);
     };
+
+    // Clear cache link (SweetAlert2)
+    document.addEventListener('DOMContentLoaded', function() {
+        var el = document.getElementById('adminClearCacheLink');
+        if (!el) return;
+        el.addEventListener('click', function(e) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'question',
+                title: 'Clear cache?',
+                text: 'This will clear application, config, view, route and optimize caches.',
+                showCancelButton: true,
+                confirmButtonColor: '#0d6efd',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Clear cache'
+            }).then(function(result) {
+                if (!result.isConfirmed) return;
+                var url = '{{ route("admin.clear-cache") }}';
+                var token = document.querySelector('meta[name="csrf-token"]');
+                token = token ? token.getAttribute('content') : '';
+                Swal.fire({
+                    title: 'Clearing cache...',
+                    html: 'Please wait',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: function() { Swal.showLoading(); }
+                });
+                var formData = new FormData();
+                formData.append('_token', token);
+                fetch(url, {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+                    body: formData
+                }).then(function(r) {
+                    return r.text().then(function(text) {
+                        try { return { ok: r.ok, data: JSON.parse(text) }; }
+                        catch (e) { return { ok: r.ok, data: { success: false, message: text || r.statusText } }; }
+                    });
+                }).then(function(res) {
+                    var data = res.data;
+                    var html = (data.results && data.results.length ? data.results : [data.message || '']).join('<br>').replace(/\n/g, '<br>');
+                    Swal.fire({
+                        icon: res.ok && data.success ? 'success' : (res.ok ? 'warning' : 'error'),
+                        title: res.ok ? (data.success ? 'Cache cleared' : 'Completed with issues') : 'Request failed',
+                        html: html || (res.ok ? '' : 'Check console or try again.'),
+                        confirmButtonColor: '#0d6efd',
+                        width: 520
+                    });
+                }).catch(function(err) {
+                    Swal.fire({ icon: 'error', title: 'Failed', text: err.message || 'Request failed', confirmButtonColor: '#0d6efd' });
+                });
+            });
+        });
+    });
     </script>
     @stack('scripts')
   </body>

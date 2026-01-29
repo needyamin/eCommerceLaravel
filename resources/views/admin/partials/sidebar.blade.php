@@ -78,6 +78,14 @@
 					</a>
 				</li>
 				@endcan
+				@can('admin.media.index')
+				<li class="nav-item">
+					<a href="{{ route('admin.media.index') }}" class="nav-link {{ $isActive('admin.media.*') ? 'active' : '' }}">
+						<i class="nav-icon bi bi-images"></i>
+						<p>Media Library</p>
+					</a>
+				</li>
+				@endcan
 				@can('admin.roles.index')
 				<li class="nav-item">
 					<a href="{{ route('admin.roles.index') }}" class="nav-link {{ $isActive('admin.roles.*') ? 'active' : '' }}">
@@ -104,7 +112,7 @@
 						}
 					}
 				@endphp
-				@if(auth()->guard('admin')->user()->can('admin.site-settings.index') || auth()->guard('admin')->user()->can('admin.email-settings.index') || auth()->guard('admin')->user()->can('admin.payment-gateways.index') || auth()->guard('admin')->user()->can('admin.shipping-settings.index') || auth()->guard('admin')->user()->can('admin.otp-settings.index') || auth()->guard('admin')->user()->can('admin.coin-settings.index') || auth()->guard('admin')->user()->can('admin.storage-settings.index'))
+				@if(auth()->guard('admin')->user()?->can('admin.site-settings.index') || auth()->guard('admin')->user()?->can('admin.email-settings.index') || auth()->guard('admin')->user()?->can('admin.payment-gateways.index') || auth()->guard('admin')->user()?->can('admin.shipping-settings.index') || auth()->guard('admin')->user()?->can('admin.otp-settings.index') || auth()->guard('admin')->user()?->can('admin.coin-settings.index') || auth()->guard('admin')->user()?->can('admin.storage-settings.index'))
 				<li class="nav-item {{ $isSettingsActive ? 'menu-open' : '' }}">
 					<a href="#" class="nav-link {{ $isSettingsActive ? 'active' : '' }}">
 						<i class="nav-icon bi bi-gear"></i>
@@ -205,7 +213,7 @@
 				@php
 					$isReviewsActive = $isActive('admin.reviews.*') || $isActive('admin.site-settings.index');
 				@endphp
-				@if(auth()->guard('admin')->user()->can('admin.reviews.index') || auth()->guard('admin')->user()->can('admin.site-settings.index'))
+				@if(auth()->guard('admin')->user()?->can('admin.reviews.index') || auth()->guard('admin')->user()?->can('admin.site-settings.index'))
 				<li class="nav-item {{ $isReviewsActive ? 'menu-open' : '' }}">
 					<a href="#" class="nav-link {{ $isReviewsActive ? 'active' : '' }}">
 						<i class="nav-icon bi bi-star"></i>
@@ -241,7 +249,7 @@
 						}
 					}
 				@endphp
-				@if(auth()->guard('admin')->user()->can('admin.activities.carts') || auth()->guard('admin')->user()->can('admin.activities.wishlists') || auth()->guard('admin')->user()->can('admin.activities.sessions'))
+				@if(auth()->guard('admin')->user()?->can('admin.activities.carts') || auth()->guard('admin')->user()?->can('admin.activities.wishlists') || auth()->guard('admin')->user()?->can('admin.activities.sessions'))
 				<li class="nav-item {{ $isActivityActive ? 'menu-open' : '' }}">
 					<a href="#" class="nav-link {{ $isActivityActive ? 'active' : '' }}">
 						<i class="nav-icon bi bi-activity"></i>
@@ -292,9 +300,25 @@
 				</li>
 				@endcan
 				@php
+					$errorLogsCount = 0;
+					try {
+						if (class_exists(\App\Models\ErrorLog::class) && \Illuminate\Support\Facades\Schema::hasTable('error_logs')) {
+							$errorLogsCount = \App\Models\ErrorLog::count();
+						}
+					} catch (\Throwable $e) { }
+				@endphp
+				@if(auth()->guard('admin')->check())
+				<li class="nav-item">
+					<a href="{{ route('admin.error-logs.index') }}" class="nav-link {{ $isActive('admin.error-logs.*') ? 'active' : '' }}">
+						<i class="nav-icon bi bi-bug"></i>
+						<p>Error Logs @if($errorLogsCount > 0)<span class="badge bg-danger ms-1">{{ $errorLogsCount > 99 ? '99+' : $errorLogsCount }}</span>@endif</p>
+					</a>
+				</li>
+				@endif
+				@php
 					$hasBackupPermission = false;
 					try {
-						$hasBackupPermission = auth()->guard('admin')->user()->can('admin.backup.index');
+						$hasBackupPermission = auth()->guard('admin')->user()?->can('admin.backup.index');
 					} catch (\Exception $e) {
 						// Permission doesn't exist yet, show for Super Admin
 						$hasBackupPermission = auth()->guard('admin')->user()->hasRole('Super Admin', 'admin');

@@ -99,7 +99,7 @@
                 <div>
                     <h4 class="mb-3">Product Details</h4>
                     <div class="prose">
-                        {!! $product->description !!}
+                        @mediaContent($product->description)
                     </div>
                 </div>
                 @endif

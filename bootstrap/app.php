@@ -35,5 +35,25 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->reportable(function (\Throwable $e) {
+            try {
+                if (!app()->bound('db') || !\Illuminate\Support\Facades\Schema::hasTable('error_logs')) {
+                    return;
+                }
+                $user = auth()->user();
+                \App\Models\ErrorLog::create([
+                    'type' => get_class($e),
+                    'message' => mb_substr($e->getMessage(), 0, 500),
+                    'file' => mb_substr($e->getFile(), 0, 500),
+                    'line' => $e->getLine(),
+                    'url' => request()->fullUrl() ? mb_substr(request()->fullUrl(), 0, 1000) : null,
+                    'method' => request()->method(),
+                    'trace' => mb_substr($e->getTraceAsString(), 0, 65535),
+                    'context' => null,
+                    'user_type' => $user ? get_class($user) : null,
+                    'user_id' => $user?->getKey(),
+                ]);
+            } catch (\Throwable $ignored) {
+            }
+        });
     })->create();

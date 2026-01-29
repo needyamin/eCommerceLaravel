@@ -12,6 +12,7 @@ try {
             'products' => 'Products',
             'orders' => 'Orders',
             'users' => 'Users',
+            'media' => 'Media Library',
             'roles' => 'Roles',
             'permissions' => 'Permissions',
             'coupons' => 'Coupons',

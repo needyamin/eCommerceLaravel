@@ -445,7 +445,7 @@
                         </h5>
                     </div>
                     <div class="card-body">
-                        <div class="prose">{!! $product->description !!}</div>
+                        <div class="prose">@mediaContent($product->description)</div>
                     </div>
                 </div>
             </div>
