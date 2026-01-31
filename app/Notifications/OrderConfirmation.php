@@ -34,7 +34,7 @@ class OrderConfirmation extends Notification implements ShouldQueue
         
         return (new \Illuminate\Notifications\Messages\MailMessage)
             ->subject('Order Confirmation - ' . $this->order->number)
-            ->view('emails.orders.confirmation', [
+            ->view('frontend.emails.orders.confirmation', [
                 'order' => $this->order,
                 'siteName' => $siteSettings->site_name ?? 'eCommerce Store',
                 'siteUrl' => url('/'),

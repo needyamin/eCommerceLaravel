@@ -30,7 +30,7 @@ class WelcomeNotification extends Notification implements ShouldQueue
         
         return (new MailMessage)
             ->subject('Welcome to ' . ($siteSettings->site_name ?? 'Our Store'))
-            ->view('emails.auth.welcome', [
+            ->view('frontend.emails.auth.welcome', [
                 'user' => $this->user,
                 'siteName' => $siteSettings->site_name ?? 'Our Store',
                 'siteUrl' => url('/'),

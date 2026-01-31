@@ -169,8 +169,9 @@ use Illuminate\Support\Facades\Storage;
                                         <div class="row g-3 sortable-images" id="existing_images" style="display: flex; flex-wrap: wrap;">
                                             @foreach($product->images->sortBy('position') as $index => $image)
                                                 <div class="col-md-3 col-6 image-item" data-image-id="{{ $image->id }}" data-position="{{ $image->position }}">
-                                                    <div class="position-relative image-sortable-item" style="cursor: move;">
-                                                        <div class="position-absolute top-0 start-0 m-1">
+                                                    <div class="position-relative image-sortable-item">
+                                                        <div class="position-absolute top-0 start-0 m-1 d-flex align-items-center gap-1">
+                                                            <span class="drag-handle" title="Drag to reorder"><i class="bi bi-grip-vertical fs-5"></i></span>
                                                             <span class="badge bg-secondary image-order-badge">{{ $index + 1 }}</span>
                                                         </div>
                                                         @php
@@ -178,17 +179,17 @@ use Illuminate\Support\Facades\Storage;
                                                                 ? Storage::disk('public')->url($image->path) 
                                                                 : asset('storage/' . $image->path);
                                                         @endphp
-                                                        <img src="{{ $imageUrl }}" class="img-fluid rounded border" style="height: 150px; width: 100%; object-fit: cover;" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'150\' height=\'150\'%3E%3Crect width=\'150\' height=\'150\' fill=\'%23ddd\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%23999\'%3EImage%3C/text%3E%3C/svg%3E';">
+                                                        <img src="{{ $imageUrl }}" draggable="false" class="img-fluid rounded border" style="height: 150px; width: 100%; object-fit: cover; pointer-events: none;" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'150\' height=\'150\'%3E%3Crect width=\'150\' height=\'150\' fill=\'%23ddd\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%23999\'%3EImage%3C/text%3E%3C/svg%3E';">
                                                         @if($image->is_primary)
                                                             <span class="badge bg-primary position-absolute bottom-0 start-0 m-1">Primary</span>
                                                         @endif
                                                         <div class="btn-group position-absolute top-0 end-0 m-1">
                                                             @if(!$image->is_primary)
-                                                                <button type="button" class="btn btn-sm btn-success set-primary-image" data-image-id="{{ $image->id }}" title="Set as Primary">
+                                                                <button type="button" class="btn btn-sm btn-success set-primary-image" onclick="adminProductSetPrimary({{ $image->id }})" title="Set as Primary">
                                                                     <i class="bi bi-star"></i>
                                                                 </button>
                                                             @endif
-                                                            <button type="button" class="btn btn-sm btn-danger delete-image" data-image-id="{{ $image->id }}" title="Delete">
+                                                            <button type="button" class="btn btn-sm btn-danger delete-image" onclick="adminProductDeleteImage({{ $image->id }}, this)" title="Delete">
                                                                 <i class="bi bi-trash"></i>
                                                             </button>
                                                         </div>
@@ -356,10 +357,9 @@ use Illuminate\Support\Facades\Storage;
         z-index: 1000;
         box-shadow: 0 8px 16px rgba(0,0,0,0.2);
     }
-    .image-sortable-item {
-        user-select: none;
-        cursor: move !important;
-    }
+    .image-sortable-item { user-select: none; }
+    .drag-handle { cursor: grab; padding: 8px; display: inline-block; user-select: none; }
+    .drag-handle:active { cursor: grabbing; }
     .image-sortable-item:hover {
         box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
@@ -522,6 +522,30 @@ use Illuminate\Support\Facades\Storage;
 <!-- SortableJS -->
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 <script>
+function adminProductSetPrimary(imageId) {
+    const token = document.querySelector('meta[name="csrf-token"]')?.content;
+    fetch('/admin/products/images/' + imageId + '/set-primary', {
+        method: 'POST',
+        headers: { 'X-CSRF-TOKEN': token, 'Accept': 'application/json', 'Content-Type': 'application/json' }
+    }).then(r => r.json()).then(data => {
+        if (data.success) location.reload();
+        else Swal.fire({ icon: 'error', title: 'Error', text: data.message || 'Failed' });
+    }).catch(() => Swal.fire({ icon: 'error', title: 'Error', text: 'Request failed' }));
+}
+function adminProductDeleteImage(imageId, btn) {
+    Swal.fire({ icon: 'warning', title: 'Delete?', text: 'Delete this image?', showCancelButton: true, confirmButtonColor: '#dc3545' })
+    .then(r => {
+        if (!r.isConfirmed) return;
+        const token = document.querySelector('meta[name="csrf-token"]')?.content;
+        fetch('/admin/products/images/' + imageId, {
+            method: 'DELETE',
+            headers: { 'X-CSRF-TOKEN': token, 'Accept': 'application/json' }
+        }).then(res => res.json()).then(data => {
+            if (data.success) { btn.closest('.image-item').remove(); if (window.updateExistingOrderBadges) window.updateExistingOrderBadges(); }
+            else Swal.fire({ icon: 'error', title: 'Error', text: data.message || 'Failed' });
+        }).catch(() => Swal.fire({ icon: 'error', title: 'Error', text: 'Failed' }));
+    });
+}
 document.addEventListener('DOMContentLoaded', function() {
     // Create editor container
     const textarea = document.getElementById('product_description');
@@ -550,7 +574,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Set initial content
     @if(old('description', $product->description))
-        quill.root.innerHTML = @json(old('description', $product->description));
+        quill.root.innerHTML = {!! str_replace('</', '<\/', json_encode(old('description', $product->description))) !!};
     @endif
     
     // Update textarea before form submit
@@ -706,7 +730,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Check initial slug on page load
     @if(old('slug', $product->slug))
-        checkSlugAvailability('{{ old("slug", $product->slug) }}');
+        checkSlugAvailability({!! json_encode(old('slug', $product->slug)) !!});
     @endif
 });
 </script>
@@ -1013,74 +1037,50 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Initialize Sortable for existing images
-    const existingImages = document.getElementById('existing_images');
-    
-    if (existingImages && typeof Sortable !== 'undefined') {
-        // Define functions first
+    function initProductImageSortable() {
+        const existingImages = document.getElementById('existing_images');
+        if (!existingImages || typeof Sortable === 'undefined') return;
+        if (existingImages._sortable) return; // already initialized
+
         function updateExistingOrderBadges() {
             const items = existingImages.querySelectorAll('.image-item');
             items.forEach((item, index) => {
                 const badge = item.querySelector('.image-order-badge');
-                if (badge) {
-                    badge.textContent = index + 1;
-                }
+                if (badge) badge.textContent = index + 1;
             });
         }
-
         function saveImageOrder() {
             const items = existingImages.querySelectorAll('.image-item');
-            const order = Array.from(items).map((item, index) => ({
-                id: item.dataset.imageId,
-                position: index + 1
-            }));
-
+            const order = Array.from(items).map((item, index) => ({ id: item.dataset.imageId, position: index + 1 }));
             fetch('{{ route("admin.products.images.update-order", $product->id) }}', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'Accept': 'application/json' },
                 body: JSON.stringify({ order: order })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Update data-position attributes
-                    items.forEach((item, index) => {
-                        item.dataset.position = index + 1;
-                    });
-                } else {
-                    console.error('Error updating order:', data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+            }).then(r => r.json()).then(data => {
+                if (data.success) items.forEach((item, i) => { item.dataset.position = i + 1; });
+            }).catch(e => console.error(e));
         }
-
-        // Make functions available globally for delete handler
         window.updateExistingOrderBadges = updateExistingOrderBadges;
 
-        // Initialize Sortable
-        const sortable = Sortable.create(existingImages, {
+        existingImages._sortable = Sortable.create(existingImages, {
             animation: 150,
             handle: '.image-sortable-item',
-            ghostClass: 'sortable-ghost',
-            dragClass: 'sortable-drag',
             filter: '.btn, .btn-group',
             preventOnFilter: false,
-            onEnd: function(evt) {
-                // Update order badges
+            draggable: '.image-item',
+            swapThreshold: 0.5,
+            ghostClass: 'sortable-ghost',
+            dragClass: 'sortable-drag',
+            onEnd: function() {
                 updateExistingOrderBadges();
-                // Save new order
                 saveImageOrder();
             }
         });
     }
+    initProductImageSortable();
 
-    // Delete existing image
-    if (existingImages) {
+    // Delete/Set-primary use inline onclick handlers
+    if (false && existingImages) {
         existingImages.addEventListener('click', function(e) {
             if (e.target.closest('.delete-image')) {
                 const btn = e.target.closest('.delete-image');

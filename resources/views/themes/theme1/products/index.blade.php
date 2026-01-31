@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('themes.theme1.layouts.app')
 
 @section('title', 'Products')
 
@@ -942,7 +942,7 @@
                 <div id="productGrid" class="row g-4 g-md-5" style="--desktop-cols: {{ $desktopCols }};">
                     @foreach($products as $product)
                         <div class="{{ $colClass }}">
-                            @include('products._card', ['product' => $product])
+                            @include('themes.theme1.products._card', ['product' => $product])
                         </div>
                     @endforeach
                 </div>

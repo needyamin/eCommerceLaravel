@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('themes.theme1.layouts.app')
 
 @section('title', $product->name)
 
@@ -60,7 +60,7 @@
     <!-- Page Builder Content -->
     @if($product->page_builder_data && is_array($product->page_builder_data) && count($product->page_builder_data) > 0)
         @foreach($product->page_builder_data as $block)
-            @include('products.page-builder._block', ['block' => $block, 'product' => $product])
+            @include('themes.theme1.products.page-builder._block', ['block' => $block, 'product' => $product])
         @endforeach
     @else
         <div class="alert alert-warning text-center py-5">

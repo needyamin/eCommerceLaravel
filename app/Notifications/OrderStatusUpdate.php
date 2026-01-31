@@ -33,7 +33,7 @@ class OrderStatusUpdate extends Notification implements ShouldQueue
         
         return (new MailMessage)
             ->subject('Order Status Update - ' . $this->order->number)
-            ->view('emails.orders.status-update', [
+            ->view('frontend.emails.orders.status-update', [
                 'order' => $this->order,
                 'message' => $this->message,
                 'siteName' => $siteSettings->site_name ?? 'eCommerce Store',

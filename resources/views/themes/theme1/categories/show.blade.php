@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('themes.theme1.layouts.app')
 
 @section('title', $category->name)
 
@@ -57,7 +57,7 @@
         <div class="row g-4">
         	@foreach($products as $product)
             	<div class="col-lg-3 col-md-6">
-                	@include('products._card', ['product' => $product])
+                	@include('themes.theme1.products._card', ['product' => $product])
             	</div>
         	@endforeach
         </div>

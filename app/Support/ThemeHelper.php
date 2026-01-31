@@ -35,14 +35,9 @@ class ThemeHelper
     {
         $theme = static::current();
         $themedView = "themes.{$theme}.{$view}";
-        
-        // Check if themed view exists, fallback to original view
-        if (view()->exists($themedView)) {
-            return $themedView;
-        }
-        
-        // Fallback to original view location
-        return $view;
+        $fallbackView = "frontend.{$view}";
+        if (view()->exists($themedView)) return $themedView;
+        return $fallbackView;
     }
 
     /**

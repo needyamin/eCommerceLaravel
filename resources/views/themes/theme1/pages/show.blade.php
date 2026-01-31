@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('themes.theme1.layouts.app')
 
 @section('title', $page->meta_title ?? $page->title)
 

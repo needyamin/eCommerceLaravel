@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('themes.theme2.layouts.app')
 
 @section('title', 'My Wishlist')
 
@@ -18,7 +18,7 @@
         <div class="row g-3">
             @foreach($items as $wl)
                 <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                    @include('products._card', ['product' => $wl->product])
+                    @include('themes.theme2.products._card', ['product' => $wl->product])
                 </div>
             @endforeach
         </div>

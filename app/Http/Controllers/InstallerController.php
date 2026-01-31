@@ -31,7 +31,7 @@ class InstallerController extends Controller
             $requirements['folder_permissions']['satisfied'] &&
             $requirements['env_file']['satisfied'];
 
-        return view('installer.index', [
+        return view('frontend.installer.index', [
             'requirements' => $requirements,
             'allSatisfied' => $allSatisfied,
             'isInstalled' => $isInstalled,
@@ -51,7 +51,7 @@ class InstallerController extends Controller
             'password' => '',
         ]);
 
-        return view('installer.database', ['dbConfig' => $dbConfig]);
+        return view('frontend.installer.database', ['dbConfig' => $dbConfig]);
     }
 
     /**
@@ -110,7 +110,7 @@ class InstallerController extends Controller
             'password_confirmation' => '',
         ]);
 
-        return view('installer.admin', ['adminData' => $adminData]);
+        return view('frontend.installer.admin', ['adminData' => $adminData]);
     }
 
     /**
@@ -141,7 +141,7 @@ class InstallerController extends Controller
             return redirect()->route('installer.admin');
         }
 
-        return view('installer.install');
+        return view('frontend.installer.install');
     }
 
     /**
@@ -381,7 +381,7 @@ class InstallerController extends Controller
             return redirect()->route('installer.index');
         }
 
-        return view('installer.complete');
+        return view('frontend.installer.complete');
     }
 }
 

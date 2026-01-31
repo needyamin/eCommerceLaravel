@@ -30,7 +30,7 @@ class NewsletterWelcome extends Notification implements ShouldQueue
         
         return (new MailMessage)
             ->subject('Welcome to Our Newsletter!')
-            ->view('emails.newsletter.welcome', [
+            ->view('frontend.emails.newsletter.welcome', [
                 'subscriber' => $this->subscriber,
                 'siteName' => $siteSettings->site_name ?? 'Our Store',
                 'siteUrl' => url('/'),

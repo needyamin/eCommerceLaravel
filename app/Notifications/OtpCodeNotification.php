@@ -34,7 +34,7 @@ class OtpCodeNotification extends Notification
         
         return (new MailMessage)
             ->subject('Your Verification Code')
-            ->view('emails.otp.code', [
+            ->view('frontend.emails.otp.code', [
                 'code' => $this->code,
                 'expiresAt' => $this->expiresAt,
                 'siteName' => $siteSettings->site_name ?? 'eCommerce Store',

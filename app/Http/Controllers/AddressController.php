@@ -64,7 +64,7 @@ class AddressController extends Controller
     public function show(UserAddress $address)
     {
         $this->authorize('view', $address);
-        return view('addresses.show', compact('address'));
+        return view(ThemeHelper::view('addresses.show'), compact('address'));
     }
 
     public function edit(UserAddress $address)

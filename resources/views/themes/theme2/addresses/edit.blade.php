@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('themes.theme2.layouts.app')
 
 @section('title', 'Edit Address')
 

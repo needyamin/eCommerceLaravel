@@ -127,7 +127,7 @@
                     <div style="padding: 1rem;">
                         @if(!empty($content['left']['blocks']))
                             @foreach($content['left']['blocks'] as $nestedBlock)
-                                @include('products.page-builder._block', ['block' => $nestedBlock, 'product' => $product])
+                                @include('themes.theme2.products.page-builder._block', ['block' => $nestedBlock, 'product' => $product])
                             @endforeach
                         @endif
                     </div>
@@ -136,7 +136,7 @@
                     <div style="padding: 1rem;">
                         @if(!empty($content['right']['blocks']))
                             @foreach($content['right']['blocks'] as $nestedBlock)
-                                @include('products.page-builder._block', ['block' => $nestedBlock, 'product' => $product])
+                                @include('themes.theme2.products.page-builder._block', ['block' => $nestedBlock, 'product' => $product])
                             @endforeach
                         @endif
                     </div>
@@ -152,7 +152,7 @@
                     <div style="padding: 1rem;">
                         @if(!empty($content['col1']['blocks']))
                             @foreach($content['col1']['blocks'] as $nestedBlock)
-                                @include('products.page-builder._block', ['block' => $nestedBlock, 'product' => $product])
+                                @include('themes.theme2.products.page-builder._block', ['block' => $nestedBlock, 'product' => $product])
                             @endforeach
                         @endif
                     </div>
@@ -161,7 +161,7 @@
                     <div style="padding: 1rem;">
                         @if(!empty($content['col2']['blocks']))
                             @foreach($content['col2']['blocks'] as $nestedBlock)
-                                @include('products.page-builder._block', ['block' => $nestedBlock, 'product' => $product])
+                                @include('themes.theme2.products.page-builder._block', ['block' => $nestedBlock, 'product' => $product])
                             @endforeach
                         @endif
                     </div>
@@ -170,7 +170,7 @@
                     <div style="padding: 1rem;">
                         @if(!empty($content['col3']['blocks']))
                             @foreach($content['col3']['blocks'] as $nestedBlock)
-                                @include('products.page-builder._block', ['block' => $nestedBlock, 'product' => $product])
+                                @include('themes.theme2.products.page-builder._block', ['block' => $nestedBlock, 'product' => $product])
                             @endforeach
                         @endif
                     </div>

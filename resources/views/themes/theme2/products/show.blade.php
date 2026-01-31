@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('themes.theme2.layouts.app')
 
 @section('title', $product->name)
 
@@ -592,7 +592,7 @@
                         <div class="d-flex flex-nowrap gap-3 m-0 p-1" style="scroll-behavior: smooth;">
                             @foreach($related as $relatedProduct)
                                 <div class="flex-shrink-0" style="width: 280px;">
-                                    @include('products._card', ['product' => $relatedProduct])
+                                    @include('themes.theme2.products._card', ['product' => $relatedProduct])
                                 </div>
                             @endforeach
                         </div>

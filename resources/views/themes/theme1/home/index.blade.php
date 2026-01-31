@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('themes.theme1.layouts.app')
 
 @section('title', 'Home')
 
@@ -186,7 +186,7 @@
         <div class="row g-4" style="--desktop-cols: {{ $desktopCols }};">
             @foreach($featuredProducts as $product)
                 <div class="{{ $colClass }}">
-                    @include('products._card', ['product' => $product])
+                    @include('themes.theme1.products._card', ['product' => $product])
                 </div>
             @endforeach
         </div>
@@ -234,7 +234,7 @@
         <div class="row g-4" style="--desktop-cols: {{ $desktopCols }};">
             @foreach($latestProducts as $product)
                 <div class="{{ $colClass }}">
-                    @include('products._card', ['product' => $product])
+                    @include('themes.theme1.products._card', ['product' => $product])
                 </div>
             @endforeach
         </div>

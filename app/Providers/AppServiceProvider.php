@@ -52,7 +52,7 @@ class AppServiceProvider extends ServiceProvider
                 $view->with('currentTheme', ThemeHelper::current());
             } catch (\Throwable $e) {
                 $name = $view->name() ?? '';
-                if (str_starts_with($name, 'errors.') || str_starts_with($name, 'errors::') || str_contains($name, 'exception') || str_contains($name, 'laravel-exceptions-renderer')) {
+                if (str_starts_with($name, 'errors.') || str_starts_with($name, 'frontend.errors.') || str_starts_with($name, 'errors::') || str_contains($name, 'exception') || str_contains($name, 'laravel-exceptions-renderer')) {
                     $view->with('currentCurrency', null);
                     $view->with('activeCurrencies', collect());
                     $view->with('siteSettings', new \stdClass);

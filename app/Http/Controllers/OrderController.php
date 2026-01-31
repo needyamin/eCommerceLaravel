@@ -37,6 +37,6 @@ class OrderController extends Controller
         // Allow only guest orders (no user) via signed URL
         abort_if(!is_null($order->user_id), 403);
         $order->load('items.product');
-        return view('orders.show', compact('order'));
+        return view('frontend.orders.show', compact('order'));
     }
 }

@@ -34,7 +34,7 @@ class CheckLicense
             }
             
             // For frontend and all other routes, show license required page
-            return response()->view('errors.license-required', [], 403);
+            return response()->view('frontend.errors.license-required', [], 403);
         }
 
         // If license key exists, validate it
@@ -46,7 +46,7 @@ class CheckLicense
             }
             
             // For frontend, show license invalid page
-            return response()->view('errors.license-invalid', [], 403);
+            return response()->view('frontend.errors.license-invalid', [], 403);
         }
 
         return $next($request);
